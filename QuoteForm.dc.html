@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./services-data.js"></script>
+</helmet>
+<form onSubmit="{{ onSubmit }}" style="display:flex;flex-direction:column;gap:16px;font-family:Inter,system-ui,sans-serif;color:#FCFCED;font-weight:300">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="display:flex;align-items:center;gap:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6"><span data-ws-pulse="1" style="width:8px;height:8px;border-radius:50%;background:#B1CDC6;animation:wsDot 1.1s ease-in-out infinite"></span>Instant price · Takes 60 seconds</span>
+    <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(20px,1.8vw,26px);text-transform:uppercase;letter-spacing:-0.015em;line-height:1.05">Price your job now</span>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Step 1 — Scope</span>
+    <span style="flex:1;height:1px;background:rgba(252,252,237,0.14)"></span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Services — pick one or combine several</span>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="14">
+        <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ c.toggle }}" aria-pressed="true" style="display:flex;align-items:center;gap:6px;min-height:40px;padding:8px 12px;background:#B1CDC6;border:1px solid #B1CDC6;color:#0E2438;font-family:Inter,sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;text-align:left"><span style="font-size:12px;line-height:1">✓</span>{{ c.label }}</button>
+        </sc-if>
+        <sc-if value="{{ c.off }}" hint-placeholder-val="{{ true }}">
+          <button type="button" onClick="{{ c.toggle }}" aria-pressed="false" style="display:flex;align-items:center;gap:6px;min-height:40px;padding:8px 12px;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:400;font-size:13.5px;cursor:pointer;text-align:left" style-hover="border-color:#B1CDC6"><span style="font-size:14px;line-height:1;color:#B1CDC6">+</span>{{ c.label }}</button>
+        </sc-if>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px">
+    <sc-for list="{{ selects }}" as="f" hint-placeholder-count="4">
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">{{ f.label }}</span>
+        <div style="position:relative;display:flex;flex-direction:column">
+          <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:15px;padding:12px 38px 12px 12px;outline:none;appearance:none" style-focus="border-color:#B1CDC6">
+            <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="4">
+              <option value="{{ o }}" style="background:#14344F;color:#FCFCED">{{ o }}</option>
+            </sc-for>
+          </select>
+          <span style="position:absolute;right:14px;top:50%;transform:translateY(-3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #B1CDC6;pointer-events:none"></span>
+        </div>
+      </label>
+    </sc-for>
+  </div>
+
+  <div style="background:#0E2438;border:1px solid #B1CDC6;padding:clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Indicative price</span>
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#7C93A3">{{ scopeSummary }}</span>
+    </div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <span style="font-size:14px;color:#8DA5B4">Ontario market average</span>
+      <span style="font-size:clamp(15px,1.3vw,18px);color:#8DA5B4;text-decoration:line-through;text-decoration-color:#5E7B8D">{{ marketRange }}</span>
+    </div>
+    <div style="height:1px;background:rgba(252,252,237,0.12)"></div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <span style="font-family:Inter,sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:0.04em">Wastely</span>
+      <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(24px,2.6vw,36px);line-height:1;letter-spacing:-0.03em;color:#B1CDC6">{{ wastelyRange }}</span>
+    </div>
+    <p style="margin:0;font-size:13px;color:#8DA5B4;line-height:1.55">{{ estimateNote }}</p>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+    <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Step 2 — Contact</span>
+    <span style="flex:1;height:1px;background:rgba(252,252,237,0.14)"></span>
+  </div>
+  <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:18px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:0.06em;color:#B1CDC6;line-height:1.6">Received. An owner will call you back the same day with a final quote.</div>
+  </sc-if>
+  <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:12px">
+      <input required="required" name="name" placeholder="Name" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:12px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+      <input required="required" name="phone" type="tel" placeholder="Phone" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:12px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+      <input name="email" type="email" placeholder="Email" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:12px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+      <input name="location" placeholder="Address or city" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:12px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+    </div>
+    <textarea name="details" rows="3" placeholder="{{ prompt }}" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:12px 14px;outline:none;resize:vertical;line-height:1.5" style-focus="border-color:#B1CDC6"></textarea>
+    <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid rgba(252,252,237,0.14);background:#16394F;cursor:pointer">
+      <input type="checkbox" required="required" style="width:18px;height:18px;margin:2px 0 0;accent-color:#B1CDC6;flex-shrink:0" />
+      <span style="font-size:14px;color:#AEC1CD;line-height:1.5">{{ ackLabel }}</span>
+    </label>
+    <button type="submit" style="min-height:52px;padding:14px 20px;background:#B1CDC6;border:none;color:#0E2438;font-family:Inter,sans-serif;font-weight:700;font-size:15px;letter-spacing:0.03em;text-transform:uppercase;cursor:pointer" style-hover="background:#FCFCED">Get my final quote</button>
+  </sc-if>
+</form>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:560,&quot;height&quot;:1100},&quot;preselect&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;estate-cleanout&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { sent: false, jobs: null, size: '1,000–2,500 sq ft', fill: 'Normal contents', access: 'Ground level, truck at the door', speed: 'Standard — two weeks or more' };
+  SIZE = { 'Under 1,000 sq ft': 0.65, '1,000–2,500 sq ft': 1, '2,500–5,000 sq ft': 1.55, '5,000–10,000 sq ft': 2.3, 'Over 10,000 sq ft': 3.4 };
+  FILL = { 'Light — a few rooms': 0.75, 'Normal contents': 1, 'Packed — full to the walls': 1.4, 'Hoarding or biohazard': 1.9 };
+  ACCESS = { 'Ground level, truck at the door': 1, 'Elevator building': 1.1, 'Stairs or walk-up': 1.18, 'Occupied or restricted site': 1.3 };
+  SPEED = { 'Standard — two weeks or more': 1, 'Within a week': 1.12, '24–48 hour emergency': 1.4 };
+  MIN = 5000;
+  componentDidMount() {
+    if (!window.WASTELY_SERVICES) this._w = setInterval(() => { if (window.WASTELY_SERVICES) { clearInterval(this._w); this.forceUpdate(); } }, 40);
+  }
+  componentWillUnmount() { clearInterval(this._w); }
+  money(n) { return '$' + (Math.round(n / 50) * 50).toLocaleString('en-CA'); }
+  renderVals() {
+    const s = this.state;
+    const all = [];
+    (window.WASTELY_SERVICES || []).forEach(g => g.items.forEach(x => all.push(x)));
+    const pre = this.props.preselect;
+    const jobs = s.jobs || (pre ? [pre] : []);
+    const cur = all.find(x => x.slug === pre);
+    const ordered = cur ? [cur].concat(all.filter(x => x !== cur)) : all;
+    const base = jobs.reduce((t, j) => { const x = all.find(a => a.slug === j); return t + (x ? x.price : 0); }, 0);
+    const mult = this.SIZE[s.size] * this.FILL[s.fill] * this.ACCESS[s.access] * this.SPEED[s.speed];
+    const priced = !!base;
+    const mLo = base * mult * 0.88, mHi = base * mult * 1.18;
+    const wLo = Math.max(mLo * 0.7, this.MIN), wHi = Math.max(mHi * 0.7, this.MIN * 1.35);
+    const sel = (label, key, map) => ({ label, value: s[key], options: Object.keys(map), onChange: (e) => this.setState({ [key]: e.target.value }) });
+    return {
+      chips: ordered.map(x => {
+        const on = jobs.includes(x.slug);
+        return { label: x.title, on, off: !on, toggle: () => this.setState(st => { const j = st.jobs || (pre ? [pre] : []); return { jobs: j.includes(x.slug) ? j.filter(y => y !== x.slug) : j.concat(x.slug) }; }) };
+      }),
+      selects: [sel('Property size', 'size', this.SIZE), sel('How full is it?', 'fill', this.FILL), sel('Access', 'access', this.ACCESS), sel('When', 'speed', this.SPEED)],
+      scopeSummary: priced ? (jobs.length > 1 ? jobs.length + ' services combined · ' : '') + s.size : 'Not scoped yet',
+      marketRange: priced ? this.money(mLo) + ' – ' + this.money(mHi) : '—',
+      wastelyRange: priced ? this.money(wLo) + ' – ' + this.money(wHi) : '—',
+      estimateNote: priced
+        ? (jobs.length > 1 ? 'All ' + jobs.length + ' scopes on one crew, one mobilization and one invoice. ' : '') + 'Roughly 30% under the Ontario market average. Confirmed in writing once an owner sees photos or walks the site. Minimum job ' + this.money(this.MIN) + '.'
+        : 'Choose one or more services above and the number appears here. Minimum job ' + this.money(this.MIN) + '.',
+      ackLabel: priced
+        ? 'I understand this job is budgeted around ' + this.money(wLo) + ' – ' + this.money(wHi) + ' and want to proceed with a final quote.'
+        : 'I understand Wastely takes on jobs from ' + this.money(this.MIN) + ' and up.',
+      prompt: (cur && cur.prompt) || 'What is the property, and what has to come out?',
+      sent: s.sent, notSent: !s.sent,
+      onSubmit: (e) => { e.preventDefault(); const f = e.target; const d = { _subject: 'Wastely website: ' + (document.title || 'enquiry'), _template: 'table', _captcha: 'false', page: location.href }; f.querySelectorAll('input,select,textarea').forEach((el, i) => { const lb = el.closest('label'); const sp = lb && lb.querySelector('span'); if (el.type === 'checkbox') { if (el.checked) d['confirmed'] = lb ? lb.textContent.trim() : 'yes'; return; } if (!el.value) return; d[el.name || (sp && sp.textContent.trim()) || el.placeholder || ('field ' + i)] = el.value; }); const picked = Array.from(f.querySelectorAll('button[aria-pressed="true"]')).map(b => b.textContent.replace('\u2713', '').trim()); if (picked.length) d.services = picked.join(', '); fetch('https://formsubmit.co/ajax/go@wastely.ca', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(d) }).catch(() => {}); fetch('https://jackrabbit-psi.vercel.app/api/forms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'Quote request', page: location.href, fields: d }), keepalive: true }).catch(() => {}); this.setState({ sent: true }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

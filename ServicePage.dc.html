@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./services-data.js"></script>
+<style>
+  input::placeholder, textarea::placeholder { color: #93ABB8; }
+  @keyframes wsPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(177,205,198,0.55), 0 20px 50px rgba(0,0,0,0.35); } 50% { box-shadow: 0 0 0 14px rgba(177,205,198,0), 0 20px 50px rgba(0,0,0,0.35); } }
+  @keyframes wsDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  @media (prefers-reduced-motion: reduce) { [data-ws-pulse] { animation: none !important; } }
+</style>
+</helmet>
+
+<div style="background:#0E2438;color:#FCFCED;font-family:Inter,system-ui,sans-serif;font-weight:300;font-size:17px;line-height:1.6;overflow-x:clip">
+  <dc-import name="SiteHeader" active="services-page" style="position:sticky;top:0;z-index:50;display:block" hint-size="100%,74px"></dc-import>
+
+  <section style="padding:clamp(40px,5vw,84px) clamp(16px,4vw,56px) clamp(48px,6vw,90px);max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:clamp(32px,5vw,80px);align-items:start">
+    <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <a href="Services.dc.html" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#86A0AF" style-hover="color:#B1CDC6">Services</a>
+        <span style="width:18px;height:1px;background:rgba(252,252,237,0.25)"></span>
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">{{ group }}</span>
+      </div>
+      <h1 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(30px,3.6vw,58px);line-height:0.95;text-transform:uppercase;letter-spacing:-0.03em;text-wrap:balance;overflow-wrap:break-word;hyphens:auto" lang="en">{{ title }}</h1>
+      <p style="margin:0;font-size:clamp(16px,1.3vw,20px);color:#C3D2DB;line-height:1.65;max-width:58ch;text-wrap:pretty">{{ body }}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ trust }}" as="t" hint-placeholder-count="4">
+          <span style="padding:7px 12px;border:1px solid rgba(252,252,237,0.16);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#AEC1CD">{{ t }}</span>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:4px">
+        <a href="tel:+13434631909" style="display:inline-flex;align-items:center;min-height:52px;padding:14px 26px;background:#B1CDC6;color:#0E2438;font-weight:700;font-size:16px;letter-spacing:0.02em" style-hover="background:#FCFCED;color:#0E2438">Call (343) 463-1909</a>
+        <span style="display:inline-flex;align-items:center;font-size:14px;color:#8DA5B4">24/7 · An owner answers</span>
+      </div>
+    </div>
+
+    <div id="quote" data-ws-pulse="1" style="scroll-margin-top:96px;min-width:0;background:#14344F;border:2px solid #B1CDC6;padding:clamp(20px,2.4vw,32px);animation:wsPulse 2.2s ease-in-out infinite">
+      <dc-import name="QuoteForm" preselect="{{ slug }}" style="display:block" hint-size="100%,900px"></dc-import>
+    </div>
+  </section>
+
+  <section style="background:#14344F;border-top:1px solid rgba(252,252,237,0.1);border-bottom:1px solid rgba(252,252,237,0.1);padding:clamp(48px,6vw,90px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(32px,5vw,80px);align-items:start">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">How it runs</span>
+        <p style="margin:0;font-size:clamp(16px,1.2vw,18px);color:#C3D2DB;line-height:1.75;max-width:62ch;text-wrap:pretty">{{ more }}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">What's included</span>
+        <sc-for list="{{ points }}" as="p" hint-placeholder-count="5">
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid rgba(252,252,237,0.1)">
+            <span style="width:5px;height:5px;background:#B1CDC6;flex-shrink:0;transform:translateY(-2px)"></span>
+            <span style="font-size:16px;color:#D6E1E8;line-height:1.5">{{ p }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:clamp(48px,6vw,90px) clamp(16px,4vw,56px);max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(32px,5vw,80px);align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Who books it</span>
+      <p style="margin:0;font-size:clamp(17px,1.4vw,21px);color:#FCFCED;font-weight:500;line-height:1.5;max-width:40ch">{{ who }}</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Combine it with</span>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ pairs }}" as="r" hint-placeholder-count="3">
+          <a href="{{ r.page }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid rgba(252,252,237,0.18);font-size:15px;font-weight:500;color:#D6E1E8" style-hover="border-color:#B1CDC6;color:#B1CDC6">{{ r.title }} <span style="color:#B1CDC6">→</span></a>
+        </sc-for>
+      </div>
+      <span style="font-size:14px;color:#8DA5B4;line-height:1.55">Combined jobs run on one crew, one visit and one invoice.</span>
+    </div>
+  </section>
+
+  <section style="border-top:1px solid rgba(252,252,237,0.1);padding:clamp(48px,6vw,90px) clamp(16px,4vw,56px);text-align:center">
+    <h2 style="margin:0 auto 22px;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(26px,3.4vw,50px);line-height:0.96;text-transform:uppercase;max-width:18ch">Ready to book {{ title }}?</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+      <a href="#quote" style="display:inline-flex;align-items:center;min-height:52px;padding:14px 28px;background:#B1CDC6;color:#0E2438;font-weight:700;font-size:16px;letter-spacing:0.02em;text-transform:uppercase" style-hover="background:#FCFCED;color:#0E2438">Get my quote</a>
+      <a href="tel:+13434631909" style="display:inline-flex;align-items:center;min-height:52px;padding:14px 28px;border:1px solid rgba(252,252,237,0.22);color:#FCFCED;font-weight:600;font-size:16px" style-hover="border-color:#B1CDC6;color:#B1CDC6">Call (343) 463-1909</a>
+    </div>
+  </section>
+
+  <dc-import name="SiteFooter" hint-size="100%,360px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280},&quot;slug&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;estate-cleanout&quot;,&quot;community-housing-turnover&quot;,&quot;bulk-waste-load-out&quot;,&quot;warehouse-facility-clearouts&quot;,&quot;recycling-diversion&quot;,&quot;hazardous-waste&quot;,&quot;oil-fuel-chemical-disposal&quot;,&quot;lithium-battery-disposal&quot;,&quot;e-waste&quot;,&quot;asbestos-removal&quot;,&quot;mould-removal&quot;,&quot;interior-strip-out&quot;,&quot;industrial-dismantling&quot;,&quot;land-clearing&quot;],&quot;default&quot;:&quot;estate-cleanout&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { sent: false };
+  componentDidMount() {
+    if (!window.WASTELY_SERVICES) this._w = setInterval(() => { if (window.WASTELY_SERVICES) { clearInterval(this._w); this.forceUpdate(); } }, 40);
+  }
+  componentWillUnmount() { clearInterval(this._w); }
+  renderVals() {
+    const groups = window.WASTELY_SERVICES || [];
+    const all = [];
+    groups.forEach(g => g.items.forEach(s => all.push({ ...s, group: g.title })));
+    const slug = this.props.slug || 'estate-cleanout';
+    const s = all.find(x => x.slug === slug) || all[0] || {};
+    if (s.title && typeof document !== 'undefined') document.title = s.title + ' in Ontario | Wastely';
+    return {
+      group: s.group || '', title: s.title || '', body: s.body || '', more: s.more || '', who: s.who || '', prompt: s.prompt || 'Tell us about the job',
+      slug: s.slug || slug,
+      points: s.points || [],
+      pairs: (s.pairNums || []).map(n => all.find(x => x.num === n)).filter(Boolean).map(x => ({ title: x.title, page: x.page })),
+      trust: ['Fully insured', 'WSIB cleared', 'Anywhere in Ontario', 'Jobs from $5,000'],
+      sent: this.state.sent, notSent: !this.state.sent,
+      onSubmit: (e) => { e.preventDefault(); const f = e.target; const d = { _subject: 'Wastely website: ' + (document.title || 'enquiry'), _template: 'table', _captcha: 'false', page: location.href }; f.querySelectorAll('input,select,textarea').forEach((el, i) => { const lb = el.closest('label'); const sp = lb && lb.querySelector('span'); if (el.type === 'checkbox') { if (el.checked) d['confirmed'] = lb ? lb.textContent.trim() : 'yes'; return; } if (!el.value) return; d[el.name || (sp && sp.textContent.trim()) || el.placeholder || ('field ' + i)] = el.value; }); const picked = Array.from(f.querySelectorAll('button[aria-pressed="true"]')).map(b => b.textContent.replace('\u2713', '').trim()); if (picked.length) d.services = picked.join(', '); fetch('https://formsubmit.co/ajax/go@wastely.ca', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(d) }).catch(() => {}); fetch('https://jackrabbit-psi.vercel.app/api/forms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'Quote request', page: location.href, fields: d }), keepalive: true }).catch(() => {}); this.setState({ sent: true }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

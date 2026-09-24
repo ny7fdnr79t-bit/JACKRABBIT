@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="assets/wastely-icon-navy.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #0E2438; -webkit-font-smoothing: antialiased; }
+  a { color: #B1CDC6; text-decoration: none; }
+  a:hover { color: #D2E3DE; }
+  ::selection { background: #B1CDC6; color: #0E2438; }
+  input::placeholder, textarea::placeholder { color: #93ABB8; }
+</style>
+</helmet>
+
+<div style="background:#0E2438;color:#FCFCED;font-family:Inter,system-ui,sans-serif;font-weight:300;font-size:17px;line-height:1.6;overflow-x:hidden">
+  <dc-import name="SiteHeader" active="contact" style="position:sticky;top:0;z-index:50;display:block" hint-size="100%,74px"></dc-import>
+
+  <section style="padding:clamp(56px,7vw,110px) clamp(16px,4vw,56px) clamp(40px,5vw,70px);max-width:1440px;margin:0 auto;border-bottom:1px solid rgba(252,252,237,0.1)">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:26px">
+      <span style="width:30px;height:1px;background:#B1CDC6"></span>
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#B1CDC6">Contact</span>
+    </div>
+    <h1 style="margin:0 0 30px;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(31px,5.2vw,84px);line-height:0.92;text-transform:uppercase;letter-spacing:-0.032em;max-width:13ch">Call an owner</h1>
+    <a href="tel:+13434631909" style="display:inline-block;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(27px,3.9vw,56px);line-height:1;letter-spacing:0.02em;color:#B1CDC6" style-hover="color:#D2E3DE">(343) 463-1909</a>
+    <p style="margin:26px 0 0;max-width:620px;font-size:clamp(16px,1.3vw,20px);color:#AEC1CD;line-height:1.7">The fastest way to get an answer. If it is easier to write it down, the form below reaches the same two people.</p>
+  </section>
+
+  <section style="padding:clamp(48px,6vw,96px) clamp(16px,4vw,56px);max-width:1440px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(32px,5vw,80px);align-items:start">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:26px;margin-bottom:clamp(32px,4vw,52px)">
+          <sc-for list="{{ details }}" as="d" hint-placeholder-count="3">
+            <div>
+              <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#728B9C;margin-bottom:7px">{{ d.label }}</div>
+              <div style="font-family:Inter,sans-serif;font-weight:700;font-size:clamp(17px,1.35vw,21px);letter-spacing:0.02em;color:#FCFCED">{{ d.value }}</div>
+            </div>
+          </sc-for>
+          <div>
+            <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#728B9C;margin-bottom:7px">Email</div>
+            <a href="mailto:go@wastely.ca" style="font-family:Inter,sans-serif;font-weight:700;font-size:clamp(17px,1.35vw,21px);letter-spacing:0.02em;color:#FCFCED" style-hover="color:#B1CDC6">go@wastely.ca</a>
+          </div>
+        </div>
+        <div style="position:relative;width:100%;aspect-ratio:4/3;background:#16394F;border:1px solid rgba(252,252,237,0.11)">
+          <image-slot id="ws-contact-1" shape="rect" placeholder="Roman and co-owner — team photo"></image-slot>
+        </div>
+      </div>
+
+      <form onSubmit="{{ onSubmit }}" style="display:flex;flex-direction:column;gap:18px;background:#14344F;border:1px solid rgba(252,252,237,0.11);padding:clamp(24px,3vw,44px)">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Name</span>
+            <input type="text" placeholder="Full name" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Company</span>
+            <input type="text" placeholder="Company name" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Email</span>
+            <input type="email" placeholder="you@company.com" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Phone</span>
+            <input type="tel" placeholder="Your phone number" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+          </label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Scope — pick one or combine several</span>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ scopeChips }}" as="c" hint-placeholder-count="10">
+              <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+                <button type="button" onClick="{{ c.toggle }}" aria-pressed="true" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px;background:#B1CDC6;border:1px solid #B1CDC6;color:#0E2438;font-family:Inter,sans-serif;font-weight:600;font-size:14.5px;cursor:pointer;text-align:left"><span style="font-size:13px;line-height:1">✓</span>{{ c.label }}</button>
+              </sc-if>
+              <sc-if value="{{ c.off }}" hint-placeholder-val="{{ true }}">
+                <button type="button" onClick="{{ c.toggle }}" aria-pressed="false" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:14.5px;cursor:pointer;text-align:left" style-hover="border-color:#B1CDC6"><span style="font-size:15px;line-height:1;color:#B1CDC6">+</span>{{ c.label }}</button>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Site location</span>
+            <input type="text" placeholder="City or address" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Timeline</span>
+            <input type="text" placeholder="When does it need to be gone?" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none" style-focus="border-color:#B1CDC6" />
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Project details</span>
+          <textarea rows="5" placeholder="What is the building, how big is it, and what has to come out?" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;resize:vertical" style-focus="border-color:#B1CDC6"></textarea>
+        </label>
+        <button type="submit" style="margin-top:6px;padding:16px 28px;background:#B1CDC6;color:#0E2438;border:none;font-family:Inter,sans-serif;font-weight:700;font-size:16px;letter-spacing:0.045em;cursor:pointer" style-hover="background:#D2E3DE">{{ submitLabel }}</button>
+        <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:14px;color:#B1CDC6;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0.06em">Received. An owner will call you back.</div>
+        </sc-if>
+      </form>
+    </div>
+  </section>
+
+  <section style="background:#14344F;border-top:1px solid rgba(252,252,237,0.1);padding:clamp(48px,6vw,90px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto">
+      <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6;margin-bottom:20px">Where we work</div>
+      <h2 style="margin:0 0 28px;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(22px,2.4vw,36px);line-height:1;text-transform:uppercase">Anywhere in Ontario</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ cities }}" as="city" hint-placeholder-count="6">
+          <span style="display:inline-block;padding:8px 16px;border:1px solid rgba(252,252,237,0.16);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#AEC1CD">{{ city }}</span>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <dc-import name="SiteFooter" hint-size="100%,360px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430}}">
+class Component extends DCLogic {
+  state = { sent: false, picked: [] };
+  SCOPES = ['Urgent — needed now', 'Asbestos removal', 'Mould removal', 'Estate cleanout', 'Interior strip-out', 'Community housing turnover', 'Bulk waste & load-out', 'Warehouse or facility clear-out', 'Recycling & material diversion', 'Commercial hazardous waste', 'Oil, fuel & chemical disposal', 'Lithium battery disposal', 'E-waste & regulated electronics', 'Industrial dismantling & decommissioning', 'Land clearing & remediation', 'Multi-site or ongoing account', 'Something else'];
+  renderVals() {
+    const p = this.state.picked;
+    return {
+      scopeChips: this.SCOPES.map(sc => ({ label: sc, on: p.includes(sc), off: !p.includes(sc), toggle: () => this.setState(st => ({ picked: st.picked.includes(sc) ? st.picked.filter(x => x !== sc) : st.picked.concat(sc) })) })),
+      sent: this.state.sent,
+      submitLabel: this.state.sent ? 'Details sent' : 'Send project details',
+      onSubmit: (e) => { e.preventDefault(); const f = e.target; const d = { _subject: 'Wastely website: ' + (document.title || 'enquiry'), _template: 'table', _captcha: 'false', page: location.href }; f.querySelectorAll('input,select,textarea').forEach((el, i) => { const lb = el.closest('label'); const sp = lb && lb.querySelector('span'); if (el.type === 'checkbox') { if (el.checked) d['confirmed'] = lb ? lb.textContent.trim() : 'yes'; return; } if (!el.value) return; d[el.name || (sp && sp.textContent.trim()) || el.placeholder || ('field ' + i)] = el.value; }); const picked = Array.from(f.querySelectorAll('button[aria-pressed="true"]')).map(b => b.textContent.replace('\u2713', '').trim()); if (picked.length) d.services = picked.join(', '); fetch('https://formsubmit.co/ajax/go@wastely.ca', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(d) }).catch(() => {}); fetch('https://jackrabbit-psi.vercel.app/api/forms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'Contact', page: location.href, fields: d }), keepalive: true }).catch(() => {}); this.setState({ sent: true }); },
+      details: [
+        { label: 'Scheduled service', value: 'Monday to Saturday, 7am to 6pm' },
+        { label: 'Emergency dispatch', value: '24 hours, answered live' },
+        { label: 'Service area', value: 'Ontario-wide' }
+      ],
+      cities: ['Toronto', 'GTA', 'Ottawa', 'Kingston', 'Hamilton', 'Province-wide']
+    };
+  }
+}
+</script>
+</body>
+</html>

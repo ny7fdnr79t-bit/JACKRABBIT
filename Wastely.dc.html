@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="assets/wastely-icon-navy.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #0E2438; -webkit-font-smoothing: antialiased; }
+  a { color: #B1CDC6; text-decoration: none; }
+  a:hover { color: #D2E3DE; }
+  ::selection { background: #B1CDC6; color: #0E2438; }
+  @keyframes wsCue { 0%,100% { transform: translateY(0); opacity: .3; } 50% { transform: translateY(7px); opacity: 1; } }
+  @keyframes wsPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(14,36,56,0.5); } 50% { transform: scale(1.045); box-shadow: 0 0 0 12px rgba(14,36,56,0); } }
+  @keyframes wsRing { 0%,68%,100% { transform: rotate(0deg); } 72% { transform: rotate(-13deg); } 76% { transform: rotate(13deg); } 80% { transform: rotate(-9deg); } 84% { transform: rotate(9deg); } 88% { transform: rotate(-4deg); } 92% { transform: rotate(4deg); } }
+  @keyframes wsBeacon { 0%,100% { opacity: 1; } 50% { opacity: .18; } }
+  @keyframes wsSpin { to { transform: rotate(360deg); } }
+  @keyframes wsHalo { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(1.5); opacity: 0; } }
+  @keyframes wsCount { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</helmet>
+
+<div style="background:#0E2438;color:#FCFCED;font-family:Inter,system-ui,sans-serif;font-weight:300;font-size:17px;line-height:1.6;overflow-x:hidden">
+
+  <dc-import name="SiteHeader" active="home" style="position:sticky;top:0;z-index:50;display:block" hint-size="100%,74px"></dc-import>
+
+  <section id="top" style="position:relative;min-height:min(96vh,1000px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;border-bottom:1px solid rgba(252,252,237,0.1)">
+    <div style="position:absolute;inset:0;background:#123046">
+      <img src="./assets/hero-crew-truck-2.png" alt="Wastely crew in high-visibility jackets in front of the company truck" style="width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;filter:saturate(0.9) contrast(1.02)" />
+    </div>
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(14,36,56,0.97) 0%,rgba(14,36,56,0.92) 34%,rgba(14,36,56,0.66) 62%,rgba(14,36,56,0.34) 100%)"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(14,36,56,0.3) 0%,rgba(14,36,56,0.12) 45%,rgba(14,36,56,0) 70%)"></div>
+
+    <div style="position:relative;padding:clamp(56px,8vw,110px) clamp(16px,4vw,56px) clamp(26px,3vw,40px);max-width:1440px;width:100%;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:clamp(22px,3vw,34px)">
+        <span style="width:30px;height:1px;background:#B1CDC6"></span>
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#B1CDC6">Commercial Waste · Hazardous Disposal · Fully Insured · Ontario · 24/7</span>
+      </div>
+      <h1 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(34px,6.2vw,98px);line-height:0.92;letter-spacing:-0.032em;text-transform:uppercase;text-wrap:balance">
+        Your waste<br><span style="color:#B1CDC6">solution.</span>
+      </h1>
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(24px,4vw,64px);align-items:flex-end;margin-top:clamp(28px,4vw,48px)">
+        <p style="margin:0;max-width:600px;font-size:clamp(16px,1.3vw,20px);line-height:1.6;color:#C3D2DB">Asbestos and mould removal, estate and full-house cleanouts, community housing turnovers, bulk load-out and land clearing and remediation, anywhere in Ontario. One account, one number, one set of manifests.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px">
+          <a href="tel:+13434631909" style="display:inline-block;padding:16px 30px;background:#B1CDC6;color:#0E2438;font-family:Inter,sans-serif;font-weight:700;font-size:16px;letter-spacing:0.045em" style-hover="background:#D2E3DE">Call (343) 463-1909</a>
+          <a href="Services.dc.html" style="display:inline-block;padding:16px 30px;border:1px solid rgba(252,252,237,0.22);color:#FCFCED;font-family:Inter,sans-serif;font-weight:600;font-size:16px;letter-spacing:0.045em" style-hover="border-color:#B1CDC6;color:#B1CDC6">What we take away</a>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(22px,2.6vw,32px)">
+        <sc-for list="{{ credentials }}" as="cr" hint-placeholder-count="3">
+          <span style="display:inline-block;padding:9px 16px;border:1px solid rgba(177,205,198,0.4);background:rgba(14,36,56,0.45);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#CFE0DB">{{ cr }}</span>
+        </sc-for>
+      </div>
+      <div style="margin-top:clamp(32px,4vw,56px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="display:block;width:1px;height:26px;background:rgba(252,252,237,0.3);animation:wsCue 2.4s ease-in-out infinite"></span>
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#93ABB8">Scroll</span>
+        </div>
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6E8B9B">Ontario</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#B1CDC6;color:#0E2438">
+    <div style="max-width:1440px;margin:0 auto;padding:clamp(18px,2vw,26px) clamp(16px,4vw,56px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:9px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;font-weight:700"><img src="assets/wastely-icon-navy.png" alt="" style="width:24px;height:24px;display:block;animation:wsBeacon 1.6s ease-in-out infinite" />24/7 Emergency Response</span>
+        <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(22px,2.6vw,38px);line-height:1;letter-spacing:-0.03em;text-transform:uppercase;color:#0E2438">Whenever you need</span>
+      </div>
+      <div style="position:relative;display:inline-flex;flex-shrink:0">
+        <span style="position:absolute;inset:-9px;border:2px dashed rgba(14,36,56,0.45);animation:wsSpin 9s linear infinite;pointer-events:none"></span>
+        <span style="position:absolute;inset:-9px;border:2px solid rgba(14,36,56,0.5);animation:wsHalo 1.8s ease-out infinite;pointer-events:none"></span>
+        <a href="tel:+13434631909" style="position:relative;display:inline-flex;align-items:center;gap:11px;padding:17px 34px;background:#0E2438;color:#FCFCED;font-weight:800;font-size:clamp(17px,1.5vw,21px);letter-spacing:0.03em;text-transform:uppercase;white-space:nowrap;animation:wsPulse 1.8s ease-in-out infinite;transform-origin:center" style-hover="background:#14344F;color:#FCFCED;animation-play-state:paused"><span style="display:inline-block;font-size:21px;animation:wsRing 2.6s ease-in-out infinite;transform-origin:50% 55%">☎</span>Call now</a>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#0E2438;border-bottom:1px solid rgba(252,252,237,0.1);padding:clamp(22px,2.4vw,32px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 28px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Instant estimate</span>
+        <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(20px,2vw,30px);line-height:1;text-transform:uppercase;letter-spacing:-0.02em">Price your job in 60 seconds</span>
+      </div>
+      <a href="#quote" style="display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:14px 26px;background:#B1CDC6;color:#0E2438;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:0.02em;text-transform:uppercase" style-hover="background:#FCFCED">Get my price <span style="font-size:18px">→</span></a>
+    </div>
+  </section>
+
+  <section style="border-bottom:1px solid rgba(252,252,237,0.1);background:#14344F">
+    <div style="max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))">
+      <sc-for list="{{ proof }}" as="p" hint-placeholder-count="4">
+        <div style="padding:clamp(26px,3vw,40px) clamp(16px,2.5vw,36px);border-left:1px solid rgba(252,252,237,0.09)">
+          <div style="font-family:Inter,sans-serif;font-weight:700;font-size:clamp(28px,2.6vw,40px);line-height:1;letter-spacing:0.01em">{{ p.value }}</div>
+          <div style="font-size:14px;color:#8DA5B4;margin-top:9px;line-height:1.5">{{ p.label }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="capabilities" style="scroll-margin-top:86px;background:#14344F;border-top:1px solid rgba(252,252,237,0.1);border-bottom:1px solid rgba(252,252,237,0.1);padding:clamp(64px,8vw,132px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(24px,4vw,72px);align-items:end;margin-bottom:clamp(40px,5vw,72px)">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;color:#B1CDC6">01</span>
+            <span style="width:24px;height:1px;background:rgba(252,252,237,0.2)"></span>
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8DA5B4">Capabilities</span>
+          </div>
+          <h2 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(27px,3.7vw,53px);line-height:0.98;text-transform:uppercase;letter-spacing:-0.03em">What we take away</h2>
+        </div>
+        <p style="margin:0;font-size:clamp(15px,1.15vw,18px);color:#AEC1CD;max-width:520px;line-height:1.7">Everyday waste streams and the ones nobody else will touch, on the same account. Book any one on its own or combine several into a single job, one crew and one invoice.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1px;background:rgba(252,252,237,0.1);border:1px solid rgba(252,252,237,0.1)">
+        <sc-for list="{{ services }}" as="s" hint-placeholder-count="8">
+          <div style="background:#14344F;padding:clamp(26px,2.6vw,40px);display:flex;flex-direction:column;gap:15px;min-height:250px;transition:background .25s ease" style-hover="background:#1A4059">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.16em;color:#B1CDC6">{{ s.num }}</span>
+              <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#86A0AF">{{ s.group }}</span>
+            </div>
+            <h3 style="margin:0;font-family:Inter,sans-serif;font-weight:700;font-size:clamp(20px,1.6vw,25px);line-height:1.08;text-transform:uppercase;letter-spacing:-0.018em">{{ s.title }}</h3>
+            <p style="margin:0;font-size:15.5px;color:#9AB0BE;line-height:1.65">{{ s.body }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:clamp(28px,3vw,44px)">
+        <a href="Services.dc.html" style="display:inline-flex;align-items:center;gap:12px;font-family:Inter,sans-serif;font-weight:600;font-size:17px;letter-spacing:0.035em;color:#B1CDC6" style-hover="color:#D2E3DE">All services<span style="font-size:20px;line-height:1">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="work" style="scroll-margin-top:86px;padding:clamp(64px,8vw,132px) clamp(16px,4vw,56px);max-width:1440px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;color:#B1CDC6">02</span>
+      <span style="width:24px;height:1px;background:rgba(252,252,237,0.2)"></span>
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8DA5B4">Diversion</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(24px,4vw,72px);align-items:end;margin-bottom:clamp(36px,4vw,60px)">
+      <h2 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(27px,3.7vw,53px);line-height:0.98;text-transform:uppercase;max-width:16ch;letter-spacing:-0.03em">Most of it never reaches the dump</h2>
+      <p style="margin:0;font-size:clamp(15px,1.15vw,18px);color:#AEC1CD;max-width:520px;line-height:1.7">Landfill is the last stop, not the first. Every load gets sorted before it moves, so metal, wood, working goods and electronics leave on their own stream and only the true residual gets tipped.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(28px,4vw,64px);align-items:center;padding:clamp(28px,3.4vw,52px);background:#14344F;border:1px solid rgba(252,252,237,0.11)">
+      <div>
+        <div style="display:flex;align-items:flex-start;gap:6px;animation:wsCount .7s ease-out both">
+          <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(64px,13vw,190px);line-height:0.8;letter-spacing:-0.05em;color:#B1CDC6;display:inline-flex;align-items:center;gap:0.12em">70<span style="display:inline-block;width:0.28em;height:0.07em;background:#B1CDC6;opacity:0.7;transform:translateY(0.04em)"></span>75</span>
+          <span style="font-family:Inter,sans-serif;font-weight:700;font-size:clamp(28px,3.4vw,52px);line-height:1;color:#B1CDC6;margin-top:6px">%</span>
+        </div>
+        <p style="margin:22px 0 0;font-size:clamp(16px,1.25vw,19px);color:#D6E1E8;line-height:1.6;max-width:30ch">of everything we hauled recently was kept out of landfill.</p>
+      </div>
+      <div>
+        <div style="display:flex;height:22px;border:1px solid rgba(252,252,237,0.14)">
+          <div style="flex:72.5;background:#B1CDC6"></div>
+          <div style="flex:27.5;background:#1B3E56"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:16px;margin-top:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase">
+          <span style="color:#B1CDC6">70 – 75% diverted</span>
+          <span style="color:#8DA5B4">25 – 30% landfill</span>
+        </div>
+        <p style="margin:24px 0 0;font-size:15.5px;color:#9AB0BE;line-height:1.65">Figures come off our own weigh tickets, not an estimate. Diversion tonnage is reported back to you with the close-out package on every job.</p>
+      </div>
+    </div>
+
+
+    <div style="margin-top:clamp(28px,3vw,44px);padding:clamp(28px,3.4vw,52px);border:1px solid #B1CDC6;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(24px,4vw,64px);align-items:center">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">The goal · 2028</span>
+        <h3 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(26px,3.2vw,46px);line-height:0.98;text-transform:uppercase;letter-spacing:-0.03em">The leap to 90%</h3>
+        <p style="margin:0;font-size:clamp(15px,1.15vw,18px);color:#AEC1CD;line-height:1.7;max-width:48ch;text-wrap:pretty">We want to make that leap. By 2028 our target is to keep 90% of everything we haul out of landfill, through more sorting on site, more reuse partners and more material sold back into use.</p>
+      </div>
+      <div>
+        <div style="position:relative;height:22px;border:1px solid rgba(252,252,237,0.14);background:#1B3E56">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:72.5%;background:#B1CDC6"></div>
+          <div style="position:absolute;left:72.5%;top:0;bottom:0;width:17.5%;background:repeating-linear-gradient(135deg,rgba(177,205,198,0.45) 0 6px,transparent 6px 12px)"></div>
+          <div style="position:absolute;left:90%;top:-8px;bottom:-8px;width:2px;background:#FCFCED"></div>
+        </div>
+        <div style="position:relative;height:36px;margin-top:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase">
+          <span style="position:absolute;left:0;color:#B1CDC6">Today 70 – 75%</span>
+          <span style="position:absolute;right:10%;transform:translateX(50%);color:#FCFCED;white-space:nowrap">2028 · 90%</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(28px,3vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1px;background:rgba(252,252,237,0.1);border:1px solid rgba(252,252,237,0.1)">
+      <sc-for list="{{ streams }}" as="st" hint-placeholder-count="5">
+        <div style="background:#0E2438;padding:clamp(22px,2.4vw,34px);display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#B1CDC6">{{ st.dest }}</span>
+          <h3 style="margin:0;font-family:Inter,sans-serif;font-weight:700;font-size:clamp(17px,1.35vw,21px);line-height:1.1;text-transform:uppercase;letter-spacing:-0.012em">{{ st.title }}</h3>
+          <p style="margin:0;font-size:14.5px;color:#8DA5B4;line-height:1.6">{{ st.body }}</p>
+        </div>
+      </sc-for>
+    </div>
+
+  </section>
+
+  <section style="background:#14344F;border-top:1px solid rgba(252,252,237,0.1);border-bottom:1px solid rgba(252,252,237,0.1);padding:clamp(64px,8vw,120px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(32px,5vw,80px);align-items:center">
+      <div style="position:relative;width:100%;aspect-ratio:4/3;background:#16394F;border:1px solid rgba(252,252,237,0.11);overflow:hidden">
+        <img src="./assets/clean-room.jpeg" alt="Stripped room swept clean and handed back" style="width:100%;height:100%;object-fit:cover;object-position:center 60%;display:block" />
+      </div>
+      <div>
+        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6;margin-bottom:20px">How we work</div>
+        <h2 style="margin:0 0 28px;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(25px,2.9vw,43px);line-height:1;text-transform:uppercase">We leave it clean</h2>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ commitments }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;align-items:flex-start;gap:18px;padding:18px 0;border-top:1px solid rgba(252,252,237,0.11)">
+              <span style="width:6px;height:6px;background:#B1CDC6;flex-shrink:0;margin-top:9px"></span>
+              <div>
+                <div style="font-family:Inter,sans-serif;font-weight:600;font-size:19px;text-transform:uppercase;letter-spacing:0.005em">{{ c.title }}</div>
+                <div style="font-size:15px;color:#9AB0BE;line-height:1.6;margin-top:3px">{{ c.body }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process" style="scroll-margin-top:86px;padding:clamp(64px,8vw,132px) clamp(16px,4vw,56px);max-width:1440px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;color:#B1CDC6">03</span>
+      <span style="width:24px;height:1px;background:rgba(252,252,237,0.2)"></span>
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8DA5B4">How It Runs</span>
+    </div>
+    <h2 style="margin:0 0 clamp(36px,4vw,60px);font-family:Inter,sans-serif;font-weight:800;font-size:clamp(27px,3.7vw,53px);line-height:0.98;text-transform:uppercase;max-width:18ch">No surprises after the quote</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:clamp(20px,2.5vw,36px)">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:14px;padding-top:20px;border-top:1px solid #B1CDC6">
+          <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(30px,2.5vw,40px);line-height:1;color:#22475F">{{ st.num }}</span>
+          <h3 style="margin:0;font-family:Inter,sans-serif;font-weight:600;font-size:20px;text-transform:uppercase;letter-spacing:0.005em">{{ st.title }}</h3>
+          <p style="margin:0;font-size:15px;color:#9AB0BE;line-height:1.65">{{ st.body }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="gear" style="padding:0 clamp(16px,4vw,56px) clamp(64px,8vw,132px);max-width:1440px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(12px,1.5vw,20px);align-items:stretch">
+      <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:clamp(24px,3vw,40px);background:#14344F;border:1px solid rgba(252,252,237,0.11)">
+        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Kitted out</div>
+        <h2 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(25px,2.9vw,43px);line-height:1;text-transform:uppercase">Suited up for the job</h2>
+        <p style="margin:0;font-size:15px;color:#9AB0BE;line-height:1.65;max-width:40ch">Disposable coveralls, taped gloves and boots, half-face respirators and eye protection, matched to the material on site.</p>
+      </div>
+      <div style="position:relative;aspect-ratio:3/4;overflow:hidden;border:1px solid rgba(252,252,237,0.11);background:#16394F">
+        <img src="./assets/gear-suit.jpeg" alt="Crew member in a disposable coverall, taped gloves and dust mask" style="width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block" />
+        <span style="position:absolute;left:12px;bottom:12px;padding:6px 10px;background:#0E2438;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#B1CDC6">Coverall · Gloves · Mask</span>
+      </div>
+      <div style="position:relative;aspect-ratio:3/4;overflow:hidden;border:1px solid rgba(252,252,237,0.11);background:#16394F">
+        <img src="./assets/gear-respirator.jpeg" alt="Crew member in a half-face respirator and safety glasses" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block" />
+        <span style="position:absolute;left:12px;bottom:12px;padding:6px 10px;background:#0E2438;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#B1CDC6">Respirator · Eye protection</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" style="scroll-margin-top:86px;background:#14344F;border-top:1px solid rgba(252,252,237,0.1);padding:clamp(64px,8vw,132px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;color:#B1CDC6">04</span>
+        <span style="width:24px;height:1px;background:rgba(252,252,237,0.2)"></span>
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8DA5B4">Who We Are</span>
+      </div>
+      <h2 style="margin:0 0 clamp(20px,2vw,28px);font-family:Inter,sans-serif;font-weight:800;font-size:clamp(26px,3.3vw,48px);line-height:0.98;text-transform:uppercase">Our story</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(20px,3vw,56px);align-items:end;margin-bottom:clamp(28px,3vw,44px)">
+        <p style="margin:0;font-size:clamp(16px,1.25vw,19px);color:#C9D6DC;line-height:1.7;max-width:60ch;text-wrap:pretty">We are young men dedicated to diverting waste from the landfill. Every job gets sorted by stream, and because we get paid for the material we recover, that sorting brings the cost of getting rid of your waste down.</p>
+        <div style="display:flex;align-items:baseline;gap:16px;padding-top:18px;border-top:1px solid #B1CDC6">
+          <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(44px,5vw,72px);line-height:0.9;letter-spacing:-0.04em;color:#B1CDC6">90%</span>
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#AEC1CD;line-height:1.6">Waste diversion<br />target by 2028</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(12px,1.5vw,20px)">
+        <div style="aspect-ratio:4/5;overflow:hidden;border:1px solid rgba(252,252,237,0.11);background:#16394F">
+          <img src="./assets/team-portrait.jpeg" alt="The Wastely owners on a job site" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block" />
+        </div>
+        <div style="aspect-ratio:4/5;overflow:hidden;border:1px solid rgba(252,252,237,0.11);background:#16394F">
+          <img src="./assets/team-work.jpeg" alt="The Wastely owners loading debris into a wheelbarrow" style="width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:clamp(40px,5vw,72px) clamp(16px,4vw,56px);max-width:1440px;margin:0 auto">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:clamp(20px,2.4vw,32px);text-align:center">
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Who we work with</span>
+      <h2 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(20px,2vw,28px);line-height:1;text-transform:uppercase;letter-spacing:-0.02em">Who calls us, and why</h2>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:1120px;margin:0 auto">
+      <sc-for list="{{ clients }}" as="c" hint-placeholder-count="7">
+        <div style="flex:0 1 260px;min-width:0;padding:18px 16px;background:#14344F;border:1px solid rgba(252,252,237,0.1);text-align:center;display:flex;flex-direction:column;justify-content:center">
+          <div style="font-family:Inter,sans-serif;font-weight:700;font-size:14.5px;text-transform:uppercase;letter-spacing:0.01em">{{ c.title }}</div>
+          <div style="font-size:13px;color:#8DA5B4;line-height:1.45;margin-top:4px">{{ c.short }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="background:#14344F;border-top:1px solid rgba(252,252,237,0.1);border-bottom:1px solid rgba(252,252,237,0.1);padding:clamp(56px,6vw,100px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto">
+      <div>
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6;margin-bottom:18px">Coverage</div>
+        <h2 style="margin:0 0 20px;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(24px,2.6vw,39px);line-height:1;text-transform:uppercase">Anywhere in Ontario</h2>
+        <p style="margin:0 0 26px;font-size:16px;color:#9AB0BE;line-height:1.7;max-width:640px;text-wrap:pretty">Toronto and the GTA, Ottawa, Kingston and everywhere between. Crews, equipment and disposal logistics mobilized anywhere the scope justifies it, with containers arranged locally through haulers we already work with.</p>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px">
+          <sc-for list="{{ cities }}" as="city" hint-placeholder-count="6">
+            <span style="display:inline-block;padding:8px 16px;border:1px solid rgba(252,252,237,0.16);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#AEC1CD">{{ city }}</span>
+          </sc-for>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quote" style="scroll-margin-top:86px;padding:clamp(64px,8vw,120px) clamp(16px,4vw,56px);max-width:1440px;margin:0 auto;border-top:1px solid rgba(252,252,237,0.1)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(30px,4vw,72px);align-items:start">
+      <div>
+        <div style="display:flex;align-items:center;gap:13px;margin-bottom:20px">
+          <img src="assets/wastely-icon-navy.png" alt="" style="width:40px;height:40px;display:block;border:1px solid rgba(252,252,237,0.14)" />
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Request a quote</span>
+        </div>
+        <h2 style="margin:0 0 24px;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(28px,3.9vw,62px);line-height:0.94;text-transform:uppercase;max-width:16ch;letter-spacing:-0.03em">Something needs to go?</h2>
+        <p style="margin:0 0 32px;font-size:clamp(16px,1.3vw,19px);color:#AEC1CD;line-height:1.65;max-width:560px">Answer five questions and the form prices the job in front of you: what the Ontario market charges for that scope, and our number, which runs about 30% under it. Then send the details and an owner confirms it in writing.</p>
+        <a href="tel:+13434631909" style="display:inline-block;padding:17px 34px;background:#B1CDC6;color:#0E2438;font-family:Inter,sans-serif;font-weight:700;font-size:clamp(16px,1.2vw,19px);letter-spacing:0.035em" style-hover="background:#D2E3DE">Call (343) 463-1909</a>
+        <div style="margin-top:34px;display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ quoteAssurances }}" as="a" hint-placeholder-count="3">
+            <div style="display:flex;align-items:baseline;gap:12px">
+              <span style="width:6px;height:6px;background:#B1CDC6;flex-shrink:0;margin-top:7px"></span>
+              <span style="font-size:15px;color:#9AB0BE;line-height:1.6">{{ a }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div ref="{{ overlayRef }}" onClick="{{ onBackdrop }}" style="display:block">
+      <form ref="{{ formRef }}" onSubmit="{{ onSubmit }}" style="position:relative;display:flex;flex-direction:column;gap:18px;background:#14344F;border:1px solid rgba(252,252,237,0.11);padding:clamp(24px,3vw,44px)">
+        <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:4px">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Request a quote</span>
+              <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(24px,2.6vw,36px);line-height:0.98;text-transform:uppercase;letter-spacing:-0.03em;color:#FCFCED">Price your job now</span>
+            </div>
+            <button type="button" onClick="{{ closeModal }}" aria-label="Close" style="flex-shrink:0;width:44px;height:44px;background:transparent;border:1px solid rgba(252,252,237,0.2);color:#FCFCED;font-size:22px;line-height:1;cursor:pointer" style-hover="border-color:#B1CDC6;color:#B1CDC6">×</button>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Step 1 — Scope</span>
+          <span style="flex:1;height:1px;background:rgba(252,252,237,0.14)"></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">What is the job? Pick one or combine several</span>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ jobChips }}" as="c" hint-placeholder-count="8">
+              <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+                <button type="button" onClick="{{ c.toggle }}" aria-pressed="true" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px;background:#B1CDC6;border:1px solid #B1CDC6;color:#0E2438;font-family:Inter,sans-serif;font-weight:600;font-size:14.5px;cursor:pointer;text-align:left"><span style="font-size:13px;line-height:1">✓</span>{{ c.label }}</button>
+              </sc-if>
+              <sc-if value="{{ c.off }}" hint-placeholder-val="{{ true }}">
+                <button type="button" onClick="{{ c.toggle }}" aria-pressed="false" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:14.5px;cursor:pointer;text-align:left" style-hover="border-color:#B1CDC6"><span style="font-size:15px;line-height:1;color:#B1CDC6">+</span>{{ c.label }}</button>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Property size</span>
+            <div style="position:relative;display:flex;flex-direction:column">
+              <select value="{{ size }}" onChange="{{ onSize }}" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 42px 13px 14px;outline:none;appearance:none;box-sizing:border-box" style-focus="border-color:#B1CDC6">
+                <sc-for list="{{ sizeOptions }}" as="o" hint-placeholder-count="5">
+                  <option value="{{ o }}" style="background:#14344F;color:#FCFCED">{{ o }}</option>
+                </sc-for>
+              </select>
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #B1CDC6;pointer-events:none"></span>
+            </div>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">How full is it?</span>
+            <div style="position:relative;display:flex;flex-direction:column">
+              <select value="{{ fill }}" onChange="{{ onFill }}" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 42px 13px 14px;outline:none;appearance:none;box-sizing:border-box" style-focus="border-color:#B1CDC6">
+                <sc-for list="{{ fillOptions }}" as="o" hint-placeholder-count="4">
+                  <option value="{{ o }}" style="background:#14344F;color:#FCFCED">{{ o }}</option>
+                </sc-for>
+              </select>
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #B1CDC6;pointer-events:none"></span>
+            </div>
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Access</span>
+            <div style="position:relative;display:flex;flex-direction:column">
+              <select value="{{ access }}" onChange="{{ onAccess }}" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 42px 13px 14px;outline:none;appearance:none;box-sizing:border-box" style-focus="border-color:#B1CDC6">
+                <sc-for list="{{ accessOptions }}" as="o" hint-placeholder-count="4">
+                  <option value="{{ o }}" style="background:#14344F;color:#FCFCED">{{ o }}</option>
+                </sc-for>
+              </select>
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #B1CDC6;pointer-events:none"></span>
+            </div>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">When</span>
+            <div style="position:relative;display:flex;flex-direction:column">
+              <select value="{{ speed }}" onChange="{{ onSpeed }}" style="width:100%;background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 42px 13px 14px;outline:none;appearance:none;box-sizing:border-box" style-focus="border-color:#B1CDC6">
+                <sc-for list="{{ speedOptions }}" as="o" hint-placeholder-count="3">
+                  <option value="{{ o }}" style="background:#14344F;color:#FCFCED">{{ o }}</option>
+                </sc-for>
+              </select>
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #B1CDC6;pointer-events:none"></span>
+            </div>
+          </label>
+        </div>
+
+        <div style="background:#0E2438;border:1px solid #B1CDC6;padding:clamp(20px,2.4vw,28px);display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Indicative price</span>
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#7C93A3">{{ scopeSummary }}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <span style="font-size:15px;color:#8DA5B4">Ontario market average</span>
+            <span style="font-size:clamp(16px,1.4vw,19px);color:#8DA5B4;text-decoration:line-through;text-decoration-color:#5E7B8D">{{ marketRange }}</span>
+          </div>
+          <div style="height:1px;background:rgba(252,252,237,0.12)"></div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <span style="font-family:Inter,sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.04em;color:#FCFCED">Wastely</span>
+            <span style="font-family:Inter,sans-serif;font-weight:800;font-size:clamp(26px,3vw,40px);line-height:1;letter-spacing:-0.03em;color:#B1CDC6">{{ wastelyRange }}</span>
+          </div>
+          <p style="margin:0;font-size:13.5px;color:#8DA5B4;line-height:1.6">{{ estimateNote }}</p>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Step 2 — Contact</span>
+          <span style="flex:1;height:1px;background:rgba(252,252,237,0.14)"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Name</span>
+            <input type="text" required="required" placeholder="Full name" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;width:100%;box-sizing:border-box" style-focus="border-color:#B1CDC6" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Company</span>
+            <input type="text" placeholder="Company or property" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;width:100%;box-sizing:border-box" style-focus="border-color:#B1CDC6" />
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Phone</span>
+            <input type="tel" required="required" placeholder="Your phone number" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;width:100%;box-sizing:border-box" style-focus="border-color:#B1CDC6" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Email</span>
+            <input type="email" placeholder="you@company.com" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;width:100%;box-sizing:border-box" style-focus="border-color:#B1CDC6" />
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:18px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Site location</span>
+            <input type="text" placeholder="City or address" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;width:100%;box-sizing:border-box" style-focus="border-color:#B1CDC6" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Timeline</span>
+            <input type="text" placeholder="When does it need to be gone?" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;padding:13px 14px;outline:none;width:100%;box-sizing:border-box" style-focus="border-color:#B1CDC6" />
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#829AAA">Details</span>
+          <textarea rows="5" placeholder="What is the property, how big is it, and what has to come out?" style="background:#16394F;border:1px solid rgba(252,252,237,0.14);color:#FCFCED;font-family:Inter,sans-serif;font-weight:300;font-size:16px;line-height:1.55;padding:13px 14px;outline:none;width:100%;box-sizing:border-box;resize:vertical" style-focus="border-color:#B1CDC6"></textarea>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid rgba(252,252,237,0.14);background:#16394F;cursor:pointer">
+          <input type="checkbox" required="required" style="width:18px;height:18px;margin:2px 0 0;accent-color:#B1CDC6;flex-shrink:0" />
+          <span style="font-size:14.5px;color:#AEC1CD;line-height:1.55">{{ ackLabel }}</span>
+        </label>
+        <button type="submit" style="margin-top:6px;padding:16px 28px;background:#B1CDC6;color:#0E2438;border:none;font-family:Inter,sans-serif;font-weight:700;font-size:16px;letter-spacing:0.045em;cursor:pointer;text-align:center" style-hover="background:#D2E3DE">{{ submitLabel }}</button>
+        <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:14px;color:#B1CDC6;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0.06em">Received. An owner will call you back.</div>
+        </sc-if>
+      </form>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(40px,5vw,64px);display:flex;flex-wrap:wrap;gap:12px">
+      <a href="Safety.dc.html" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8DA5B4" style-hover="color:#B1CDC6">Safety &amp; compliance</a>
+      <span style="color:#3C5A6E">·</span>
+      <a href="Careers.dc.html" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8DA5B4" style-hover="color:#B1CDC6">Careers</a>
+    </div>
+  </section>
+
+  <section id="support" style="scroll-margin-top:86px;background:#0E2438;border-top:1px solid rgba(252,252,237,0.1);padding:clamp(40px,5vw,72px) clamp(16px,4vw,56px)">
+    <div style="max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(24px,4vw,64px);align-items:center">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#B1CDC6">Support</span>
+        <h2 style="margin:0;font-family:Inter,sans-serif;font-weight:800;font-size:clamp(25px,2.9vw,43px);line-height:1;text-transform:uppercase;max-width:20ch">Help us clean up illegal dumping</h2>
+        <p style="margin:0;font-size:16px;color:#9AB0BE;line-height:1.7;max-width:58ch;text-wrap:pretty">We are raising money on GoFundMe, and any amount helps. 100% of the proceeds go to cleaning up illegal dumping and waste in your local parks, forests and green spaces.</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start">
+        <a href="https://www.gofundme.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:14px 26px;background:#B1CDC6;color:#0E2438;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:0.02em;text-transform:uppercase" style-hover="background:#FCFCED">Donate on GoFundMe <span style="font-size:18px">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <dc-import name="SiteFooter" hint-size="100%,360px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430}}">
+class Component extends DCLogic {
+  state = {
+    sent: false,
+    jobs: [],
+    size: '1,000–2,500 sq ft',
+    fill: 'Normal contents',
+    access: 'Ground level, truck at the door',
+    speed: 'Standard — two weeks or more'
+  };
+  JOBS = {
+    'Estate cleanout': 3200,
+    'Interior strip-out': 7500,
+    'Community housing turnover': 2200,
+    'Asbestos removal': 8000,
+    'Mould removal': 5500,
+    'Bulk waste & load-out': 2800,
+    'Warehouse or facility clear-out': 11000,
+    'Commercial hazardous waste': 5000,
+    'E-waste & regulated electronics': 2200,
+    'Land clearing & remediation': 14000,
+    'Emergency or hoarding cleanout': 4200,
+    'Multi-site or ongoing account': 6000,
+    'Something else': 3500
+  };
+  SIZE = { 'Under 1,000 sq ft': 0.65, '1,000–2,500 sq ft': 1, '2,500–5,000 sq ft': 1.55, '5,000–10,000 sq ft': 2.3, 'Over 10,000 sq ft': 3.4 };
+  FILL = { 'Light — a few rooms': 0.75, 'Normal contents': 1, 'Packed — full to the walls': 1.4, 'Hoarding or biohazard': 1.9 };
+  ACCESS = { 'Ground level, truck at the door': 1, 'Elevator building': 1.1, 'Stairs or walk-up': 1.18, 'Occupied or restricted site': 1.3 };
+  SPEED = { 'Standard — two weeks or more': 1, 'Within a week': 1.12, '24–48 hour emergency': 1.4 };
+  MIN = 5000;
+  overlayRef = React.createRef();
+  formRef = React.createRef();
+  componentDidMount() {
+    this._t = setTimeout(() => {
+      try { if (sessionStorage.getItem('wastely-quote-popped')) return; sessionStorage.setItem('wastely-quote-popped', '1'); } catch (e) {}
+      this.openModal();
+    }, 4000);
+    if (location.hash === '#quote') setTimeout(() => this.openModal(), 300);
+    this._click = (e) => {
+      const a = e.target.closest && e.target.closest('a[href$="#quote"]');
+      if (a) { e.preventDefault(); this.openModal(); }
+    };
+    this._key = (e) => { if (e.key === 'Escape') this.closeModal(); };
+    document.addEventListener('click', this._click, true);
+    document.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() {
+    clearTimeout(this._t);
+    document.removeEventListener('click', this._click, true);
+    document.removeEventListener('keydown', this._key);
+    document.body.style.overflow = '';
+  }
+  openModal() {
+    const o = this.overlayRef.current, f = this.formRef.current;
+    if (!o || !f || this.state.modalOpen) return;
+    Object.assign(o.style, { position: 'fixed', inset: '0', zIndex: '300', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'clamp(12px,4vh,48px) clamp(12px,3vw,32px)', background: 'rgba(8,20,32,0.86)', overflowY: 'auto', backdropFilter: 'blur(4px)' });
+    Object.assign(f.style, { width: '100%', maxWidth: '680px', margin: 'auto 0', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', borderColor: '#B1CDC6' });
+    document.body.style.overflow = 'hidden';
+    this.setState({ modalOpen: true });
+  }
+  closeModal() {
+    const o = this.overlayRef.current, f = this.formRef.current;
+    if (!o || !f || !this.state.modalOpen) return;
+    o.removeAttribute('style'); o.style.display = 'block';
+    ['width', 'maxWidth', 'margin', 'boxShadow', 'borderColor'].forEach(k => { f.style[k] = ''; });
+    f.style.border = '1px solid rgba(252,252,237,0.11)';
+    document.body.style.overflow = '';
+    this.setState({ modalOpen: false });
+  }
+  money(n) { return '$' + (Math.round(n / 50) * 50).toLocaleString('en-CA'); }
+  renderVals() {
+    const s = this.state;
+    const base = s.jobs.reduce((t, j) => t + (this.JOBS[j] || 0), 0);
+    const mult = (this.SIZE[s.size] || 1) * (this.FILL[s.fill] || 1) * (this.ACCESS[s.access] || 1) * (this.SPEED[s.speed] || 1);
+    const priced = !!base;
+    const mLo = base ? base * mult * 0.88 : 0;
+    const mHi = base ? base * mult * 1.18 : 0;
+    const wLo = Math.max(mLo * 0.7, this.MIN);
+    const wHi = Math.max(mHi * 0.7, this.MIN * 1.35);
+    const set = (k) => (e) => { const v = e.target.value; this.setState({ [k]: v }); };
+    return {
+      overlayRef: this.overlayRef, formRef: this.formRef,
+      modalOpen: !!s.modalOpen,
+      closeModal: () => this.closeModal(),
+      onBackdrop: (e) => { if (e.target === this.overlayRef.current) this.closeModal(); },
+      sent: this.state.sent,
+      submitLabel: this.state.sent ? 'Details sent' : 'Send project details',
+      onSubmit: (e) => { e.preventDefault(); const f = e.target; const d = { _subject: 'Wastely website: ' + (document.title || 'enquiry'), _template: 'table', _captcha: 'false', page: location.href }; f.querySelectorAll('input,select,textarea').forEach((el, i) => { const lb = el.closest('label'); const sp = lb && lb.querySelector('span'); if (el.type === 'checkbox') { if (el.checked) d['confirmed'] = lb ? lb.textContent.trim() : 'yes'; return; } if (!el.value) return; d[el.name || (sp && sp.textContent.trim()) || el.placeholder || ('field ' + i)] = el.value; }); const picked = Array.from(f.querySelectorAll('button[aria-pressed="true"]')).map(b => b.textContent.replace('\u2713', '').trim()); if (picked.length) d.services = picked.join(', '); fetch('https://formsubmit.co/ajax/go@wastely.ca', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(d) }).catch(() => {}); fetch('https://jackrabbit-psi.vercel.app/api/forms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'Quote request', page: location.href, fields: d }), keepalive: true }).catch(() => {}); this.setState({ sent: true }); },
+      jobChips: Object.keys(this.JOBS).map(j => {
+        const on = s.jobs.includes(j);
+        return { label: j, on, off: !on, toggle: () => this.setState(st => ({ jobs: st.jobs.includes(j) ? st.jobs.filter(x => x !== j) : st.jobs.concat(j) })) };
+      }),
+      size: s.size, fill: s.fill, access: s.access, speed: s.speed,
+      onSize: set('size'), onFill: set('fill'), onAccess: set('access'), onSpeed: set('speed'),
+      sizeOptions: Object.keys(this.SIZE),
+      fillOptions: Object.keys(this.FILL),
+      accessOptions: Object.keys(this.ACCESS),
+      speedOptions: Object.keys(this.SPEED),
+      scopeSummary: priced ? (s.jobs.length > 1 ? s.jobs.length + ' services combined · ' : '') + s.size : 'Not scoped yet',
+      marketRange: priced ? this.money(mLo) + ' – ' + this.money(mHi) : '—',
+      wastelyRange: priced ? this.money(wLo) + ' – ' + this.money(wHi) : '—',
+      estimateNote: priced
+        ? (s.jobs.length > 1 ? 'All ' + s.jobs.length + ' scopes on one crew, one mobilization and one invoice. ' : '') + 'Roughly 30% under the Ontario market average for this scope. Confirmed in writing once an owner sees photos or walks the site. Minimum job ' + this.money(this.MIN) + '.'
+        : 'Choose one or more services above and the number appears here. Minimum job ' + this.money(this.MIN) + '.',
+      ackLabel: priced
+        ? 'I understand this job is budgeted around ' + this.money(wLo) + ' – ' + this.money(wHi) + ' and want to proceed with a final quote.'
+        : 'I understand Wastely takes on jobs from ' + this.money(this.MIN) + ' and up.',
+      credentials: ['Fully insured', 'WSIB cleared', 'Licensed hazardous waste'],
+      quoteAssurances: [
+        'An owner answers, day or night — not a call centre.',
+        'Certificates of insurance and WSIB clearance sent before we mobilize.',
+        'Fixed price on the quote. The number does not move after signing.'
+      ],
+      streams: [
+        { dest: 'Scrap yards', title: 'Metal & Appliances', body: 'Steel, copper, wiring, racking, white goods and structural metal pulled out of every load and sold on. Recovery is credited back against the job.' },
+        { dest: 'Reuse & donation', title: 'Furniture & Goods', body: 'Furniture, tools, housewares and anything still serviceable set aside for charities, resellers and community reuse instead of the bin.' },
+        { dest: 'Recycling facilities', title: 'Wood & Building Debris', body: 'Clean wood, drywall, brick, concrete and aggregate separated on site and taken to recyclers that actually reprocess them.' },
+        { dest: 'Licensed processors', title: 'Electronics & Batteries', body: 'Computers, screens, cabling and lithium batteries routed to approved e-waste and battery processors under their own paperwork.' },
+        { dest: 'Landfill', title: 'The Residual 25 – 30%', body: 'Contaminated, mixed and unrecoverable material — the only portion that gets tipped, weighed and reported to you honestly.' }
+      ],
+      proof: [
+        { value: '24/7', label: 'Dispatch answered live, including overnight and weekends' },
+        { value: '100+', label: 'Commercial accounts served' },
+        { value: 'Licensed', label: 'Hazardous and regulated waste handled under manifest' },
+        { value: 'Ontario', label: 'Toronto, Ottawa, Kingston and province-wide' }
+      ],
+      services: [
+        { num: '01', group: 'Abatement', title: 'Asbestos Removal', body: 'Type 1, 2 and 3 operations under O. Reg. 278/05, with sealed containment, negative air and third-party clearance before the enclosure comes down.' },
+        { num: '02', group: 'Abatement', title: 'Mould Removal', body: 'Contained removal of affected building materials in commercial, multi-unit and community housing properties, cleared before handover.' },
+        { num: '03', group: 'Cleanouts', title: 'Estate Cleanout', body: 'Whole properties emptied \u2014 contents, furniture, appliances, garages, basements and outbuildings \u2014 with salvage and donation separated out and the house swept at handover.' },
+        { num: '04', group: 'Strip-Out', title: 'Interior Strip-Out', body: 'Flooring, drywall, cabinetry, fixtures and ceilings taken back to studs, slab or shell so the next trade walks into a bare space.' },
+        { num: '05', group: 'Cleanouts', title: 'Community Housing Turnover', body: 'Units cleared, stripped and handed back inspection-ready on a turnover schedule, including hoarding conditions and biohazard cases.' },
+        { num: '06', group: 'Disposal', title: 'Bulk Waste & Load-Out', body: 'High-volume clear-outs separated by stream, weighed and tracked to licensed receiving facilities. Containers arranged locally as part of the scope.' },
+        { num: '07', group: 'Hazardous', title: 'Commercial Hazardous Waste', body: 'Solvents, acids, aerosols, paints and unknown legacy drums profiled, packed, manifested and moved to licensed disposal.' },
+        { num: '08', group: 'Regulated', title: 'E-Waste & Batteries', body: 'Computers, screens, cabling, UPS units and lithium batteries collected and routed to approved processors under their own chain of custody.' },
+        { num: '09', group: 'Clearing', title: 'Land Clearing & Remediation', body: 'Structures, slabs, brush and buried debris off the site, impacted soil excavated and hauled, ground left graded.' }
+      ],
+      commitments: [
+        { title: 'One account, every stream', body: 'Asbestos, mould, hazardous streams, bulk load-out and full property cleanouts on a single account with a single invoice. No separate vendor for the awkward drum.' },
+        { title: 'Customer service', body: 'Calls returned the same day, an owner reachable, and a written answer when something changes.' },
+        { title: 'On-demand response', body: 'Dispatch answered live at any hour. Scattered loads, hoarded units and shutdown deadlines do not wait for a work order.' },
+        { title: 'A documented close-out', body: 'Manifests, weigh tickets, diversion tonnage, clearance certificates and photographs — one package you can pass to an auditor.' }
+      ],
+      steps: [
+        { num: '01', title: 'Walk & Profile', body: 'An owner walks the site and identifies what you actually have. Streams are profiled properly, so nothing gets refused at the gate later.' },
+        { num: '02', title: 'Scope & Price', body: 'A written scope with inclusions, exclusions, disposal streams and a fixed number. Anything unknown is named, not buried.' },
+        { num: '03', title: 'Mobilize', body: 'Crews, equipment, containers and packaging arrive with the insurance certificates and notifications already in your hands.' },
+        { num: '04', title: 'Haul & Document', body: 'Loads leave under manifest to licensed facilities. You get weights, diversion figures and clearance records as one close-out package.' }
+      ],
+      clients: [
+        { num: '01', short: 'Production waste, chemicals and shutdown clear-outs.', title: 'Manufacturing & Industrial', body: 'Production waste, process chemicals, waste oil and shutdown clear-outs, handled without stopping the line longer than planned.' },
+        { num: '02', short: 'Turnovers, cleanouts, abatement and after-hours calls.', title: 'Property Managers & REITs', body: 'Tenant turnovers, cleanouts between occupancies, abatement in occupied buildings, after-hours emergencies and one invoice instead of eleven.' },
+        { num: '03', short: 'Land clearing, abatement and contaminated soil.', title: 'Construction & Civil Contractors', body: 'Land cleared ahead of the build, asbestos and mould out of the existing structure, and contaminated material off the property under manifest.' },
+        { num: '04', short: 'Rollovers and spilled loads, with police and MTO.', title: 'Transport & Logistics', body: 'Rollovers and scattered loads cleared off the road and the shoulder, working with police, MTO and your insurer.' },
+        { num: '05', short: 'Scheduled turnovers, hoarding and biohazard.', title: 'Municipal & Community Housing', body: 'Unit turnovers on a schedule, abatement, hoarding and biohazard clear-outs, with the licensing, insurance and reporting that public contracts require as standard.' },
+        { num: '06', short: 'Transformer oils, batteries and remote-site waste.', title: 'Energy & Utilities', body: 'Transformer oils, battery storage decommissioning, substation clear-outs and remote-site waste logistics.' },
+        { num: '07', short: 'Closures, refits and multi-site waste.', title: 'Retail & Hospitality Chains', body: 'Location closures, refits and recurring waste across many sites, coordinated centrally instead of store by store.' }
+      ],
+      cities: ['Toronto', 'GTA', 'Ottawa', 'Kingston', 'Hamilton', 'Province-wide']
+
+    };
+  }
+}
+</script>
+</body>
+</html>
