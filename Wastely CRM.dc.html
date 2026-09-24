@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-2644e86a-d30a-4bff-9abf-1b30323e10ad/styles.css">
+<script src="_ds/nocturne-2644e86a-d30a-4bff-9abf-1b30323e10ad/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>html{color-scheme:dark} body{margin:0;background:var(--color-bg)} a{color:var(--color-accent)} a:hover{color:var(--color-accent-400)} select.input{appearance:auto} input[type=date].input{color-scheme:dark}</style>
+</helmet>
+<div style="display:grid;grid-template-columns:212px minmax(0,1fr);min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+  <aside style="position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:var(--space-8);padding:var(--space-6) var(--space-4);background:linear-gradient(180deg,var(--color-surface),var(--color-bg))">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 var(--space-2)">
+      <div style="width:26px;height:26px;border-radius:var(--radius-md);border:1px solid var(--color-accent);display:grid;place-items:center;color:var(--color-accent);font-size:15px"><i class="ph ph-recycle"></i></div>
+      <span style="font-size:17px;font-weight:500;letter-spacing:-0.01em">Wastely</span>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+        <button onClick="{{ n.go }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border:0;border-radius:var(--radius-md);background:{{ n.bg }};color:{{ n.color }};font:inherit;font-size:14px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
+          <i class="ph {{ n.icon }}" style="font-size:17px"></i>
+          <span style="flex:1">{{ n.label }}</span>
+          <span style="font-size:12px;color:var(--color-neutral-500)">{{ n.count }}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:var(--space-3);padding:0 var(--space-2)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:12px;border:1px solid var(--color-accent);color:var(--color-accent-200)">{{ me.initials }}</span>
+        <div style="min-width:0;display:flex;flex-direction:column">
+          <span style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ me.name }}</span>
+          <span style="font-size:11px;color:var(--color-neutral-500)">{{ me.role }}</span>
+        </div>
+      </div>
+      <select class="input" aria-label="Switch profile" value="{{ meId }}" onChange="{{ onMe }}" style="min-height:30px;font-size:12px;padding:4px 8px">
+        <sc-for list="{{ meOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+      </select>
+      <button class="btn btn-ghost" onClick="{{ resetData }}" style="justify-content:flex-start;font-size:12px;color:var(--color-neutral-400)"><i class="ph ph-arrow-counter-clockwise"></i>Reset demo data</button>
+    </div>
+  </aside>
+
+  <main style="min-width:0;padding:calc(var(--space-8)*1.4) calc(var(--space-8)*1.6) calc(var(--space-8)*3)">
+
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:calc(var(--space-8)*1.5);max-width:1240px">
+        <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">{{ todayLong }}</div>
+            <h3 style="margin:0">Overview</h3>
+          </div>
+          <button class="btn btn-primary" onClick="{{ openNewDeal }}"><i class="ph ph-plus"></i>New deal</button>
+        </header>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--space-4)">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div class="card elev-sm" style="padding:var(--space-4);gap:6px">
+              <div style="font-size:12px;color:var(--color-neutral-400)">{{ k.label }}</div>
+              <div style="font-size:28px;font-weight:500;letter-spacing:-0.02em;line-height:1.1">{{ k.value }}</div>
+              <div style="font-size:12px;color:var(--color-neutral-500)">{{ k.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:calc(var(--space-8)*1.5)">
+          <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <h5 style="margin:0">On site now</h5>
+              <span style="font-size:12px;color:var(--color-neutral-500)">{{ crewDeployed }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ onSite }}" as="o" hint-placeholder-count="2">
+                <button onClick="{{ o.open }}" style="display:flex;flex-direction:column;gap:8px;padding:var(--space-4) var(--space-2);border:0;border-radius:var(--radius-md);color:inherit;font:inherit;text-align:left;cursor:pointer;background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px" style-hover="background-color:color-mix(in srgb, var(--color-text) 4%, transparent)">
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+                    <span style="font-size:14px;font-weight:500">{{ o.client }}</span>
+                    <span style="font-size:12px;color:var(--color-neutral-400)">{{ o.dayText }}</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--color-neutral-400)">{{ o.title }} · {{ o.site }}</div>
+                  <div style="height:3px;border-radius:2px;background:var(--color-neutral-800);overflow:hidden"><div style="height:100%;width:{{ o.pct }};background:var(--color-accent)"></div></div>
+                  <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-neutral-300)"><i class="ph ph-hard-hat" style="font-size:14px;color:var(--color-neutral-500)"></i>{{ o.crewText }}</div>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <h5 style="margin:0">Pipeline by stage</h5>
+              <button class="btn btn-ghost" onClick="{{ goPipeline }}" style="font-size:13px">Open board<i class="ph ph-arrow-right"></i></button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--space-4);padding-top:var(--space-2)">
+              <sc-for list="{{ stageBars }}" as="b" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 64px;gap:12px;align-items:center;font-size:13px">
+                  <span style="color:var(--color-neutral-300)">{{ b.name }}</span>
+                  <div style="height:8px;border-radius:4px;background:var(--color-neutral-900)"><div style="height:100%;width:{{ b.w }};border-radius:4px;background:linear-gradient(to right,var(--color-accent-700),var(--color-accent))"></div></div>
+                  <span style="text-align:right;font-variant-numeric:tabular-nums">{{ b.total }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+        <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <h5 style="margin:0">Due in the next 7 days</h5>
+            <button class="btn btn-ghost" onClick="{{ goTasks }}" style="font-size:13px">All tasks<i class="ph ph-arrow-right"></i></button>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ dueSoon }}" as="t" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:28px 22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px var(--space-2);background:linear-gradient(to right,transparent,color-mix(in srgb, var(--color-text) 8%, transparent) 48px,color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+                <button onClick="{{ t.toggle }}" aria-label="Toggle done" style="width:28px;height:28px;display:grid;place-items:center;border:0;background:transparent;border-radius:var(--radius-sm);cursor:pointer;color:{{ t.checkColor }};font-size:19px" style-hover="background:color-mix(in srgb, var(--color-text) 8%, transparent)"><i class="ph {{ t.checkIcon }}"></i></button>
+                <i class="ph {{ t.icon }}" style="font-size:16px;color:var(--color-neutral-500)"></i>
+                <div style="min-width:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline">
+                  <span style="font-size:14px;color:{{ t.titleColor }};text-decoration:{{ t.deco }}">{{ t.title }}</span>
+                  <button onClick="{{ t.openJob }}" style="border:0;background:transparent;padding:0;font:inherit;font-size:12px;color:var(--color-neutral-400);cursor:pointer" style-hover="color:var(--color-accent-300)">{{ t.job }}</button>
+                </div>
+                <div style="display:flex;gap:14px;font-size:12px;white-space:nowrap">
+                  <span style="color:var(--color-neutral-400)">{{ t.assignee }}</span>
+                  <span style="color:{{ t.dueColor }};min-width:52px;text-align:right">{{ t.due }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPipeline }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8)">
+        <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">{{ pipelineSub }}</div>
+            <h3 style="margin:0">Pipeline</h3>
+          </div>
+          <div style="display:flex;gap:var(--space-3);align-items:center">
+            <span style="font-size:12px;color:var(--color-neutral-500)">Drag cards between stages</span>
+            <button class="btn btn-primary" onClick="{{ openNewDeal }}"><i class="ph ph-plus"></i>New deal</button>
+          </div>
+        </header>
+        <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(232px,1fr);gap:var(--space-4);overflow-x:auto;padding-bottom:var(--space-4);align-items:start">
+          <sc-for list="{{ columns }}" as="col" hint-placeholder-count="5">
+            <div onDragOver="{{ col.onDragOver }}" onDragEnter="{{ col.onDragEnter }}" onDrop="{{ col.onDrop }}" style="display:flex;flex-direction:column;gap:var(--space-3);min-height:420px;padding:var(--space-3);border-radius:var(--radius-lg);background:{{ col.bg }};box-shadow:{{ col.ring }}">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:0 2px">
+                <div style="display:flex;gap:8px;align-items:baseline"><span style="font-size:13px;font-weight:500">{{ col.name }}</span><span style="font-size:12px;color:var(--color-neutral-500)">{{ col.count }}</span></div>
+                <span style="font-size:12px;color:var(--color-neutral-400);font-variant-numeric:tabular-nums">{{ col.total }}</span>
+              </div>
+              <div style="height:2px;border-radius:1px;background:{{ col.mark }}"></div>
+              <sc-for list="{{ col.cards }}" as="c" hint-placeholder-count="2">
+                <div draggable="true" onDragStart="{{ c.onDragStart }}" onDragEnd="{{ c.onDragEnd }}" onClick="{{ c.open }}" class="card elev-sm" style="gap:8px;padding:var(--space-4);cursor:grab" style-hover="box-shadow:var(--shadow-md)">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
+                    <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-300);line-height:1.35">{{ c.service }}</div>
+                    <sc-if value="{{ c.emergency }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline" style="gap:4px;padding:1px 6px;flex:none"><i class="ph ph-siren"></i>24/7</span></sc-if>
+                  </div>
+                  <div style="font-size:14px;font-weight:500;line-height:1.3">{{ c.client }}</div>
+                  <div style="font-size:13px;color:var(--color-neutral-400);line-height:1.35">{{ c.title }}</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px">
+                    <span style="font-size:15px;font-variant-numeric:tabular-nums">{{ c.value }}</span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span style="font-size:12px;color:{{ c.marginColor }}">{{ c.margin }}</span>
+                      <span title="{{ c.owner }}" style="width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:10px;background:var(--color-neutral-800);color:var(--color-neutral-200)">{{ c.initials }}</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isContracts }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8);max-width:1240px">
+        <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">Won work, costs and billing</div>
+            <h3 style="margin:0">Contracts</h3>
+          </div>
+          <div class="seg">
+            <sc-for list="{{ cFilters }}" as="f" hint-placeholder-count="4">
+              <label class="seg-opt"><input type="radio" name="cfilter" checked="{{ f.active }}" onChange="{{ f.pick }}"></input>{{ f.v }}<span style="color:var(--color-neutral-500)">{{ f.count }}</span></label>
+            </sc-for>
+          </div>
+        </header>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--space-4)">
+          <sc-for list="{{ cTotals }}" as="k" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:4px;padding-left:var(--space-4);border-left:1px solid var(--color-divider)">
+              <span style="font-size:12px;color:var(--color-neutral-400)">{{ k.label }}</span>
+              <span style="font-size:22px;font-weight:500;letter-spacing:-0.015em;font-variant-numeric:tabular-nums">{{ k.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="table" style="min-width:880px">
+            <thead>
+              <tr><th>Contract</th><th>Status</th><th>Dates</th><th style="text-align:right">Value</th><th style="text-align:right">Op. cost</th><th style="text-align:right">Margin</th><th>Crew</th><th>Billing</th></tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ cRows }}" as="r" hint-placeholder-count="4">
+                <tr onClick="{{ r.open }}" style="cursor:pointer">
+                  <td style="padding-top:10px;padding-bottom:10px"><div style="font-weight:500;display:flex;align-items:center;gap:6px">{{ r.client }}<i class="ph {{ r.emIcon }}" style="color:var(--color-accent);font-size:14px"></i></div><div style="font-size:12px;color:var(--color-neutral-400)">{{ r.title }}</div></td>
+                  <td><span class="tag {{ r.statusTag }}">{{ r.status }}</span></td>
+                  <td style="font-size:13px;color:var(--color-neutral-300);white-space:nowrap">{{ r.dates }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.value }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-neutral-300)">{{ r.cost }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ r.marginColor }};white-space:nowrap"><i class="ph {{ r.marginIcon }}" style="font-size:13px;margin-right:4px"></i>{{ r.margin }}</td>
+                  <td style="font-size:13px;color:var(--color-neutral-300);white-space:nowrap"><i class="ph ph-hard-hat" style="margin-right:6px;color:var(--color-neutral-500)"></i>{{ r.crew }}</td>
+                  <td><span class="tag {{ r.billingTag }}">{{ r.billing }}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isTasks }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8);max-width:980px">
+        <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">{{ tasksSub }}</div>
+            <h3 style="margin:0">Tasks</h3>
+          </div>
+          <div class="field" style="display:flex;align-items:center;gap:10px">
+            <label style="margin:0">Assigned to</label>
+            <select class="input" value="{{ tFilter }}" onChange="{{ onTFilter }}" style="width:180px">
+              <sc-for list="{{ assigneeFilterOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for>
+            </select>
+          </div>
+        </header>
+        <form onSubmit="{{ addTask }}" style="display:grid;grid-template-columns:minmax(200px,1fr) 170px 180px 150px auto;gap:var(--space-3);align-items:center">
+          <input class="input" placeholder="Add a task…" value="{{ nt.title }}" onChange="{{ nt.onTitle }}"></input>
+          <select class="input" value="{{ nt.jobId }}" onChange="{{ nt.onJob }}">
+            <sc-for list="{{ jobOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+          </select>
+          <select class="input" value="{{ nt.assignee }}" onChange="{{ nt.onAssignee }}">
+            <sc-for list="{{ assigneeOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for>
+          </select>
+          <input class="input" type="date" value="{{ nt.due }}" onChange="{{ nt.onDue }}"></input>
+          <button class="btn btn-primary" type="submit"><i class="ph ph-plus"></i>Add</button>
+        </form>
+        <sc-for list="{{ taskGroups }}" as="g" hint-placeholder-count="3">
+          <section style="display:flex;flex-direction:column;gap:var(--space-2)">
+            <div style="display:flex;gap:8px;align-items:baseline"><h6 style="margin:0;color:{{ g.color }}">{{ g.label }}</h6><span style="font-size:12px;color:var(--color-neutral-500)">{{ g.count }}</span></div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ g.items }}" as="t" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:28px 22px minmax(0,1fr) auto 28px;gap:10px;align-items:center;padding:9px var(--space-2);background:linear-gradient(to right,transparent,color-mix(in srgb, var(--color-text) 8%, transparent) 48px,color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+                  <button onClick="{{ t.toggle }}" aria-label="Toggle done" style="width:28px;height:28px;display:grid;place-items:center;border:0;background:transparent;border-radius:var(--radius-sm);cursor:pointer;color:{{ t.checkColor }};font-size:19px" style-hover="background:color-mix(in srgb, var(--color-text) 8%, transparent)"><i class="ph {{ t.checkIcon }}"></i></button>
+                  <i class="ph {{ t.icon }}" style="font-size:16px;color:var(--color-neutral-500)"></i>
+                  <div style="min-width:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline">
+                    <span style="font-size:14px;color:{{ t.titleColor }};text-decoration:{{ t.deco }}">{{ t.title }}</span>
+                    <button onClick="{{ t.openJob }}" style="border:0;background:transparent;padding:0;font:inherit;font-size:12px;color:var(--color-neutral-400);cursor:pointer" style-hover="color:var(--color-accent-300)">{{ t.job }}</button>
+                  </div>
+                  <div style="display:flex;gap:14px;font-size:12px;white-space:nowrap">
+                    <span style="color:var(--color-neutral-400)">{{ t.assignee }}</span>
+                    <span style="color:{{ t.dueColor }};min-width:52px;text-align:right">{{ t.due }}</span>
+                  </div>
+                  <button onClick="{{ t.remove }}" aria-label="Delete task" style="width:28px;height:28px;display:grid;place-items:center;border:0;background:transparent;border-radius:var(--radius-sm);cursor:pointer;color:var(--color-neutral-600);font-size:15px" style-hover="color:var(--color-neutral-200);background:color-mix(in srgb, var(--color-text) 8%, transparent)"><i class="ph ph-x"></i></button>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isWeb }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8);max-width:980px">
+        <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">{{ webSub }}</div>
+            <h3 style="margin:0">Web leads</h3>
+          </div>
+          <div class="seg">
+            <sc-for list="{{ wFilters }}" as="f" hint-placeholder-count="4">
+              <label class="seg-opt"><input type="radio" name="{{ f.name }}" checked="{{ f.active }}" onChange="{{ f.pick }}"></input>{{ f.v }}<span style="color:var(--color-neutral-500)">{{ f.count }}</span></label>
+            </sc-for>
+          </div>
+        </header>
+        <sc-if value="{{ noWebLeads }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:14px;color:var(--color-neutral-500)">Nothing here.</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+          <sc-for list="{{ webLeads }}" as="w" hint-placeholder-count="3">
+            <article class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+              <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+                <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <span style="display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-300)"><i class="ph {{ w.formIcon }}" style="font-size:13px"></i>{{ w.form }}</span>
+                    <sc-if value="{{ w.urgent }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline" style="gap:4px;padding:1px 6px"><i class="ph ph-siren"></i>Urgent</span></sc-if>
+                    <span class="tag {{ w.statusTag }}" style="padding:1px 8px">{{ w.statusLabel }}</span>
+                  </div>
+                  <div style="font-size:18px;font-weight:500">{{ w.name }}</div>
+                  <div style="font-size:13px;color:var(--color-neutral-400)">{{ w.sub }}</div>
+                  <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--color-neutral-300)">
+                    <span style="display:flex;gap:6px;align-items:center"><i class="ph ph-envelope-simple" style="color:var(--color-neutral-500)"></i>{{ w.email }}</span>
+                    <span style="display:flex;gap:6px;align-items:center"><i class="ph ph-phone" style="color:var(--color-neutral-500)"></i>{{ w.phone }}</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right">
+                  <span style="font-size:12px;color:var(--color-neutral-500)">{{ w.time }}</span>
+                  <span style="font-size:11px;color:var(--color-neutral-600)">{{ w.page }}</span>
+                  <sc-if value="{{ w.hasEstimate }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:12px;color:var(--color-neutral-400);margin-top:6px">Indicative price</span>
+                    <span style="font-size:18px;font-variant-numeric:tabular-nums">{{ w.estimate }}</span>
+                  </sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ w.hasServices }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                  <sc-for list="{{ w.services }}" as="sv" hint-placeholder-count="2"><span class="tag tag-accent">{{ sv.v }}</span></sc-for>
+                </div>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:minmax(110px,160px) minmax(0,1fr);gap:6px 16px;font-size:13px">
+                <sc-for list="{{ w.rows }}" as="r" hint-placeholder-count="4">
+                  <span style="color:var(--color-neutral-500)">{{ r.key }}</span>
+                  <span style="color:var(--color-neutral-200);line-height:1.5">{{ r.value }}</span>
+                </sc-for>
+              </div>
+              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center">
+                <sc-if value="{{ w.canConvert }}" hint-placeholder-val="{{ true }}"><button class="btn btn-primary" onClick="{{ w.convert }}"><i class="ph ph-arrow-bend-up-right"></i>Create deal</button></sc-if>
+                <sc-if value="{{ w.isNew }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" onClick="{{ w.archive }}"><i class="ph ph-archive"></i>Archive</button></sc-if>
+                <sc-if value="{{ w.isConverted }}" hint-placeholder-val="{{ false }}"><button class="btn btn-secondary" onClick="{{ w.openJob }}"><i class="ph ph-briefcase"></i>{{ w.jobLabel }}</button></sc-if>
+                <sc-if value="{{ w.isArchived }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ w.restore }}"><i class="ph ph-arrow-counter-clockwise"></i>Move back to New</button></sc-if>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);gap:var(--space-8);height:max(620px, calc(100vh - 80px))">
+        <div style="display:flex;flex-direction:column;gap:var(--space-4);min-height:0">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">Email and Quo texts and calls</div>
+            <h3 style="margin:0">Inbox</h3>
+          </div>
+          <input class="input" placeholder="Search clients or contacts…" value="{{ inboxQ }}" onChange="{{ onInboxQ }}"></input>
+          <div style="display:flex;flex-direction:column;gap:2px;overflow-y:auto;min-height:0;margin:0 -6px;padding:0 6px">
+            <sc-for list="{{ threads }}" as="th" hint-placeholder-count="5">
+              <button onClick="{{ th.open }}" style="display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:8px;align-items:start;padding:9px 10px 9px 6px;border:0;border-radius:var(--radius-md);background:{{ th.bg }};color:inherit;font:inherit;text-align:left;cursor:pointer" style-hover="background-color:color-mix(in srgb, var(--color-text) 6%, transparent)">
+                <span style="width:6px;height:6px;border-radius:50%;margin-top:7px;background:{{ th.unreadDot }}"></span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:14px;font-weight:{{ th.weight }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ th.contact }}</span>
+                  <span style="font-size:12px;color:var(--color-neutral-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ th.client }}</span>
+                  <span style="font-size:12px;color:var(--color-neutral-500);display:flex;gap:6px;align-items:center;min-width:0"><i class="ph {{ th.icon }}" style="flex:none"></i><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ th.snippet }}</span></span>
+                </span>
+                <span style="font-size:11px;color:var(--color-neutral-500);white-space:nowrap">{{ th.time }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ inbox.hasThread }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:var(--space-4);min-height:0">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-bottom:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+              <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                <h4 style="margin:0">{{ inbox.contact }}</h4>
+                <div style="font-size:13px;color:var(--color-neutral-400);display:flex;gap:12px;flex-wrap:wrap">
+                  <span>{{ inbox.client }}</span>
+                  <span style="display:flex;gap:5px;align-items:center"><i class="ph ph-envelope-simple"></i>{{ inbox.email }}</span>
+                  <span style="display:flex;gap:5px;align-items:center"><i class="ph ph-phone"></i>{{ inbox.phone }}</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:var(--space-2)">
+                <button class="btn btn-secondary" onClick="{{ inbox.openJob }}"><i class="ph ph-briefcase"></i>Open job</button>
+                <button class="btn btn-primary" onClick="{{ inbox.call }}" disabled="{{ inbox.callDisabled }}"><i class="ph ph-phone"></i>Call via Quo</button>
+              </div>
+            </div>
+            <div ref="{{ timelineRef }}" style="flex:1;min-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:var(--space-4);padding-right:4px">
+              <sc-if value="{{ inbox.isEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:13px;color:var(--color-neutral-500);padding:var(--space-4) 0">No messages with this contact yet.</div>
+              </sc-if>
+              <sc-for list="{{ timeline }}" as="m" hint-placeholder-count="3">
+                <sc-if value="{{ m.isSms }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:{{ m.align }};gap:3px">
+                    <div style="max-width:min(70%,520px);padding:8px 12px;border-radius:var(--radius-lg);background:{{ m.bubbleBg }};font-size:14px;line-height:1.45;white-space:pre-wrap">{{ m.body }}</div>
+                    <div style="font-size:11px;color:var(--color-neutral-500);display:flex;gap:5px;align-items:center"><i class="ph ph-chat-circle-text"></i>{{ m.who }} · {{ m.time }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.isEmail }}" hint-placeholder-val="{{ false }}">
+                  <div class="card elev-sm" style="gap:8px;padding:var(--space-4);max-width:720px;align-self:{{ m.align }};width:100%">
+                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+                      <span style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:500"><i class="ph ph-envelope-simple" style="color:var(--color-neutral-500)"></i>{{ m.subject }}</span>
+                      <span style="font-size:11px;color:var(--color-neutral-500);white-space:nowrap">{{ m.time }}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--color-neutral-400)">{{ m.emailMeta }}</div>
+                    <div style="font-size:14px;line-height:1.55;white-space:pre-wrap;color:var(--color-neutral-200)">{{ m.body }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.isCall }}" hint-placeholder-val="{{ false }}">
+                  <div class="card elev-sm" style="gap:10px;padding:var(--space-4);max-width:720px;width:100%;align-self:{{ m.align }}">
+                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+                      <span style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:500"><i class="ph {{ m.callIcon }}" style="color:var(--color-accent)"></i>{{ m.callTitle }}</span>
+                      <span style="font-size:11px;color:var(--color-neutral-500);white-space:nowrap">{{ m.time }}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--color-neutral-400)">{{ m.callWho }} · via Quo</div>
+                    <sc-if value="{{ m.recorded }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center">
+                        <button class="btn btn-secondary btn-icon" onClick="{{ m.togglePlay }}" aria-label="Play recording" style="width:32px;height:32px"><i class="ph {{ m.playIcon }}"></i></button>
+                        <div style="height:4px;border-radius:2px;background:var(--color-neutral-800);overflow:hidden"><div style="height:100%;width:{{ m.pct }};background:var(--color-accent)"></div></div>
+                        <span style="font-size:12px;color:var(--color-neutral-400);font-variant-numeric:tabular-nums">{{ m.playTime }}</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ m.hasSummary }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:13px;line-height:1.5;color:var(--color-neutral-200);padding-left:var(--space-3);border-left:2px solid var(--color-accent-700)">{{ m.summary }}</div>
+                    </sc-if>
+                    <sc-if value="{{ m.hasTranscript }}" hint-placeholder-val="{{ false }}">
+                      <button class="btn btn-ghost" onClick="{{ m.toggleTx }}" style="align-self:flex-start;font-size:13px"><i class="ph ph-text-align-left"></i>{{ m.txLabel }}</button>
+                      <sc-if value="{{ m.txOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;flex-direction:column;gap:8px;padding:var(--space-3);border-radius:var(--radius-md);background:var(--color-bg)">
+                          <sc-for list="{{ m.lines }}" as="ln" hint-placeholder-count="3">
+                            <div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;font-size:13px;line-height:1.45">
+                              <span style="color:{{ ln.color }};font-weight:500">{{ ln.who }}</span>
+                              <span style="color:var(--color-neutral-200)">{{ ln.text }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </sc-for>
+            </div>
+            <form onSubmit="{{ compose.send }}" class="card elev-sm" style="gap:var(--space-3);padding:var(--space-4)">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+                <div class="seg">
+                  <sc-for list="{{ composeTabs }}" as="f" hint-placeholder-count="2">
+                    <label class="seg-opt"><input type="radio" name="{{ f.name }}" checked="{{ f.active }}" onChange="{{ f.pick }}"></input><i class="ph {{ f.icon }}"></i>{{ f.v }}</label>
+                  </sc-for>
+                </div>
+                <span style="font-size:12px;color:var(--color-neutral-500)">{{ compose.note }}</span>
+              </div>
+              <sc-if value="{{ isComposeEmail }}" hint-placeholder-val="{{ true }}">
+                <input class="input" placeholder="Subject" value="{{ compose.subject }}" onChange="{{ compose.onSubject }}" disabled="{{ compose.disabled }}"></input>
+              </sc-if>
+              <textarea class="input" placeholder="{{ compose.placeholder }}" value="{{ compose.body }}" onChange="{{ compose.onBody }}" disabled="{{ compose.disabled }}" style="min-height:56px"></textarea>
+              <div style="display:flex;justify-content:flex-end">
+                <button class="btn btn-primary" type="submit" disabled="{{ compose.disabled }}"><i class="ph ph-paper-plane-tilt"></i>{{ compose.sendLabel }}</button>
+              </div>
+            </form>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8);max-width:1240px">
+        <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-bottom:6px">Profiles, email and Quo</div>
+            <h3 style="margin:0">Team</h3>
+          </div>
+          <div style="display:flex;gap:var(--space-3);align-items:center">
+            <div class="seg">
+              <sc-for list="{{ settingsTabs }}" as="f" hint-placeholder-count="2">
+                <label class="seg-opt"><input type="radio" name="{{ f.name }}" checked="{{ f.active }}" onChange="{{ f.pick }}"></input>{{ f.v }}</label>
+              </sc-for>
+            </div>
+            <sc-if value="{{ isProfilesTab }}" hint-placeholder-val="{{ true }}">
+              <button class="btn btn-primary" onClick="{{ newProfile }}"><i class="ph ph-user-plus"></i>New profile</button>
+            </sc-if>
+          </div>
+        </header>
+        <sc-if value="{{ isProfilesTab }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4)">
+            <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="6">
+              <div class="card elev-sm" style="padding:var(--space-4);gap:12px">
+                <div style="display:flex;gap:10px;align-items:center">
+                  <span style="width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:13px;background:var(--color-neutral-800);color:var(--color-neutral-100)">{{ p.initials }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0">
+                    <span style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:500">{{ p.name }}<sc-if value="{{ p.isMe }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline" style="padding:0 6px">You</span></sc-if></span>
+                    <span style="font-size:12px;color:var(--color-neutral-400)">{{ p.role }}</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--color-neutral-300)">
+                  <span style="display:flex;gap:8px;align-items:center"><i class="ph ph-envelope-simple" style="color:var(--color-neutral-500)"></i>{{ p.email }}</span>
+                  <span style="display:flex;gap:8px;align-items:center"><i class="ph ph-phone" style="color:var(--color-neutral-500)"></i>{{ p.phoneLine }}</span>
+                  <span style="display:flex;gap:8px;align-items:center"><i class="ph ph-briefcase" style="color:var(--color-neutral-500)"></i>{{ p.load }}</span>
+                </div>
+                <div style="display:flex;gap:var(--space-2)">
+                  <button class="btn btn-secondary" onClick="{{ p.edit }}" style="font-size:13px"><i class="ph ph-pencil-simple"></i>Edit</button>
+                  <sc-if value="{{ p.notMe }}" hint-placeholder-val="{{ true }}"><button class="btn btn-ghost" onClick="{{ p.makeMe }}" style="font-size:13px">Switch to this profile</button></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isIntegrationsTab }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:var(--space-8)">
+            <section class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                <div style="display:flex;gap:10px;align-items:center"><i class="ph ph-envelope-simple" style="font-size:22px;color:var(--color-accent)"></i><div><div style="font-size:17px;font-weight:500">Email</div><div style="font-size:12px;color:var(--color-neutral-400)">Send and log email from each profile’s mailbox</div></div></div>
+                <span class="tag {{ emailInt.statusTag }}">{{ emailInt.status }}</span>
+              </div>
+              <div class="seg" style="align-self:flex-start">
+                <sc-for list="{{ emailInt.providers }}" as="f" hint-placeholder-count="2">
+                  <label class="seg-opt"><input type="radio" name="{{ f.name }}" checked="{{ f.active }}" onChange="{{ f.pick }}"></input>{{ f.v }}</label>
+                </sc-for>
+              </div>
+              <sc-for list="{{ emailInt.toggles }}" as="x" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start">
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px">{{ x.label }}</span><span style="font-size:12px;color:var(--color-neutral-400)">{{ x.desc }}</span></div>
+                  <button type="button" role="switch" aria-label="{{ x.label }}" onClick="{{ x.toggle }}" style="width:34px;height:20px;flex:none;border-radius:10px;border:1px solid {{ x.border }};background:{{ x.bg }};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:2px;left:{{ x.left }};width:14px;height:14px;border-radius:50%;background:{{ x.knob }};transition:left .15s"></span></button>
+                </div>
+              </sc-for>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <h6 style="margin:0;color:var(--color-neutral-400)">Mailboxes</h6>
+                <sc-for list="{{ emailInt.mailboxes }}" as="mb" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span>{{ mb.name }}</span><span style="color:var(--color-neutral-400)">{{ mb.value }}</span></div>
+                </sc-for>
+              </div>
+              <button class="btn btn-secondary" onClick="{{ emailInt.toggleConnect }}" style="align-self:flex-start">{{ emailInt.connectLabel }}</button>
+            </section>
+            <section class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                <div style="display:flex;gap:10px;align-items:center"><i class="ph ph-phone-call" style="font-size:22px;color:var(--color-accent)"></i><div><div style="font-size:17px;font-weight:500">Quo</div><div style="font-size:12px;color:var(--color-neutral-400)">Texts, calls, recordings and transcripts</div></div></div>
+                <span class="tag {{ quoInt.statusTag }}">{{ quoInt.status }}</span>
+              </div>
+              <sc-for list="{{ quoInt.toggles }}" as="x" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start">
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px">{{ x.label }}</span><span style="font-size:12px;color:var(--color-neutral-400)">{{ x.desc }}</span></div>
+                  <button type="button" role="switch" aria-label="{{ x.label }}" onClick="{{ x.toggle }}" style="width:34px;height:20px;flex:none;border-radius:10px;border:1px solid {{ x.border }};background:{{ x.bg }};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:2px;left:{{ x.left }};width:14px;height:14px;border-radius:50%;background:{{ x.knob }};transition:left .15s"></span></button>
+                </div>
+              </sc-for>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <h6 style="margin:0;color:var(--color-neutral-400)">Phone numbers</h6>
+                <sc-for list="{{ quoInt.numbers }}" as="mb" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span>{{ mb.name }}</span><span style="color:var(--color-neutral-400);font-variant-numeric:tabular-nums">{{ mb.value }}</span></div>
+                </sc-for>
+              </div>
+              <button class="btn btn-secondary" onClick="{{ quoInt.toggleConnect }}" style="align-self:flex-start">{{ quoInt.connectLabel }}</button>
+            </section>
+            <section class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                <div style="display:flex;gap:10px;align-items:center"><i class="ph ph-globe-simple" style="font-size:22px;color:var(--color-accent)"></i><div><div style="font-size:17px;font-weight:500">Website forms</div><div style="font-size:12px;color:var(--color-neutral-400)">wastely.ca submissions land in Web leads</div></div></div>
+                <span class="tag {{ webInt.statusTag }}">{{ webInt.status }}</span>
+              </div>
+              <sc-for list="{{ webInt.toggles }}" as="x" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start">
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px">{{ x.label }}</span><span style="font-size:12px;color:var(--color-neutral-400)">{{ x.desc }}</span></div>
+                  <button type="button" role="switch" aria-label="{{ x.label }}" onClick="{{ x.toggle }}" style="width:34px;height:20px;flex:none;border-radius:10px;border:1px solid {{ x.border }};background:{{ x.bg }};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:2px;left:{{ x.left }};width:14px;height:14px;border-radius:50%;background:{{ x.knob }};transition:left .15s"></span></button>
+                </div>
+              </sc-for>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <h6 style="margin:0;color:var(--color-neutral-400)">Connected forms</h6>
+                <sc-for list="{{ webInt.forms }}" as="mb" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span>{{ mb.name }}</span><span style="color:var(--color-neutral-400)">{{ mb.value }}</span></div>
+                </sc-for>
+              </div>
+              <button class="btn btn-secondary" onClick="{{ webInt.toggleConnect }}" style="align-self:flex-start">{{ webInt.connectLabel }}</button>
+            </section>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </main>
+</div>
+
+<sc-if value="{{ hasDrawer }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:color-mix(in srgb, var(--color-neutral-900) 55%, transparent);z-index:20"></div>
+  <aside style="position:fixed;top:0;right:0;bottom:0;width:min(540px,100%);overflow-y:auto;z-index:21;background:var(--color-surface);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-8);padding:var(--space-8)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-300)">{{ dj.clientType }}</span>
+          <sc-if value="{{ dj.hasSource }}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="gap:4px;padding:1px 6px"><i class="ph ph-globe-simple"></i>{{ dj.source }}</span></sc-if>
+          <sc-if value="{{ dj.emergency }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline" style="gap:4px;padding:1px 6px"><i class="ph ph-siren"></i>Emergency 24/7</span></sc-if>
+        </div>
+        <h4 style="margin:0">{{ dj.client }}</h4>
+        <div style="font-size:14px;color:var(--color-neutral-300)">{{ dj.title }}</div>
+      </div>
+      <button class="btn btn-secondary btn-icon" onClick="{{ closeDrawer }}" aria-label="Close"><i class="ph ph-x" style="font-size:16px"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+      <div class="field"><label>Stage</label><select class="input" value="{{ dj.stage }}" onChange="{{ dj.onStage }}"><sc-for list="{{ stageOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+      <div class="field"><label>Account manager</label><select class="input" value="{{ dj.owner }}" onChange="{{ dj.onOwner }}"><sc-for list="{{ ownerOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+      <sc-if value="{{ dj.isWon }}" hint-placeholder-val="{{ false }}">
+        <div class="field"><label>Job status</label><select class="input" value="{{ dj.status }}" onChange="{{ dj.onStatus }}"><sc-for list="{{ statusOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+        <div class="field"><label>Billing</label><select class="input" value="{{ dj.billing }}" onChange="{{ dj.onBilling }}"><sc-for list="{{ billingOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+        <div class="field"><label>Start</label><input class="input" type="date" value="{{ dj.start }}" onChange="{{ dj.onStart }}"></input></div>
+        <div class="field"><label>End</label><input class="input" type="date" value="{{ dj.end }}" onChange="{{ dj.onEnd }}"></input></div>
+      </sc-if>
+      <div class="field" style="grid-column:1 / -1"><label>Site</label><input class="input" value="{{ dj.site }}" onChange="{{ dj.onSite }}"></input></div>
+      <div class="field" style="grid-column:1 / -1"><label>Client contact</label><input class="input" value="{{ dj.contact }}" onChange="{{ dj.onContact }}"></input></div>
+      <div class="field"><label>Contact email</label><input class="input" type="email" value="{{ dj.contactEmail }}" onChange="{{ dj.onContactEmail }}"></input></div>
+      <div class="field"><label>Contact phone</label><input class="input" type="tel" value="{{ dj.contactPhone }}" onChange="{{ dj.onContactPhone }}"></input></div>
+    </div>
+
+    <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><h5 style="margin:0">Conversation</h5><button class="btn btn-ghost" onClick="{{ dj.openInbox }}" style="font-size:13px">Open in inbox<i class="ph ph-arrow-right"></i></button></div>
+      <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+        <button class="btn btn-secondary" onClick="{{ dj.emailJob }}" disabled="{{ dj.commDisabledEmail }}"><i class="ph ph-envelope-simple"></i>Email</button>
+        <button class="btn btn-secondary" onClick="{{ dj.textJob }}" disabled="{{ dj.commDisabledQuo }}"><i class="ph ph-chat-circle-text"></i>Text</button>
+        <button class="btn btn-primary" onClick="{{ dj.callJob }}" disabled="{{ dj.commDisabledQuo }}"><i class="ph ph-phone"></i>Call {{ dj.contactName }}</button>
+      </div>
+      <sc-if value="{{ dj.hasRecent }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ dj.recent }}" as="rc" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:7px 0;font-size:13px;background:linear-gradient(to right,transparent,color-mix(in srgb, var(--color-text) 8%, transparent) 48px,color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+              <i class="ph {{ rc.icon }}" style="color:var(--color-neutral-500)"></i>
+              <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--color-neutral-200)">{{ rc.text }}</span>
+              <span style="font-size:11px;color:var(--color-neutral-500);white-space:nowrap">{{ rc.time }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:var(--space-4)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><h5 style="margin:0">Services</h5><span style="font-size:12px;color:var(--color-neutral-500)">{{ dj.picker.summary }}</span></div>
+      <div class="seg" style="align-self:flex-start">
+        <sc-for list="{{ dj.emSeg }}" as="f" hint-placeholder-count="2">
+          <label class="seg-opt"><input type="radio" name="{{ f.name }}" checked="{{ f.active }}" onChange="{{ f.pick }}"></input><i class="ph {{ f.icon }}"></i>{{ f.v }}</label>
+        </sc-for>
+      </div>
+      <sc-for list="{{ dj.picker.groups }}" as="g" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <h6 style="margin:0;color:var(--color-neutral-400)">{{ g.name }}</h6>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+              <button type="button" onClick="{{ it.toggle }}" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--radius-md);border:1px solid {{ it.border }};background:{{ it.bg }};color:{{ it.color }};font:inherit;font-size:12.5px;cursor:pointer" style-hover="border-color:var(--color-accent-500)"><i class="ph {{ it.icon }}" style="font-size:12px"></i>{{ it.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+      <div style="display:flex;gap:var(--space-2);margin-top:-4px">
+        <input class="input" placeholder="Add a custom service…" value="{{ dj.picker.customDraft }}" onChange="{{ dj.picker.onCustomDraft }}" onKeyDown="{{ dj.picker.onCustomKey }}" style="min-height:32px;font-size:13px"></input>
+        <button class="btn btn-secondary" type="button" onClick="{{ dj.picker.addCustom }}" style="font-size:13px">Add</button>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+      <h5 style="margin:0">{{ dj.moneyHeading }}</h5>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 140px;gap:var(--space-2) var(--space-4);align-items:center">
+        <span style="font-size:14px">Contract value</span>
+        <input class="input" type="number" min="0" step="500" value="{{ dj.value }}" onChange="{{ dj.onValue }}" style="text-align:right;font-variant-numeric:tabular-nums"></input>
+        <sc-if value="{{ dj.hasValueWarn }}" hint-placeholder-val="{{ false }}"><span style="grid-column:1 / -1;font-size:12px;color:var(--color-accent-300);display:flex;align-items:center;gap:6px;justify-content:flex-end"><i class="ph ph-warning"></i>{{ dj.valueWarn }}</span></sc-if>
+        <sc-for list="{{ dj.costLines }}" as="l" hint-placeholder-count="5">
+          <span style="font-size:13px;color:var(--color-neutral-300);padding-left:var(--space-4)">{{ l.label }}</span>
+          <input class="input" type="number" min="0" step="100" value="{{ l.val }}" onChange="{{ l.onChange }}" style="text-align:right;font-variant-numeric:tabular-nums;min-height:32px;font-size:13px"></input>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px">
+        <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:var(--color-neutral-400)">Operating cost</span><span style="font-size:18px;font-variant-numeric:tabular-nums">{{ dj.costTotal }}</span></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:var(--color-neutral-400)">Gross profit</span><span style="font-size:18px;font-variant-numeric:tabular-nums">{{ dj.profit }}</span></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:var(--color-neutral-400)">Margin</span><span style="font-size:18px;font-variant-numeric:tabular-nums;color:{{ dj.marginColor }}">{{ dj.margin }}</span></div>
+      </div>
+    </section>
+
+    <sc-if value="{{ dj.isWon }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+        <div style="display:flex;align-items:baseline;justify-content:space-between"><h5 style="margin:0">Crew on site</h5><span style="font-size:12px;color:var(--color-neutral-500)">{{ dj.crewSummary }}</span></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--space-2)">
+          <sc-for list="{{ dj.crewOpts }}" as="m" hint-placeholder-count="6">
+            <button onClick="{{ m.toggle }}" style="display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border-radius:var(--radius-md);border:1px solid {{ m.border }};background:{{ m.bg }};color:inherit;font:inherit;text-align:left;cursor:pointer" style-hover="border-color:var(--color-accent-500)">
+              <i class="ph {{ m.icon }}" style="font-size:17px;color:{{ m.iconColor }};margin-top:1px"></i>
+              <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                <span style="font-size:13px">{{ m.name }}</span>
+                <span style="font-size:11px;color:var(--color-neutral-500)">{{ m.role }}{{ m.busy }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <section style="display:flex;flex-direction:column;gap:var(--space-3)">
+      <h5 style="margin:0">Tasks</h5>
+      <form onSubmit="{{ dj.addTask }}" style="display:flex;gap:var(--space-2)">
+        <input class="input" placeholder="Add a task for this job…" value="{{ dj.taskDraft }}" onChange="{{ dj.onTaskDraft }}"></input>
+        <button class="btn btn-secondary" type="submit">Add</button>
+      </form>
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ dj.tasks }}" as="t" hint-placeholder-count="2">
+          <div style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;background:linear-gradient(to right,transparent,color-mix(in srgb, var(--color-text) 8%, transparent) 48px,color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+            <button onClick="{{ t.toggle }}" aria-label="Toggle done" style="width:28px;height:28px;display:grid;place-items:center;border:0;background:transparent;border-radius:var(--radius-sm);cursor:pointer;color:{{ t.checkColor }};font-size:19px"><i class="ph {{ t.checkIcon }}"></i></button>
+            <span style="font-size:13px;color:{{ t.titleColor }};text-decoration:{{ t.deco }}">{{ t.title }}</span>
+            <span style="font-size:12px;color:{{ t.dueColor }};white-space:nowrap">{{ t.assignee }} · {{ t.due }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;gap:var(--space-3);margin-top:auto;padding-top:var(--space-4)">
+      <button class="btn btn-secondary" onClick="{{ dj.remove }}" style="color:var(--color-neutral-300)"><i class="ph ph-trash"></i>Delete deal</button>
+      <button class="btn btn-primary" onClick="{{ closeDrawer }}">Done</button>
+    </div>
+  </aside>
+</sc-if>
+
+<sc-if value="{{ hasNewDeal }}" hint-placeholder-val="{{ false }}">
+  <div class="dialog-backdrop" style="z-index:30" onClick="{{ closeNewDeal }}">
+    <form class="dialog" onClick="{{ stop }}" onSubmit="{{ createDeal }}" style="width:min(720px,100%);max-height:calc(100vh - 32px);overflow-y:auto">
+      <div style="display:flex;flex-direction:column;gap:4px"><div class="dialog-title">New deal</div><div style="font-size:13px;color:var(--color-neutral-400)">{{ minJob }}</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+        <div class="field" style="grid-column:1 / -1"><label>Client</label><input class="input" required="{{ true }}" placeholder="Company name" value="{{ draft.client }}" onChange="{{ df.client }}"></input></div>
+        <div class="field" style="grid-column:1 / -1"><label>Job</label><input class="input" required="{{ true }}" placeholder="e.g. 80k sq ft warehouse decommission" value="{{ draft.title }}" onChange="{{ df.title }}"></input></div>
+        <div class="field"><label>Client type</label><select class="input" value="{{ draft.clientType }}" onChange="{{ df.clientType }}"><sc-for list="{{ clientTypeOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+        <div class="field"><label>Estimated value ($)</label><input class="input" type="number" min="0" step="500" value="{{ draft.value }}" onChange="{{ df.value }}"></input></div>
+        <div class="field"><label>Account manager</label><select class="input" value="{{ draft.owner }}" onChange="{{ df.owner }}"><sc-for list="{{ ownerOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+        <div class="field"><label>Response</label>
+          <div class="seg">
+            <sc-for list="{{ emSegNew }}" as="f" hint-placeholder-count="2">
+              <label class="seg-opt"><input type="radio" name="{{ f.name }}" checked="{{ f.active }}" onChange="{{ f.pick }}"></input><i class="ph {{ f.icon }}"></i>{{ f.v }}</label>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><h5 style="margin:0">Services</h5><span style="font-size:12px;color:var(--color-neutral-500)">{{ pickNew.summary }}</span></div>
+        <sc-for list="{{ pickNew.groups }}" as="g" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <h6 style="margin:0;color:var(--color-neutral-400)">{{ g.name }}</h6>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                <button type="button" onClick="{{ it.toggle }}" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--radius-md);border:1px solid {{ it.border }};background:{{ it.bg }};color:{{ it.color }};font:inherit;font-size:12.5px;cursor:pointer" style-hover="border-color:var(--color-accent-500)"><i class="ph {{ it.icon }}" style="font-size:12px"></i>{{ it.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <div style="display:flex;gap:var(--space-2);margin-top:-4px">
+          <input class="input" placeholder="Add a custom service…" value="{{ pickNew.customDraft }}" onChange="{{ pickNew.onCustomDraft }}" onKeyDown="{{ pickNew.onCustomKey }}" style="min-height:32px;font-size:13px"></input>
+          <button class="btn btn-secondary" type="button" onClick="{{ pickNew.addCustom }}" style="font-size:13px">Add</button>
+        </div>
+      </div>
+      <sc-if value="{{ hasDraftError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--color-accent-300);display:flex;align-items:center;gap:6px"><i class="ph ph-warning"></i>{{ draftError }}</div></sc-if>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" onClick="{{ closeNewDeal }}">Cancel</button>
+        <button class="btn btn-primary" type="submit">Create deal</button>
+      </div>
+    </form>
+  </div>
+</sc-if>
+
+<sc-if value="{{ hasProfileDraft }}" hint-placeholder-val="{{ false }}">
+  <div class="dialog-backdrop" style="z-index:30" onClick="{{ closeProfile }}">
+    <form class="dialog" onClick="{{ stop }}" onSubmit="{{ saveProfile }}" style="width:min(520px,100%)">
+      <div class="dialog-title">{{ profileTitle }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+        <div class="field"><label>Name</label><input class="input" required="{{ true }}" value="{{ pdraft.name }}" onChange="{{ pf.name }}"></input></div>
+        <div class="field"><label>Role</label><select class="input" value="{{ pdraft.role }}" onChange="{{ pf.role }}"><sc-for list="{{ roleOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
+        <div class="field"><label>Work email</label><input class="input" type="email" required="{{ true }}" placeholder="name@wastely.ca" value="{{ pdraft.email }}" onChange="{{ pf.email }}"></input></div>
+        <div class="field"><label>Quo number</label><input class="input" type="tel" placeholder="(416) 555-0100" value="{{ pdraft.phone }}" onChange="{{ pf.phone }}"></input></div>
+        <div class="field" style="grid-column:1 / -1"><label>Email signature</label><textarea class="input" value="{{ pdraft.signature }}" onChange="{{ pf.signature }}" style="min-height:70px"></textarea></div>
+      </div>
+      <div class="dialog-actions" style="justify-content:space-between">
+        <div>
+          <sc-if value="{{ canDeleteProfile }}" hint-placeholder-val="{{ false }}"><button class="btn btn-secondary" type="button" onClick="{{ deleteProfile }}" style="color:var(--color-neutral-300)"><i class="ph ph-trash"></i>Delete</button></sc-if>
+        </div>
+        <div style="display:flex;gap:var(--space-2)">
+          <button class="btn btn-secondary" type="button" onClick="{{ closeProfile }}">Cancel</button>
+          <button class="btn btn-primary" type="submit">Save profile</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</sc-if>
+
+<sc-if value="{{ hasCall }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;right:24px;bottom:24px;width:320px;z-index:40;background:var(--color-surface);box-shadow:var(--shadow-lg);border-radius:var(--radius-lg);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-4)">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-300)">Quo · {{ cv.from }}</span>
+      <sc-if value="{{ cv.recOn }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="gap:5px"><i class="ph ph-record"></i>Recording</span></sc-if>
+    </div>
+    <div>
+      <div style="font-size:18px;font-weight:500">{{ cv.name }}</div>
+      <div style="font-size:13px;color:var(--color-neutral-400)">{{ cv.client }} · {{ cv.phone }}</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:26px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em">{{ cv.phaseLabel }}</span>
+      <span style="font-size:12px;color:var(--color-neutral-400)">{{ cv.statusLabel }}</span>
+    </div>
+    <span style="font-size:12px;color:var(--color-neutral-500);margin-top:-8px">{{ cv.announce }}</span>
+    <textarea class="input" placeholder="Call notes…" value="{{ cv.notes }}" onChange="{{ cv.onNotes }}" style="min-height:64px"></textarea>
+    <div style="display:flex;gap:var(--space-2)">
+      <button class="btn btn-secondary" onClick="{{ cv.toggleRec }}"><i class="ph {{ cv.recIcon }}"></i>{{ cv.recLabel }}</button>
+      <button class="btn btn-primary" onClick="{{ cv.end }}" style="margin-left:auto"><i class="ph ph-phone-x"></i>End call</button>
+    </div>
+  </div>
+</sc-if></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;marginTarget&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:30,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Business rules&quot;},&quot;showLost&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pipeline&quot;},&quot;defaultScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;overview&quot;,&quot;options&quot;:[&quot;overview&quot;,&quot;pipeline&quot;,&quot;contracts&quot;,&quot;tasks&quot;,&quot;web&quot;,&quot;inbox&quot;,&quot;team&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;}}">
+const KEY = 'wastely-crm-v2';
+const TODAY = '2026-09-24';
+const STAGES = ['Lead', 'Site visit', 'Quoted', 'Negotiation', 'Won', 'Lost'];
+const OPEN = ['Lead', 'Site visit', 'Quoted', 'Negotiation'];
+const COSTS = [['labour', 'Labour'], ['equipment', 'Equipment rental'], ['disposal', 'Disposal & tipping'], ['hauling', 'Hauling'], ['permits', 'Permits & fees']];
+const CREW = [['Luis Ortega', 'Foreman'], ['Tom Becker', 'Foreman'], ['Sam Whitfield', 'Operator'], ['Jen Tran', 'Operator'], ['Kyle Brandt', 'Driver'], ['Aiden Cho', 'Driver'], ['Omar Haddad', 'Labourer'], ['Rosa Lima', 'Labourer'], ['Nate Kowalski', 'Labourer'], ['Beth Morin', 'Labourer']];
+const OWNERS = ['Priya Nair', 'Marcus Bell', 'Dana Okafor'];
+const STAFF = [...OWNERS, 'Ravi Sethi', 'Helen Park'];
+const SERVICE_GROUPS = [
+  { name: 'Cleanouts & Disposal', items: ['Estate Cleanout', 'Community Housing Turnover', 'Bulk Waste & Load-Out', 'Warehouse & Facility Clear-Outs', 'Recycling & Material Diversion'] },
+  { name: 'Hazardous & Regulated', items: ['Commercial Hazardous Waste', 'Oil, Fuel & Chemical Disposal', 'Lithium Battery Disposal', 'E-Waste & Regulated Electronics'] },
+  { name: 'Abatement', items: ['Asbestos Removal', 'Mould Removal'] },
+  { name: 'Clearing & Removal', items: ['Interior Strip-Out', 'Industrial Dismantling & Decommissioning', 'Land Clearing & Site Prep'] }
+];
+const ALL_SERVICES = SERVICE_GROUPS.flatMap(g => g.items);
+const MIN_JOB = 5000;
+const SEED_SERVICES = {
+  j1: ['Warehouse & Facility Clear-Outs', 'Industrial Dismantling & Decommissioning', 'Recycling & Material Diversion'],
+  j2: ['Land Clearing & Site Prep'], j3: ['Estate Cleanout'],
+  j4: ['Industrial Dismantling & Decommissioning', 'Oil, Fuel & Chemical Disposal'],
+  j5: ['Warehouse & Facility Clear-Outs', 'Interior Strip-Out', 'E-Waste & Regulated Electronics'],
+  j6: ['Land Clearing & Site Prep'], j7: ['Bulk Waste & Load-Out', 'Asbestos Removal'],
+  j8: ['Bulk Waste & Load-Out', 'Oil, Fuel & Chemical Disposal'],
+  j9: ['Industrial Dismantling & Decommissioning', 'Commercial Hazardous Waste'], j10: ['Estate Cleanout'],
+  j11: ['Land Clearing & Site Prep'], j12: ['Land Clearing & Site Prep'],
+  j13: ['Industrial Dismantling & Decommissioning', 'Commercial Hazardous Waste', 'E-Waste & Regulated Electronics'],
+  j14: ['Land Clearing & Site Prep', 'Commercial Hazardous Waste'],
+  j15: ['Community Housing Turnover', 'Mould Removal']
+};
+const ROLES = ['Account manager', 'Dispatch', 'Billing', 'Leadership', 'Field'];
+const SEED_TEAM = [
+  { id: 'u1', name: 'Priya Nair', role: 'Account manager', email: 'priya@wastely.ca', phone: '(416) 555-0142', signature: 'Priya Nair\nAccount Manager, Wastely' },
+  { id: 'u2', name: 'Marcus Bell', role: 'Account manager', email: 'marcus@wastely.ca', phone: '(416) 555-0157', signature: 'Marcus Bell\nAccount Manager, Wastely' },
+  { id: 'u3', name: 'Dana Okafor', role: 'Account manager', email: 'dana@wastely.ca', phone: '(416) 555-0163', signature: 'Dana Okafor\nAccount Manager, Wastely' },
+  { id: 'u4', name: 'Ravi Sethi', role: 'Dispatch', email: 'ravi@wastely.ca', phone: '(416) 555-0171', signature: 'Ravi Sethi\nDispatch, Wastely' },
+  { id: 'u5', name: 'Helen Park', role: 'Billing', email: 'helen@wastely.ca', phone: '', signature: 'Helen Park\nBilling, Wastely' },
+  { id: 'u6', name: 'Jordan Wells', role: 'Leadership', email: 'jordan@wastely.ca', phone: '(416) 555-0100', signature: 'Jordan Wells\nOperations Director, Wastely' }
+];
+const SEED_INTEGRATIONS = {
+  email: { connected: true, provider: 'Google Workspace', autoLog: true, signature: true },
+  quo: { connected: true, record: true, transcribe: true, summarize: true, announce: true }
+};
+const C = (id, jobId, kind, dir, userId, at, extra) => Object.assign({ id, jobId, kind, dir, userId, at }, extra || {});
+function seedComms() {
+  return [
+    C('c1', 'j1', 'email', 'out', 'u1', '2026-09-19T10:04', { subject: 'Bldg 2 schedule and bin placement', body: 'Hi Alan,\n\nWe finish racking removal in Bldg 1 by Wednesday and move into Bldg 2 on Thursday. We will need the east dock clear for three 40-yard roll-offs. Can you confirm the dock is available from 7 am?\n\nThanks,\nPriya' }),
+    C('c2', 'j1', 'email', 'in', null, '2026-09-19T14:31', { subject: 'Re: Bldg 2 schedule and bin placement', body: 'Priya, the east dock is yours from 7. Security will have the gate open. The tenant in unit 4 asked that trucks avoid the north lane before 9.\n\nAlan' }),
+    C('c3', 'j1', 'call', 'out', 'u1', '2026-09-23T15:12', { duration: 262, recorded: true, summary: 'Alan confirmed dock access for Thursday. He asked for a disposal manifest for the refrigeration units and weigh tickets with the next invoice. Priya will send both by Friday.', transcript: [['Priya', 'Hi Alan, it’s Priya from Wastely. Quick call about Thursday.'], ['Alan', 'Sure. Are we still good for the east dock?'], ['Priya', 'Yes, three roll-offs arriving at 7. Luis will be the foreman on site.'], ['Alan', 'Great. Our insurer wants a disposal manifest for the refrigeration units. Can you send that?'], ['Priya', 'I’ll include the manifest and the weigh tickets with the next invoice.'], ['Alan', 'Perfect. Friday works.']] }),
+    C('c4', 'j1', 'sms', 'in', null, '2026-09-24T07:48', { body: 'Gate is open. Trucks can come in through the south entrance.' }),
+    C('c5', 'j1', 'sms', 'out', 'u4', '2026-09-24T07:52', { body: 'Thanks Alan. First roll-off is 10 minutes out.' }),
+    C('c6', 'j5', 'email', 'in', null, '2026-09-23T16:20', { subject: 'Contract redlines, Bldg B', body: 'Hi Priya,\n\nAttached are our redlines. The main items are the payment schedule (we would like 20/40/40) and a cap on e-waste disposal fees. Can we talk this week?\n\nMaya' }),
+    C('c7', 'j7', 'sms', 'out', 'u3', '2026-09-21T11:05', { body: 'Hi Grace, can we get on site Tuesday to confirm access and the power shutoff?' }),
+    C('c8', 'j7', 'sms', 'in', null, '2026-09-21T11:40', { body: 'Tuesday is tight. Could Wednesday morning work?' }),
+    C('c9', 'j15', 'call', 'in', 'u3', '2026-09-22T22:47', { duration: 418, recorded: true, summary: 'After-hours emergency: a burst pipe flooded six ground-floor units. Carla needs units stripped and mould-treated before tenants return. Dana booked a crew for 7 am and estimated $21,500.', transcript: [['Carla', 'Hi, this is Carla at Northfield Housing. We have a burst pipe and six units flooded.'], ['Dana', 'I’m sorry to hear that. Is the water shut off?'], ['Carla', 'Yes, but the drywall and flooring are soaked and tenants are waiting to move back.'], ['Dana', 'We can have a crew there at 7 tomorrow for strip-out and mould treatment.'], ['Carla', 'Please do. What will it cost?'], ['Dana', 'For six units I’d estimate twenty-one five. I’ll email the quote tonight.']] }),
+    C('c10', 'j15', 'email', 'out', 'u3', '2026-09-22T23:15', { subject: 'Emergency quote, Northfield units 101–106', body: 'Hi Carla,\n\nAs discussed, our quote for strip-out, disposal and mould treatment across six units is $21,500. The crew arrives at 7 am.\n\nDana' }),
+    C('c11', 'j2', 'sms', 'in', null, '2026-09-23T16:02', { body: 'Sofia here. Can the crew leave the tree line along the north fence?' })
+  ];
+}
+const S = (id, form, at, page, fields) => ({ id, form, at, page, fields, status: 'new', jobId: null });
+function seedSubmissions() {
+  return [
+    S('w1', 'Quote request', '2026-09-24T08:41', 'https://wastely.ca/estate-cleanout.dc.html', { name: 'Melissa Grant', phone: '(613) 555-0147', email: 'melissa.grant@gmail.com', location: 'Kanata, Ottawa', services: 'Estate Cleanout', 'Property size': '1,000–2,500 sq ft', 'How full is it?': 'Packed — full to the walls', Access: 'Ground level, truck at the door', When: 'Within a week', details: 'My mother’s 3-bedroom bungalow. Full basement and a packed garage. We list in three weeks.', confirmed: 'I understand this job is budgeted around $7,450 – $10,000 and want to proceed with a final quote.' }),
+    S('w2', 'Contact', '2026-09-24T06:12', 'https://wastely.ca/Contact.dc.html', { Name: 'Derek Ahn', Company: 'Ridgeline Property Management', Email: 'dahn@ridgelinepm.ca', Phone: '(416) 555-0193', 'Site location': 'Scarborough', Timeline: 'As soon as possible, tenant has moved out', 'Project details': 'Two units with visible mould behind the drywall after a leak. Need strip-out and remediation before we re-rent.', services: 'Urgent — needed now, Mould removal, Interior strip-out' }),
+    S('w3', 'Quote request', '2026-09-23T17:05', 'https://wastely.ca/industrial-dismantling.dc.html', { name: 'Kevin Laroche', phone: '(613) 555-0122', email: 'kevin@larochemfg.ca', location: 'Kingston', services: 'Industrial Dismantling & Decommissioning, Oil, Fuel & Chemical Disposal', 'Property size': 'Over 10,000 sq ft', 'How full is it?': 'Normal contents', Access: 'Occupied or restricted site', When: 'Standard — two weeks or more', details: 'Closing our stamping line. Presses, conveyors and hydraulic oil to remove while the rest of the plant keeps running.', confirmed: 'I understand this job is budgeted around $38,600 – $51,750 and want to proceed with a final quote.' }),
+    S('w4', 'Careers', '2026-09-23T12:30', 'https://wastely.ca/Careers.dc.html', { Name: 'Tyler Boucher', Email: 'tyler.b@outlook.com', Phone: '(343) 555-0175', Position: 'Labourer', Experience: 'Three years in demolition. WHMIS and Working at Heights certified. Own truck.' })
+  ];
+}
+const norm = x => String(x || '').toLowerCase().replace(/[^a-z]/g, '');
+const mapService = label => {
+  const n = norm(label);
+  if (!n || n.startsWith('urgent') || n.startsWith('somethingelse')) return null;
+  return ALL_SERVICES.find(sv => norm(sv).slice(0, 8) === n.slice(0, 8)) || label.trim();
+};
+const pick = (f, ...keys) => { for (const key of keys) { const hit = Object.keys(f).find(x => x.toLowerCase() === key.toLowerCase()); if (hit && f[hit]) return f[hit]; } return ''; };
+const parseRange = txt => { const m = String(txt || '').match(/\$([\d,]+)\s*[–-]\s*\$([\d,]+)/); return m ? [+m[1].replace(/,/g, ''), +m[2].replace(/,/g, '')] : null; };
+const contactName = j => (j.contact || '').split(',')[0].trim() || j.client;
+function deriveContact(j, i) {
+  if (!j.contactEmail) {
+    const n = contactName(j).toLowerCase().replace(/[^a-z ]/g, '').split(' ').filter(Boolean);
+    const dom = j.client.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 20) + '.ca';
+    j.contactEmail = n.length > 1 ? n[0] + '.' + n[n.length - 1] + '@' + dom : 'info@' + dom;
+  }
+  if (!j.contactPhone) j.contactPhone = '(905) 555-0' + String(110 + i * 7).slice(-3);
+}
+const mmss = sec => Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
+const fmtAt = at => {
+  const d = new Date(at);
+  const t = d.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+  return at.slice(0, 10) === TODAY ? t : d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) + ', ' + t;
+};
+const nowAt = () => TODAY + 'T' + new Date().toTimeString().slice(0, 5);
+const svcLabel = a => !a || !a.length ? 'No services' : a[0] + (a.length > 1 ? ' +' + (a.length - 1) : '');
+const CLIENT_TYPES = ['Developer', 'Realtor', 'Commercial', 'Industrial', 'Property manager', 'Private owner'];
+const BILLING = ['Not invoiced', 'Deposit invoiced', 'Progress invoiced', 'Invoiced in full', 'Paid'];
+const STATUS = ['Scheduled', 'On site', 'Completed'];
+const TASK_ICONS = { Call: 'ph-phone', Visit: 'ph-map-pin', Dispatch: 'ph-truck', Invoice: 'ph-receipt', Quote: 'ph-calculator', Task: 'ph-circle-dashed' };
+const STAGE_MARK = { Lead: 'var(--color-neutral-700)', 'Site visit': 'var(--color-neutral-600)', Quoted: 'var(--color-accent-700)', Negotiation: 'var(--color-accent-600)', Won: 'var(--color-accent)', Lost: 'var(--color-neutral-800)' };
+const STATUS_TAG = { Scheduled: 'tag-neutral', 'On site': 'tag-accent', Completed: 'tag-outline' };
+const BILLING_TAG = { 'Not invoiced': 'tag-neutral', 'Deposit invoiced': 'tag-accent-2', 'Progress invoiced': 'tag-accent-2', 'Invoiced in full': 'tag-accent', Paid: 'tag-outline' };
+
+const J = (id, title, client, clientType, service, stage, value, c, owner, site, contact, extra) => Object.assign({
+  id, title, client, clientType, service, stage, value,
+  costs: { labour: c[0], equipment: c[1], disposal: c[2], hauling: c[3], permits: c[4] },
+  owner, site, contact, status: 'Scheduled', billing: 'Not invoiced', start: '', end: '', crew: []
+}, extra || {});
+const T = (id, title, jobId, assignee, due, type, done) => ({ id, title, jobId, assignee, due, type, done: !!done });
+
+function seed() {
+  const d = seed0();
+  d.jobs.push(J('j15', 'Flood-damaged unit turnover, 6 units', 'Northfield Community Housing', 'Property manager', '', 'Won', 21500, [7800, 2400, 3100, 1600, 600], 'Dana Okafor', '71 Northfield Ave, Brampton', 'Carla Mendes, Housing ops', { status: 'On site', billing: 'Not invoiced', start: '2026-09-23', end: '2026-09-26', crew: ['Nate Kowalski', 'Aiden Cho'], emergency: true }));
+  d.jobs.forEach(j => { j.services = SEED_SERVICES[j.id] || []; delete j.service; j.emergency = !!j.emergency; });
+  d.customServices = [];
+  return d;
+}
+function seed0() {
+  return {
+    jobs: [
+      J('j1', '120k sq ft warehouse decommission', 'Northgate Logistics', 'Industrial', 'Warehouse decommissioning', 'Won', 186000, [42000, 28500, 31200, 12800, 3400], 'Priya Nair', '6350 Airport Rd, Mississauga', 'Alan Reyes, Facilities', { status: 'On site', billing: 'Deposit invoiced', start: '2026-09-08', end: '2026-10-17', crew: ['Luis Ortega', 'Sam Whitfield', 'Omar Haddad', 'Kyle Brandt'] }),
+      J('j2', '14-acre lot clearing, Phase 2', 'Halton Ridge Developments', 'Developer', 'Land clearing', 'Won', 94500, [26000, 21500, 9800, 7400, 2100], 'Marcus Bell', 'Britannia Rd & 4th Line, Milton', 'Sofia Grant, Project lead', { status: 'On site', billing: 'Progress invoiced', start: '2026-09-15', end: '2026-10-03', crew: ['Tom Becker', 'Jen Tran', 'Rosa Lima'] }),
+      J('j3', 'Estate cleanout before listing', 'Crestview Realty', 'Realtor', 'Property cleanout', 'Won', 8900, [3200, 0, 1900, 900, 0], 'Dana Okafor', '418 Maple Grove Dr, Oakville', 'Kim Laurent, Listing agent', { status: 'Completed', billing: 'Paid', start: '2026-09-02', end: '2026-09-04', crew: ['Nate Kowalski', 'Aiden Cho'] }),
+      J('j4', 'Racking & refrigeration removal', 'Brampton Cold Storage', 'Industrial', 'Warehouse decommissioning', 'Won', 132000, [34000, 18000, 38500, 14000, 4200], 'Priya Nair', '40 Van Kirk Dr, Brampton', 'Derek Ho, Operations', { status: 'Scheduled', billing: 'Deposit invoiced', start: '2026-10-06', end: '2026-11-07', crew: ['Luis Ortega', 'Beth Morin'] }),
+      J('j5', 'Distribution centre decommission, Bldg B', 'Westway Distribution', 'Industrial', 'Warehouse decommissioning', 'Negotiation', 240000, [58000, 36000, 44000, 18500, 5200], 'Priya Nair', '2100 Steeles Ave W, Vaughan', 'Maya Chen, Real estate'),
+      J('j6', '3-lot clearing and grubbing', 'Maple & Finch Homes', 'Developer', 'Land clearing', 'Quoted', 36000, [9800, 8200, 3600, 2900, 900], 'Marcus Bell', 'Rutherford Rd, Vaughan', 'Joe Russo, Site super'),
+      J('j7', 'Demolition debris haul-out', 'Harbourline Properties', 'Property manager', 'Demolition debris', 'Site visit', 58000, [14000, 9000, 16500, 7800, 1200], 'Dana Okafor', '255 Wellington St N, Hamilton', 'Grace Oduya, Asset manager'),
+      J('j8', 'Shop and yard cleanout', 'Keele Street Auto', 'Commercial', 'Property cleanout', 'Lead', 12000, [3800, 1200, 2600, 1400, 0], 'Dana Okafor', 'Keele St, Toronto', 'Frank Deluca, Owner'),
+      J('j9', 'Portfolio decommissioning, 3 sites', 'Summit Industrial REIT', 'Industrial', 'Warehouse decommissioning', 'Lead', 410000, [0, 0, 0, 0, 0], 'Priya Nair', 'Mississauga, Brampton, Milton', 'Owen Park, Portfolio manager'),
+      J('j10', 'Pre-listing cleanout', 'Lakeshore Realty Group', 'Realtor', 'Property cleanout', 'Quoted', 6400, [2200, 0, 1300, 700, 0], 'Dana Okafor', '88 Lakeshore Rd E, Mississauga', 'Tara Singh, Broker'),
+      J('j11', 'Subdivision clearing', 'Ironwood Builders', 'Developer', 'Land clearing', 'Lost', 72000, [21000, 17500, 7200, 5600, 1800], 'Marcus Bell', 'Caledon', 'Brent Cole, Land acquisition'),
+      J('j12', 'Orchard removal and grading', 'Greenbelt Farms', 'Commercial', 'Land clearing', 'Negotiation', 48000, [12500, 11800, 4200, 3600, 1500], 'Marcus Bell', 'Heritage Rd, Caledon', 'Anne Vos, Owner'),
+      J('j13', 'Print plant decommission', 'Dufferin Print Co.', 'Industrial', 'Warehouse decommissioning', 'Site visit', 120000, [0, 0, 0, 0, 0], 'Priya Nair', 'Dufferin St, Toronto', 'Leo Marsh, Plant manager'),
+      J('j14', 'Soil and debris remediation', 'Queensway Lands Inc.', 'Developer', 'Site remediation', 'Quoted', 164000, [38000, 29000, 41000, 16000, 7800], 'Marcus Bell', 'The Queensway, Etobicoke', 'Rita Alves, Development')
+    ],
+    tasks: [
+      T('t1', 'Send revised quote with tipping fees', 'j6', 'Marcus Bell', '2026-09-23', 'Quote'),
+      T('t2', 'Book three 40-yd roll-offs for Bldg 2', 'j1', 'Ravi Sethi', '2026-09-24', 'Dispatch'),
+      T('t3', 'Invoice progress draw #2', 'j2', 'Helen Park', '2026-09-26', 'Invoice'),
+      T('t4', 'Walkthrough with plant manager', 'j13', 'Priya Nair', '2026-09-25', 'Visit'),
+      T('t5', 'Follow up on contract redlines', 'j5', 'Priya Nair', '2026-09-24', 'Call'),
+      T('t6', 'Schedule crew and equipment for Oct 6 start', 'j4', 'Ravi Sethi', '2026-09-30', 'Dispatch'),
+      T('t7', 'Confirm site access and power shutoff', 'j7', 'Dana Okafor', '2026-09-22', 'Visit'),
+      T('t8', 'Intro call with portfolio manager', 'j9', 'Priya Nair', '2026-09-29', 'Call'),
+      T('t9', 'Send deposit invoice', 'j4', 'Helen Park', '2026-09-18', 'Invoice', true),
+      T('t10', 'Quote follow-up call', 'j10', 'Dana Okafor', '2026-10-01', 'Call'),
+      T('t11', 'File tree removal permit', 'j12', 'Marcus Bell', '2026-09-27', 'Task'),
+      T('t12', 'Final walkthrough photos to client', 'j3', 'Dana Okafor', '2026-09-05', 'Visit', true)
+    ]
+  };
+}
+
+const money = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-CA');
+const k = n => n >= 1e6 ? '$' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/\.?0+$/, '') + 'M' : n >= 1000 ? '$' + Math.round(n / 1000) + 'k' : '$' + Math.round(n);
+const dt = d => d ? new Date(d + 'T00:00:00') : null;
+const fmtD = d => d ? dt(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) : '—';
+const days = (a, b) => Math.round((dt(b) - dt(a)) / 86400000);
+const addDays = (d, n) => { const x = dt(d); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
+const initials = n => n.split(' ').map(p => p[0]).join('');
+const opts = a => a.map(v => ({ v }));
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+    const d = saved && saved.jobs ? saved : seed();
+    d.jobs.forEach((j, i) => { if (!j.services) j.services = j.service ? [j.service] : []; deriveContact(j, i); });
+    this.timelineRef = React.createRef();
+    this.state = {
+      jobs: d.jobs, tasks: d.tasks, customServices: d.customServices || [], customNew: '', customJob: '', screen: props.defaultScreen || 'overview',
+      openId: null, draft: null, dropCol: null, cFilter: 'All', tFilter: 'Everyone',
+      nt: { title: '', jobId: '', assignee: 'Priya Nair', due: TODAY }, drawerTask: '',
+      team: d.team || SEED_TEAM, meId: d.meId || 'u1', comms: d.comms || seedComms(),
+      integrations: { ...SEED_INTEGRATIONS, web: { connected: true, callbackTask: true, emailCopy: true }, ...(d.integrations || {}) }, read: d.read || {},
+      submissions: d.submissions || seedSubmissions(), wFilter: 'New',
+      threadId: null, inboxQ: '', composeMode: 'email', compose: { subject: '', body: '' },
+      openTx: {}, playing: null, call: null, settingsTab: 'Profiles', profileDraft: null
+    };
+  }
+  componentDidMount() {
+    this.tick = setInterval(() => {
+      const st = this.state;
+      if (st.playing) {
+        const c = st.comms.find(x => x.id === st.playing.id);
+        const pos = st.playing.pos + 0.5;
+        this.setState({ playing: !c || pos >= c.duration ? null : { ...st.playing, pos } });
+      } else if (st.call && st.call.phase === 'live') this.forceUpdate();
+    }, 500);
+  }
+  componentWillUnmount() { clearInterval(this.tick); clearTimeout(this.ringT); }
+  componentDidUpdate(pp, ps) {
+    const s = this.state;
+    const keys = ['jobs', 'tasks', 'customServices', 'team', 'meId', 'comms', 'integrations', 'read', 'submissions'];
+    if (keys.some(key => ps[key] !== s[key])) {
+      try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(keys.map(key => [key, s[key]])))); } catch (e) {}
+    }
+    const el = this.timelineRef.current;
+    if (el && (ps.threadId !== s.threadId || ps.comms !== s.comms || ps.screen !== s.screen)) el.scrollTop = el.scrollHeight;
+  }
+  updateJob(id, patch) {
+    this.setState(s => ({ jobs: s.jobs.map(j => j.id === id ? { ...j, ...patch } : j) }));
+  }
+  renderVals() {
+    const s = this.state, P = this.props;
+    const target = P.marginTarget ?? 30;
+    const showLost = P.showLost ?? false;
+    const jobs = s.jobs;
+    const byId = Object.fromEntries(jobs.map(j => [j.id, j]));
+    const sum = (a, f) => a.reduce((x, y) => x + f(y), 0);
+    const cost = j => COSTS.reduce((a, [key]) => a + (+j.costs[key] || 0), 0);
+    const marginOf = j => j.value ? Math.round((j.value - cost(j)) / j.value * 100) : 0;
+    const costed = j => cost(j) > 0;
+    const marginColor = j => !costed(j) ? 'var(--color-neutral-500)' : marginOf(j) < target ? 'var(--color-accent-300)' : 'var(--color-neutral-200)';
+    const won = jobs.filter(j => j.stage === 'Won');
+    const open = jobs.filter(j => OPEN.includes(j.stage));
+    const active = won.filter(j => j.status !== 'Completed');
+    const onSiteJobs = won.filter(j => j.status === 'On site');
+    const openJob = id => () => this.setState({ openId: id, drawerTask: '' });
+    const go = id => () => this.setState({ screen: id });
+    const openTaskCount = s.tasks.filter(t => !t.done).length;
+    const team = s.team;
+    const me = team.find(u => u.id === s.meId) || team[0];
+    const uName = id => (team.find(u => u.id === id) || {}).name || 'Wastely';
+    const teamNames = team.map(u => u.name);
+    const teamFirst = new Set(teamNames.map(n => n.split(' ')[0]));
+    const ig = s.integrations;
+    const emailOn = ig.email.connected, quoOn = ig.quo.connected;
+    const commsBy = {};
+    s.comms.forEach(c => { (commsBy[c.jobId] = commsBy[c.jobId] || []).push(c); });
+    Object.values(commsBy).forEach(a => a.sort((x, y) => x.at.localeCompare(y.at)));
+    const lastOf = id => (commsBy[id] || []).slice(-1)[0];
+    const isUnread = id => { const l = lastOf(id); return !!l && l.dir === 'in' && !((s.read[id] || '') >= l.at); };
+    const markRead = id => { const l = lastOf(id); return l ? { ...s.read, [id]: l.at } : s.read; };
+    const goThread = (id, mode) => () => this.setState({ screen: 'inbox', threadId: id, openId: null, read: markRead(id), composeMode: mode || this.state.composeMode });
+    const startCall = id => () => {
+      if (!quoOn) return;
+      clearTimeout(this.ringT);
+      this.setState({ call: { jobId: id, phase: 'ringing', start: null, recording: ig.quo.record, notes: '' } });
+      this.ringT = setTimeout(() => this.setState(st => st.call ? { call: { ...st.call, phase: 'live', start: Date.now() } } : null), 1800);
+    };
+    const unreadCount = jobs.filter(j => isUnread(j.id) && !(s.screen === 'inbox' && s.threadId === j.id)).length;
+    const allCustom = [...new Set([...s.customServices, ...jobs.flatMap(j => j.services).filter(x => !ALL_SERVICES.includes(x))])];
+    const picker = (selected, onSet, draftKey) => {
+      const add = () => {
+        const v = (this.state[draftKey] || '').trim(); if (!v) return;
+        this.setState(st => ({ customServices: st.customServices.includes(v) || ALL_SERVICES.includes(v) ? st.customServices : [...st.customServices, v], [draftKey]: '' }));
+        if (!selected.includes(v)) onSet([...selected, v]);
+      };
+      return {
+        groups: [...SERVICE_GROUPS, { name: 'Custom', items: allCustom }].map(g => ({
+          name: g.name,
+          items: g.items.map(label => {
+            const on = selected.includes(label);
+            return {
+              label, toggle: () => onSet(on ? selected.filter(x => x !== label) : [...selected, label]),
+              border: on ? 'var(--color-accent)' : 'var(--color-divider)',
+              bg: on ? 'color-mix(in srgb, var(--color-accent) 14%, transparent)' : 'transparent',
+              color: on ? 'var(--color-accent-200)' : 'var(--color-neutral-300)',
+              icon: on ? 'ph-check' : 'ph-plus'
+            };
+          })
+        })),
+        summary: selected.length ? selected.length + (selected.length === 1 ? ' service' : ' services combined') : 'Pick one or more',
+        customDraft: s[draftKey], onCustomDraft: e => this.setState({ [draftKey]: e.target.value }),
+        addCustom: e => { if (e && e.preventDefault) e.preventDefault(); add(); },
+        onCustomKey: e => { if (e.key === 'Enter') { e.preventDefault(); add(); } }
+      };
+    };
+    const emergencySeg = (on, set, name) => [
+      { v: 'Standard', icon: 'ph-calendar-blank', active: !on, name, pick: () => set(false) },
+      { v: 'Emergency 24/7', icon: 'ph-siren', active: !!on, name, pick: () => set(true) }
+    ];
+
+    const nav = [
+      { id: 'overview', label: 'Overview', icon: 'ph-squares-four', count: '' },
+      { id: 'pipeline', label: 'Pipeline', icon: 'ph-kanban', count: String(open.length) },
+      { id: 'contracts', label: 'Contracts', icon: 'ph-file-text', count: String(active.length) },
+      { id: 'tasks', label: 'Tasks', icon: 'ph-check-square', count: String(openTaskCount) },
+      { id: 'web', label: 'Web leads', icon: 'ph-globe-simple', count: (() => { const n = s.submissions.filter(x => x.status === 'new').length; return n ? String(n) : ''; })() },
+      { id: 'inbox', label: 'Inbox', icon: 'ph-tray', count: unreadCount ? String(unreadCount) : '' },
+      { id: 'team', label: 'Team', icon: 'ph-users-three', count: '' }
+    ].map(n => {
+      const on = s.screen === n.id;
+      return { ...n, go: go(n.id), bg: on ? 'color-mix(in srgb, var(--color-accent) 14%, transparent)' : 'transparent', color: on ? 'var(--color-accent-200)' : 'var(--color-neutral-300)' };
+    });
+
+    const taskView = t => {
+      const j = byId[t.jobId];
+      const overdue = !t.done && t.due < TODAY;
+      return {
+        id: t.id, title: t.title, job: j ? j.client : '', assignee: t.assignee,
+        due: t.due === TODAY ? 'Today' : fmtD(t.due),
+        dueColor: overdue ? 'var(--color-accent-300)' : 'var(--color-neutral-400)',
+        icon: TASK_ICONS[t.type] || TASK_ICONS.Task,
+        checkIcon: t.done ? 'ph-check-square' : 'ph-square',
+        checkColor: t.done ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        titleColor: t.done ? 'var(--color-neutral-500)' : 'var(--color-text)',
+        deco: t.done ? 'line-through' : 'none',
+        toggle: () => this.setState(st => ({ tasks: st.tasks.map(x => x.id === t.id ? { ...x, done: !x.done } : x) })),
+        remove: () => this.setState(st => ({ tasks: st.tasks.filter(x => x.id !== t.id) })),
+        openJob: j ? openJob(j.id) : () => {}
+      };
+    };
+    const byDue = (a, b) => a.due.localeCompare(b.due);
+
+    // Overview
+    const wv = sum(active, j => j.value), wc = sum(active, cost);
+    const unpaid = won.filter(j => j.billing !== 'Paid');
+    const kpis = [
+      { label: 'Open pipeline', value: k(sum(open, j => j.value)), sub: open.length + ' deals in play' },
+      { label: 'Active contracts', value: k(wv), sub: active.length + ' scheduled or on site' },
+      { label: 'Margin on active work', value: (wv ? Math.round((wv - wc) / wv * 100) : 0) + '%', sub: 'Target ' + target + '%' },
+      { label: 'Awaiting payment', value: k(sum(unpaid, j => j.value)), sub: unpaid.length + ' contracts not yet paid' }
+    ];
+    const deployed = new Set(onSiteJobs.flatMap(j => j.crew));
+    const onSite = onSiteJobs.map(j => {
+      const total = Math.max(1, days(j.start, j.end));
+      const d = Math.min(total, Math.max(0, days(j.start, TODAY)));
+      return {
+        client: j.client, title: j.title, site: j.site.split(',').pop().trim(),
+        dayText: 'Day ' + (d + 1) + ' of ' + (total + 1),
+        pct: Math.round(d / total * 100) + '%',
+        crewText: j.crew.length ? j.crew.join(', ') : 'No crew assigned',
+        open: openJob(j.id)
+      };
+    });
+    const stageTotals = OPEN.map(st => ({ st, items: jobs.filter(j => j.stage === st) }));
+    const maxT = Math.max(1, ...stageTotals.map(x => sum(x.items, j => j.value)));
+    const stageBars = stageTotals.map(x => {
+      const t = sum(x.items, j => j.value);
+      return { name: x.st, total: k(t), w: Math.max(2, t / maxT * 100) + '%' };
+    });
+    const weekOut = addDays(TODAY, 7);
+    const dueSoon = s.tasks.filter(t => !t.done && t.due <= weekOut).sort(byDue).map(taskView);
+
+    // Pipeline
+    const stages = showLost ? STAGES : STAGES.filter(x => x !== 'Lost');
+    const columns = stages.map(st => {
+      const items = jobs.filter(j => j.stage === st);
+      const hot = s.dropCol === st;
+      return {
+        name: st, count: String(items.length), total: k(sum(items, j => j.value)),
+        mark: STAGE_MARK[st],
+        bg: hot ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'color-mix(in srgb, var(--color-text) 2.5%, transparent)',
+        ring: hot ? 'inset 0 0 0 1px var(--color-accent-700)' : 'none',
+        onDragOver: e => e.preventDefault(),
+        onDragEnter: () => { if (s.dropCol !== st) this.setState({ dropCol: st }); },
+        onDrop: e => {
+          e.preventDefault();
+          const id = this.dragId; this.dragId = null;
+          if (id) this.updateJob(id, byId[id].stage !== 'Won' && st === 'Won' ? { stage: st, status: 'Scheduled' } : { stage: st });
+          this.setState({ dropCol: null });
+        },
+        cards: items.map(j => ({
+          client: j.client, title: j.title, service: svcLabel(j.services), emergency: !!j.emergency, value: k(j.value),
+          margin: costed(j) ? marginOf(j) + '% margin' : 'Not costed',
+          marginColor: marginColor(j), owner: j.owner, initials: initials(j.owner),
+          open: openJob(j.id),
+          onDragStart: e => { this.dragId = j.id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', j.id); },
+          onDragEnd: () => this.setState({ dropCol: null })
+        }))
+      };
+    });
+
+    // Contracts
+    const cf = s.cFilter;
+    const cList = won.filter(j => cf === 'All' || j.status === cf);
+    const statusOrder = { 'On site': 0, Scheduled: 1, Completed: 2 };
+    cList.sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || (a.start || '').localeCompare(b.start || ''));
+    const cFilters = ['All', ...STATUS].map(v => ({
+      v, active: cf === v, count: String(v === 'All' ? won.length : won.filter(j => j.status === v).length),
+      pick: () => this.setState({ cFilter: v })
+    }));
+    const ctv = sum(cList, j => j.value), cc = sum(cList, cost);
+    const cTotals = [
+      { label: 'Contract value', value: money(ctv) },
+      { label: 'Operating cost', value: money(cc) },
+      { label: 'Gross profit', value: money(ctv - cc) },
+      { label: 'Blended margin', value: (ctv ? Math.round((ctv - cc) / ctv * 100) : 0) + '%' }
+    ];
+    const cRows = cList.map(j => {
+      const low = costed(j) && marginOf(j) < target;
+      return {
+        client: j.client, title: j.title + ' · ' + svcLabel(j.services), emIcon: j.emergency ? 'ph-siren' : '', status: j.status, statusTag: STATUS_TAG[j.status],
+        dates: j.start ? fmtD(j.start) + ' – ' + fmtD(j.end) : 'Not scheduled',
+        value: money(j.value), cost: money(cost(j)), margin: marginOf(j) + '%',
+        marginColor: marginColor(j), marginIcon: low ? 'ph-warning' : '',
+        crew: j.crew.length ? j.crew.length + ' · ' + (j.crew.find(c => CREW.find(x => x[0] === c && x[1] === 'Foreman')) || j.crew[0]).split(' ')[0] : 'None',
+        billing: j.billing, billingTag: BILLING_TAG[j.billing], open: openJob(j.id)
+      };
+    });
+
+    // Tasks
+    const tf = s.tFilter;
+    const mine = s.tasks.filter(t => tf === 'Everyone' || t.assignee === tf);
+    const groups = [
+      { label: 'Overdue', color: 'var(--color-accent-300)', items: mine.filter(t => !t.done && t.due < TODAY).sort(byDue) },
+      { label: 'Today', color: 'var(--color-neutral-200)', items: mine.filter(t => !t.done && t.due === TODAY) },
+      { label: 'Upcoming', color: 'var(--color-neutral-200)', items: mine.filter(t => !t.done && t.due > TODAY).sort(byDue) },
+      { label: 'Done', color: 'var(--color-neutral-500)', items: mine.filter(t => t.done).sort(byDue).reverse() }
+    ].filter(g => g.items.length).map(g => ({ ...g, count: String(g.items.length), items: g.items.map(taskView) }));
+    const overdueCount = s.tasks.filter(t => !t.done && t.due < TODAY).length;
+    const setNt = key => e => this.setState({ nt: { ...s.nt, [key]: e.target.value } });
+    const nt = { ...s.nt, onTitle: setNt('title'), onJob: setNt('jobId'), onAssignee: setNt('assignee'), onDue: setNt('due') };
+    const addTask = e => {
+      e.preventDefault();
+      const title = s.nt.title.trim(); if (!title) return;
+      const type = /invoice|payment/i.test(title) ? 'Invoice' : /call/i.test(title) ? 'Call' : /visit|walk/i.test(title) ? 'Visit' : 'Task';
+      this.setState(st => ({ tasks: [...st.tasks, T('t' + Date.now(), title, st.nt.jobId, st.nt.assignee, st.nt.due || TODAY, type)], nt: { ...st.nt, title: '' } }));
+    };
+    const jobOpts = [{ v: '', label: 'No job' }, ...jobs.filter(j => j.stage !== 'Lost').map(j => ({ v: j.id, label: j.client }))];
+
+    // Drawer
+    let dj = { costLines: [], crewOpts: [], tasks: [] };
+    const j = s.openId && byId[s.openId];
+    if (j) {
+      const up = patch => this.updateJob(j.id, patch);
+      const busy = {};
+      onSiteJobs.filter(x => x.id !== j.id).forEach(x => x.crew.forEach(c => { busy[c] = x.client; }));
+      const c = cost(j);
+      dj = {
+        ...j, isWon: j.stage === 'Won', serviceLabel: svcLabel(j.services),
+        hasSource: !!j.source, source: j.source || '',
+        contactName: contactName(j),
+        onContactEmail: e => up({ contactEmail: e.target.value }),
+        onContactPhone: e => up({ contactPhone: e.target.value }),
+        emailJob: goThread(j.id, 'email'), textJob: goThread(j.id, 'sms'), callJob: startCall(j.id), openInbox: goThread(j.id),
+        commDisabledEmail: !emailOn, commDisabledQuo: !quoOn,
+        recent: (commsBy[j.id] || []).slice(-3).reverse().map(c => ({
+          icon: c.kind === 'email' ? 'ph-envelope-simple' : c.kind === 'sms' ? 'ph-chat-circle-text' : c.dir === 'in' ? 'ph-phone-incoming' : 'ph-phone-outgoing',
+          text: c.kind === 'email' ? c.subject : c.kind === 'sms' ? c.body : (c.summary || (c.dir === 'in' ? 'Incoming call' : 'Outgoing call') + ' · ' + mmss(c.duration)),
+          time: fmtAt(c.at)
+        })),
+        hasRecent: !!(commsBy[j.id] || []).length,
+        picker: picker(j.services, v => up({ services: v }), 'customJob'),
+        emSeg: emergencySeg(j.emergency, v => up({ emergency: v }), 'em-job'),
+        hasValueWarn: j.value < MIN_JOB, valueWarn: 'Below the ' + money(MIN_JOB) + ' job minimum',
+        moneyHeading: j.stage === 'Won' ? 'Contract and operating costs' : 'Estimate',
+        costTotal: money(c), profit: money(j.value - c),
+        margin: costed(j) ? marginOf(j) + '%' : '—', marginColor: marginColor(j),
+        onStage: e => up(e.target.value === 'Won' && j.stage !== 'Won' ? { stage: 'Won', status: 'Scheduled' } : { stage: e.target.value }),
+        onOwner: e => up({ owner: e.target.value }),
+        onStatus: e => up({ status: e.target.value }),
+        onBilling: e => up({ billing: e.target.value }),
+        onStart: e => up({ start: e.target.value }),
+        onEnd: e => up({ end: e.target.value }),
+        onSite: e => up({ site: e.target.value }),
+        onContact: e => up({ contact: e.target.value }),
+        onValue: e => up({ value: +e.target.value || 0 }),
+        costLines: COSTS.map(([key, label]) => ({ label, val: j.costs[key], onChange: e => up({ costs: { ...j.costs, [key]: +e.target.value || 0 } }) })),
+        crewSummary: j.crew.length + ' assigned',
+        crewOpts: CREW.map(([name, role]) => {
+          const on = j.crew.includes(name);
+          return {
+            name, role, busy: busy[name] ? ' · on site at ' + busy[name] : '',
+            border: on ? 'var(--color-accent)' : 'var(--color-divider)',
+            bg: on ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent',
+            icon: on ? 'ph-check-circle' : 'ph-circle', iconColor: on ? 'var(--color-accent)' : 'var(--color-neutral-600)',
+            toggle: () => up({ crew: on ? j.crew.filter(x => x !== name) : [...j.crew, name] })
+          };
+        }),
+        tasks: s.tasks.filter(t => t.jobId === j.id).sort(byDue).map(taskView),
+        taskDraft: s.drawerTask,
+        onTaskDraft: e => this.setState({ drawerTask: e.target.value }),
+        addTask: e => {
+          e.preventDefault();
+          const title = s.drawerTask.trim(); if (!title) return;
+          this.setState(st => ({ tasks: [...st.tasks, T('t' + Date.now(), title, j.id, j.owner, addDays(TODAY, 1), 'Task')], drawerTask: '' }));
+        },
+        remove: () => { if (confirm('Delete ' + j.client + '?')) this.setState(st => ({ jobs: st.jobs.filter(x => x.id !== j.id), tasks: st.tasks.filter(t => t.jobId !== j.id), openId: null })); }
+      };
+    }
+
+    // Inbox
+    const q = (s.inboxQ || '').trim().toLowerCase();
+    const threadJobs = jobs.filter(j => q ? (j.client + ' ' + j.contact + ' ' + j.contactEmail).toLowerCase().includes(q) : (commsBy[j.id] || j.id === s.threadId));
+    const sortKey = j => (lastOf(j.id) || {}).at || (j.id === s.threadId ? '9999' : '');
+    threadJobs.sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+    const threadId = s.threadId && byId[s.threadId] ? s.threadId : (threadJobs[0] || {}).id;
+    const tj = threadId ? byId[threadId] : null;
+    const threads = threadJobs.map(j => {
+      const l = lastOf(j.id), sel = j.id === threadId;
+      return {
+        client: j.client, contact: contactName(j),
+        snippet: !l ? 'No messages yet' : l.kind === 'email' ? l.subject : l.kind === 'sms' ? l.body : (l.dir === 'in' ? 'Incoming' : 'Outgoing') + ' call · ' + mmss(l.duration),
+        icon: !l ? 'ph-dot-outline' : l.kind === 'email' ? 'ph-envelope-simple' : l.kind === 'sms' ? 'ph-chat-circle-text' : 'ph-phone',
+        time: l ? fmtAt(l.at).split(',')[0] : '',
+        unreadDot: isUnread(j.id) && !sel ? 'var(--color-accent)' : 'transparent',
+        bg: sel ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent',
+        weight: isUnread(j.id) && !sel ? '500' : '400',
+        open: () => this.setState({ threadId: j.id, read: markRead(j.id), compose: { subject: '', body: '' } })
+      };
+    });
+    const timeline = tj ? (commsBy[tj.id] || []).map(c => {
+      const out = c.dir === 'out';
+      const playing = s.playing && s.playing.id === c.id;
+      const pos = playing ? s.playing.pos : 0;
+      return {
+        isEmail: c.kind === 'email', isSms: c.kind === 'sms', isCall: c.kind === 'call',
+        subject: c.subject, body: c.body, time: fmtAt(c.at),
+        who: out ? uName(c.userId) : contactName(tj),
+        emailMeta: out ? uName(c.userId) + ' to ' + tj.contactEmail : contactName(tj) + ' · ' + tj.contactEmail,
+        align: out ? 'flex-end' : 'flex-start',
+        bubbleBg: out ? 'color-mix(in srgb, var(--color-accent) 18%, transparent)' : 'var(--color-surface)',
+        callIcon: out ? 'ph-phone-outgoing' : 'ph-phone-incoming',
+        callTitle: (out ? 'Outgoing call' : 'Incoming call') + ' · ' + mmss(c.duration || 0),
+        callWho: out ? uName(c.userId) + ' called ' + contactName(tj) : contactName(tj) + ' → ' + uName(c.userId),
+        recorded: !!c.recorded,
+        playIcon: playing ? 'ph-pause' : 'ph-play',
+        togglePlay: () => this.setState(st => ({ playing: st.playing && st.playing.id === c.id ? null : { id: c.id, pos: 0 } })),
+        pct: (c.duration ? pos / c.duration * 100 : 0) + '%',
+        playTime: mmss(pos) + ' / ' + mmss(c.duration || 0),
+        hasSummary: !!c.summary, summary: c.summary || '',
+        hasTranscript: !!(c.transcript && c.transcript.length),
+        txOpen: !!s.openTx[c.id], txLabel: s.openTx[c.id] ? 'Hide transcript' : 'Show transcript',
+        toggleTx: () => this.setState(st => ({ openTx: { ...st.openTx, [c.id]: !st.openTx[c.id] } })),
+        lines: (c.transcript || []).map(([w, t]) => ({ who: w, text: t, color: teamFirst.has(w) ? 'var(--color-accent-300)' : 'var(--color-neutral-300)' }))
+      };
+    }) : [];
+    const composeEmail = s.composeMode === 'email';
+    const composeOk = composeEmail ? emailOn : quoOn;
+    const setCompose = key => e => this.setState({ compose: { ...this.state.compose, [key]: e.target.value } });
+    const inbox = tj ? {
+      hasThread: true, contact: contactName(tj), client: tj.client, email: tj.contactEmail, phone: tj.contactPhone,
+      openJob: openJob(tj.id), call: startCall(tj.id), callDisabled: !quoOn,
+      isEmpty: !(commsBy[tj.id] || []).length
+    } : { hasThread: false };
+    const composeTabs = [
+      { v: 'Email', icon: 'ph-envelope-simple', name: 'cmode', active: composeEmail, pick: () => this.setState({ composeMode: 'email' }) },
+      { v: 'Text', icon: 'ph-chat-circle-text', name: 'cmode', active: !composeEmail, pick: () => this.setState({ composeMode: 'sms' }) }
+    ];
+    const compose = {
+      subject: s.compose.subject, body: s.compose.body, onSubject: setCompose('subject'), onBody: setCompose('body'),
+      disabled: !composeOk,
+      note: composeEmail ? (emailOn ? 'From ' + me.email + ' via ' + ig.email.provider : 'Email isn’t connected. Connect it under Team → Integrations.') : (quoOn ? (me.phone ? 'From ' + me.phone + ' via Quo' : 'Your profile has no Quo number.') : 'Quo isn’t connected. Connect it under Team → Integrations.'),
+      placeholder: composeEmail ? 'Write an email…' : 'Write a text message…',
+      sendLabel: composeEmail ? 'Send email' : 'Send text',
+      send: e => {
+        e.preventDefault();
+        const st = this.state; const body = st.compose.body.trim();
+        if (!tj || !body || !composeOk || (!composeEmail && !me.phone)) return;
+        const c = composeEmail
+          ? C('c' + Date.now(), tj.id, 'email', 'out', me.id, nowAt(), { subject: st.compose.subject.trim() || tj.title, body: body + (ig.email.signature && me.signature ? '\n\n' + me.signature : '') })
+          : C('c' + Date.now(), tj.id, 'sms', 'out', me.id, nowAt(), { body });
+        this.setState({ comms: [...st.comms, c], compose: { subject: '', body: '' } });
+      }
+    };
+
+    // Call panel
+    let cv = {};
+    const cj = s.call && byId[s.call.jobId];
+    if (cj) {
+      const live = s.call.phase === 'live';
+      const secs = live ? Math.floor((Date.now() - s.call.start) / 1000) : 0;
+      cv = {
+        name: contactName(cj), client: cj.client, phone: cj.contactPhone, from: me.phone || 'Quo',
+        phaseLabel: live ? mmss(secs) : 'Calling…', statusLabel: live ? 'Connected' : 'Ringing',
+        recOn: live && s.call.recording, recLabel: s.call.recording ? 'Stop recording' : 'Record', recIcon: s.call.recording ? 'ph-stop-circle' : 'ph-record',
+        announce: ig.quo.announce && s.call.recording ? 'Callers hear a recording notice.' : '',
+        toggleRec: () => this.setState(st => ({ call: { ...st.call, recording: !st.call.recording } })),
+        notes: s.call.notes, onNotes: e => this.setState({ call: { ...this.state.call, notes: e.target.value } }),
+        end: () => {
+          clearTimeout(this.ringT);
+          const st = this.state, call = st.call;
+          if (call.phase !== 'live') return this.setState({ call: null });
+          const dur = Math.max(1, Math.floor((Date.now() - call.start) / 1000));
+          const first = contactName(cj).split(' ')[0], mine = me.name.split(' ')[0];
+          const tx = call.recording && ig.quo.transcribe ? [
+            [mine, 'Hi ' + first + ', it’s ' + mine + ' from Wastely. Do you have a minute on the ' + cj.title.toLowerCase() + '?'],
+            [first, 'Sure, go ahead.'],
+            [mine, 'I want to confirm timing and site access before we lock in the crew.'],
+            [first, 'That works. Send me the details by email and I’ll confirm.'],
+            [mine, 'Will do. Thanks.']
+          ] : null;
+          const summary = [call.recording && ig.quo.summarize ? 'Discussed timing and site access. ' + first + ' asked for the details by email.' : '', call.notes.trim() ? 'Notes: ' + call.notes.trim() : ''].filter(Boolean).join(' ');
+          const c = C('c' + Date.now(), cj.id, 'call', 'out', me.id, nowAt(), { duration: dur, recorded: !!call.recording, transcript: tx, summary });
+          this.setState({ call: null, comms: [...st.comms, c] });
+        }
+      };
+    }
+
+    // Web leads
+    const wf = s.wFilter;
+    const statusName = { new: 'New', converted: 'Converted', archived: 'Archived' };
+    const wFilters = ['New', 'Converted', 'Archived', 'All'].map(v => ({ v, name: 'wfilter', active: wf === v, count: String(v === 'All' ? s.submissions.length : s.submissions.filter(x => statusName[x.status] === v).length), pick: () => this.setState({ wFilter: v }) }));
+    const setSub = (id, patch) => this.setState(st => ({ submissions: st.submissions.map(x => x.id === id ? { ...x, ...patch } : x) }));
+    const HIDE = ['confirmed', 'services', '_subject', '_template', '_captcha', 'page'];
+    const subView = sb => {
+      const f = sb.fields;
+      let rest = String(f.services || '');
+      const exact = ALL_SERVICES.filter(sv => { const i = rest.toLowerCase().indexOf(sv.toLowerCase()); if (i < 0) return false; rest = rest.slice(0, i) + rest.slice(i + sv.length); return true; });
+      const rawSvc = rest.split(',').map(x => x.trim()).filter(Boolean);
+      const urgent = rawSvc.some(x => /^urgent/i.test(x)) || /emergency/i.test(f.When || '');
+      const services = [...new Set([...exact, ...rawSvc.map(mapService).filter(Boolean)])];
+      const range = parseRange(f.confirmed);
+      const name = pick(f, 'name'), company = pick(f, 'company');
+      const isCareer = sb.form === 'Careers';
+      const job = sb.jobId && byId[sb.jobId];
+      return {
+        id: sb.id, form: sb.form, time: fmtAt(sb.at), page: sb.page.replace(/^https?:\/\//, ''),
+        name, company, sub: [company, pick(f, 'location', 'site location')].filter(Boolean).join(' · '),
+        email: pick(f, 'email'), phone: pick(f, 'phone'),
+        urgent, services: services.map(v => ({ v })), hasServices: !!services.length,
+        estimate: range ? money(range[0]) + ' – ' + money(range[1]) : '', hasEstimate: !!range,
+        rows: Object.keys(f).filter(key => !HIDE.includes(key) && !['name', 'email', 'phone', 'company'].includes(key.toLowerCase())).map(key => ({ key: key.charAt(0).toUpperCase() + key.slice(1), value: f[key] })),
+        formIcon: isCareer ? 'ph-hard-hat' : sb.form === 'Contact' ? 'ph-envelope-open' : 'ph-calculator',
+        isNew: sb.status === 'new', canConvert: sb.status === 'new' && !isCareer,
+        isConverted: sb.status === 'converted', isArchived: sb.status === 'archived',
+        statusLabel: statusName[sb.status], statusTag: sb.status === 'new' ? 'tag-accent' : sb.status === 'converted' ? 'tag-outline' : 'tag-neutral',
+        jobLabel: job ? 'Deal: ' + job.client : '', openJob: job ? openJob(job.id) : () => {},
+        archive: () => setSub(sb.id, { status: 'archived' }),
+        restore: () => setSub(sb.id, { status: 'new' }),
+        convert: () => {
+          const id = 'j' + Date.now();
+          const title = (pick(f, 'details', 'project details') || svcLabel(services)).split(/[.!?]/)[0].slice(0, 70);
+          const value = range ? Math.round((range[0] + range[1]) / 2 / 100) * 100 : MIN_JOB;
+          const nj = J(id, title, company || name, company ? 'Commercial' : 'Private owner', '', 'Lead', value, [0, 0, 0, 0, 0], me.name, pick(f, 'location', 'site location'), name + (company ? ', ' + company : ''), { services, emergency: urgent, contactEmail: pick(f, 'email'), contactPhone: pick(f, 'phone'), source: 'Website · ' + sb.form });
+          delete nj.service;
+          const newTasks = ig.web.callbackTask ? [T('t' + Date.now(), 'Call back ' + name.split(' ')[0] + ' about website ' + sb.form.toLowerCase(), id, me.name, TODAY, 'Call')] : [];
+          this.setState(st => ({
+            jobs: [...st.jobs, nj], tasks: [...st.tasks, ...newTasks],
+            submissions: st.submissions.map(x => x.id === sb.id ? { ...x, status: 'converted', jobId: id } : x),
+            openId: id
+          }));
+        }
+      };
+    };
+    const webLeads = s.submissions.filter(x => wf === 'All' || statusName[x.status] === wf).sort((a, b) => b.at.localeCompare(a.at)).map(subView);
+
+    // Team & integrations
+    const sw = (on, toggle) => ({ on, toggle, border: on ? 'var(--color-accent)' : 'var(--color-divider)', bg: on ? 'color-mix(in srgb, var(--color-accent) 30%, transparent)' : 'transparent', left: on ? '16px' : '2px', knob: on ? 'var(--color-accent-200)' : 'var(--color-neutral-500)' });
+    const flip = (grp, key) => () => this.setState(st => ({ integrations: { ...st.integrations, [grp]: { ...st.integrations[grp], [key]: !st.integrations[grp][key] } } }));
+    const settingsTabs = ['Profiles', 'Integrations'].map(v => ({ v, name: 'stab', active: s.settingsTab === v, pick: () => this.setState({ settingsTab: v }) }));
+    const profiles = team.map(u => ({
+      ...u, initials: initials(u.name), isMe: u.id === me.id, notMe: u.id !== me.id,
+      phoneLine: u.phone || 'No Quo number',
+      load: jobs.filter(j => j.owner === u.name && j.stage !== 'Lost' && !(j.stage === 'Won' && j.status === 'Completed')).length + ' jobs · ' + s.tasks.filter(t => t.assignee === u.name && !t.done).length + ' open tasks',
+      edit: () => this.setState({ profileDraft: { ...u } }),
+      makeMe: () => this.setState({ meId: u.id })
+    }));
+    const pdraft = s.profileDraft || {};
+    const pf = Object.fromEntries(['name', 'role', 'email', 'phone', 'signature'].map(key => [key, e => this.setState({ profileDraft: { ...this.state.profileDraft, [key]: e.target.value } })]));
+    const emailInt = {
+      connected: emailOn, status: emailOn ? 'Connected' : 'Not connected', statusTag: emailOn ? 'tag-accent' : 'tag-neutral',
+      providers: ['Google Workspace', 'Microsoft 365'].map(v => ({ v, name: 'eprov', active: ig.email.provider === v, pick: () => this.setState(st => ({ integrations: { ...st.integrations, email: { ...st.integrations.email, provider: v } } })) })),
+      connectLabel: emailOn ? 'Disconnect' : 'Connect ' + ig.email.provider, toggleConnect: flip('email', 'connected'),
+      toggles: [
+        { label: 'Log email to jobs', desc: 'Mail to or from a job’s contact appears in its inbox thread.', ...sw(ig.email.autoLog, flip('email', 'autoLog')) },
+        { label: 'Add my signature', desc: 'Appends the sender’s profile signature to outgoing email.', ...sw(ig.email.signature, flip('email', 'signature')) }
+      ],
+      mailboxes: team.map(u => ({ name: u.name, value: u.email }))
+    };
+    const quoInt = {
+      connected: quoOn, status: quoOn ? 'Connected' : 'Not connected', statusTag: quoOn ? 'tag-accent' : 'tag-neutral',
+      connectLabel: quoOn ? 'Disconnect' : 'Connect Quo', toggleConnect: flip('quo', 'connected'),
+      toggles: [
+        { label: 'Record calls', desc: 'New calls start recording automatically.', ...sw(ig.quo.record, flip('quo', 'record')) },
+        { label: 'Announce recording', desc: 'Plays a short notice so the other party knows the call is recorded.', ...sw(ig.quo.announce, flip('quo', 'announce')) },
+        { label: 'Transcribe recordings', desc: 'Adds a speaker-labelled transcript to each recorded call.', ...sw(ig.quo.transcribe, flip('quo', 'transcribe')) },
+        { label: 'Summarize calls', desc: 'Writes a short summary on the job after each call.', ...sw(ig.quo.summarize, flip('quo', 'summarize')) }
+      ],
+      numbers: team.map(u => ({ name: u.name, value: u.phone || 'No number' }))
+    };
+    const webInt = {
+      connected: ig.web.connected, status: ig.web.connected ? 'Receiving' : 'Paused', statusTag: ig.web.connected ? 'tag-accent' : 'tag-neutral',
+      connectLabel: ig.web.connected ? 'Pause' : 'Resume', toggleConnect: flip('web', 'connected'),
+      toggles: [
+        { label: 'Create a callback task', desc: 'Converting a submission adds a “Call back” task for today.', ...sw(ig.web.callbackTask, flip('web', 'callbackTask')) },
+        { label: 'Keep email copy', desc: 'Submissions still go to go@wastely.ca through FormSubmit.', ...sw(ig.web.emailCopy, flip('web', 'emailCopy')) }
+      ],
+      forms: [{ name: 'Quote request', value: 'QuoteForm, service pages' }, { name: 'Contact', value: 'Contact.dc.html' }, { name: 'Careers', value: 'Careers.dc.html' }, { name: 'Home page', value: 'Wastely.dc.html' }]
+    };
+
+    // New deal
+    const draft = s.draft || { services: [] };
+    const pickNew = picker(draft.services || [], v => this.setState(st => ({ draft: { ...st.draft, services: v } })), 'customNew');
+    const emSegNew = emergencySeg(draft.emergency, v => this.setState(st => ({ draft: { ...st.draft, emergency: v } })), 'em-new');
+    const df = Object.fromEntries(['client', 'title', 'service', 'clientType', 'value', 'owner'].map(key => [key, e => this.setState({ draft: { ...this.state.draft, [key]: e.target.value } })]));
+
+    return {
+      nav, todayLong: dt(TODAY).toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }),
+      isOverview: s.screen === 'overview', isPipeline: s.screen === 'pipeline', isContracts: s.screen === 'contracts', isTasks: s.screen === 'tasks',
+      goPipeline: go('pipeline'), goTasks: go('tasks'),
+      kpis, onSite, crewDeployed: deployed.size + ' of ' + CREW.length + ' crew deployed', stageBars, dueSoon,
+      columns, pipelineSub: open.length + ' open deals · ' + k(sum(open, x => x.value)),
+      cFilters, cTotals, cRows,
+      taskGroups: groups, tasksSub: openTaskCount + ' open' + (overdueCount ? ' · ' + overdueCount + ' overdue' : ''),
+      tFilter: tf, onTFilter: e => this.setState({ tFilter: e.target.value }),
+      assigneeFilterOpts: opts(['Everyone', ...teamNames]), assigneeOpts: opts(teamNames), jobOpts, nt, addTask,
+      hasDrawer: !!j, dj, closeDrawer: () => this.setState({ openId: null }),
+      stageOpts: opts(STAGES), statusOpts: opts(STATUS), billingOpts: opts(BILLING), ownerOpts: opts(teamNames),
+      clientTypeOpts: opts(CLIENT_TYPES),
+      hasNewDeal: !!s.draft, draft, df, pickNew, emSegNew, minJob: 'Jobs start at ' + money(MIN_JOB) + '. Combine any services into one job.',
+      hasDraftError: !!s.draftError, draftError: s.draftError || '',
+      openNewDeal: () => this.setState({ draftError: '', customNew: '', draft: { client: '', title: '', services: [], emergency: false, clientType: CLIENT_TYPES[0], value: '', owner: OWNERS[0] } }),
+      closeNewDeal: () => this.setState({ draft: null }),
+      stop: e => e.stopPropagation(),
+      createDeal: e => {
+        e.preventDefault();
+        const d = this.state.draft;
+        if (!d.services.length) return this.setState({ draftError: 'Pick at least one service.' });
+        if ((+d.value || 0) < MIN_JOB) return this.setState({ draftError: 'Jobs start at ' + money(MIN_JOB) + '.' });
+        const id = 'j' + Date.now();
+        const nj = J(id, d.title.trim(), d.client.trim(), d.clientType, '', 'Lead', +d.value || 0, [0, 0, 0, 0, 0], d.owner, '', '', { services: d.services, emergency: !!d.emergency });
+        delete nj.service;
+        this.setState(st => ({ jobs: [...st.jobs, nj], draft: null, openId: id, screen: 'pipeline' }));
+      },
+      resetData: () => { if (confirm('Reset deals, tasks and messages to the demo data?')) { const d = seed(); d.jobs.forEach(deriveContact); this.setState({ ...d, comms: seedComms(), submissions: seedSubmissions(), read: {}, openId: null, threadId: null }); } },
+      isInbox: s.screen === 'inbox', isTeam: s.screen === 'team',
+      me: { ...me, initials: initials(me.name) }, meOpts: team.map(u => ({ v: u.id, label: u.name })), meId: me.id,
+      onMe: e => this.setState({ meId: e.target.value }),
+      inboxQ: s.inboxQ, onInboxQ: e => this.setState({ inboxQ: e.target.value }),
+      threads, inbox, timeline, timelineRef: this.timelineRef, composeTabs, isComposeEmail: composeEmail, compose,
+      hasCall: !!cj, cv,
+      settingsTabs, isProfilesTab: s.settingsTab === 'Profiles', isIntegrationsTab: s.settingsTab === 'Integrations',
+      profiles, emailInt, quoInt, webInt, roleOpts: opts(ROLES),
+      isWeb: s.screen === 'web', wFilters, webLeads, hasWebLeads: !!webLeads.length, noWebLeads: !webLeads.length,
+      webSub: s.submissions.filter(x => x.status === 'new').length + ' new from wastely.ca',
+      newProfile: () => this.setState({ profileDraft: { name: '', role: ROLES[0], email: '', phone: '', signature: '' } }),
+      hasProfileDraft: !!s.profileDraft, pdraft, pf, profileTitle: pdraft.id ? 'Edit profile' : 'New profile',
+      canDeleteProfile: !!pdraft.id && pdraft.id !== me.id,
+      closeProfile: () => this.setState({ profileDraft: null }),
+      saveProfile: e => {
+        e.preventDefault();
+        const d = this.state.profileDraft;
+        if (!d.name.trim() || !d.email.trim()) return;
+        const clean = { ...d, name: d.name.trim(), email: d.email.trim(), phone: (d.phone || '').trim() };
+        if (d.id) {
+          const old = team.find(u => u.id === d.id);
+          this.setState(st => ({
+            team: st.team.map(u => u.id === d.id ? clean : u),
+            jobs: old.name === clean.name ? st.jobs : st.jobs.map(j => j.owner === old.name ? { ...j, owner: clean.name } : j),
+            tasks: old.name === clean.name ? st.tasks : st.tasks.map(t => t.assignee === old.name ? { ...t, assignee: clean.name } : t),
+            profileDraft: null
+          }));
+        } else this.setState(st => ({ team: [...st.team, { ...clean, id: 'u' + Date.now() }], profileDraft: null }));
+      },
+      deleteProfile: () => { const d = this.state.profileDraft; if (confirm('Delete ' + d.name + '’s profile?')) this.setState(st => ({ team: st.team.filter(u => u.id !== d.id), profileDraft: null })); }
+    };
+  }
+}
+</script>
+</body>
+</html>
