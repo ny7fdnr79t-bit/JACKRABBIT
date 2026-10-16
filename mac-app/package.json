@@ -1,0 +1,28 @@
+{
+  "name": "wastely-crm",
+  "productName": "Wastely CRM",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "ca.wastely.crm",
+    "productName": "Wastely CRM",
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "build/icon.png",
+      "identity": null,
+      "target": ["dir"]
+    },
+    "files": [
+      "main.js",
+      "package.json"
+    ]
+  }
+}
