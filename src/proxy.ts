@@ -6,6 +6,12 @@ const PUBLIC = ['/login', '/auth'];
 // Refreshes the Supabase session cookie on every request and sends signed-out
 // visitors to /login. Real authorization is row level security in Postgres.
 export async function proxy(request: NextRequest) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return new NextResponse(
+      'Wastely CRM isn’t connected to Supabase yet. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel → Settings → Environment Variables, then redeploy.',
+      { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } }
+    );
+  }
   let response = NextResponse.next({ request });
   const sb = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {

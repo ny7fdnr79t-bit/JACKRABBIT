@@ -33,8 +33,7 @@ npm run dev
 ```
 
 ### 3. Vercel
-The existing JACKRABBIT project is set to Framework Preset **Other** for the old static prototype. Before deploying this branch:
-- Settings → Build & Deployment → Framework Preset: **Next.js** (build command and output dir: defaults).
+The existing JACKRABBIT project is set to Framework Preset **Other** for the old static prototype. `vercel.json` sets `"framework": "nextjs"`, which overrides that for this branch. Also:
 - Environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - Keep `CRM_KEY`, `ANTHROPIC_API_KEY` and the Upstash vars — the Web leads and AI phases reuse them.
 
