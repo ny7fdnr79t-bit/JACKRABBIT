@@ -11,6 +11,10 @@ import {
   DEFAULT_SETTINGS, fromCents, guessTaskType, toCents,
   type Contact, type CostKey, type CrewMember, type Job, type Profile, type Service, type Settings, type Task, type TaskType
 } from '@/lib/crm';
+import {
+  DEFAULT_COMPANY, fillTemplate, templateVars, toAgreement, toCompany, toInvoice,
+  type Agreement, type Company, type Invoice, type InvoiceKind, type Line, type Template
+} from '@/lib/docs';
 
 type Row = Record<string, any>;
 
@@ -53,6 +57,19 @@ type Crm = {
   addCrew: (name: string, role: string) => void;
   removeCrew: (id: string) => void;
   updateProfile: (id: string, patch: Partial<Pick<Profile, 'name' | 'role' | 'quoPhone' | 'active'>>) => void;
+  // documents
+  company: Company;
+  invoices: Invoice[];
+  agreements: Agreement[];
+  templates: Template[];
+  createInvoice: (jobId: string, kind: InvoiceKind) => Promise<string | null>;
+  updateInvoice: (id: string, patch: Partial<Pick<Invoice, 'status' | 'issueDate' | 'dueDate' | 'lines' | 'taxRate' | 'notes' | 'billTo' | 'paidVia'>>) => Promise<boolean>;
+  deleteInvoice: (id: string) => Promise<boolean>;
+  createAgreement: (jobId: string) => Promise<string | null>;
+  updateAgreement: (id: string, patch: Partial<Pick<Agreement, 'status' | 'title' | 'body' | 'priceCents'>>) => Promise<boolean>;
+  deleteAgreement: (id: string) => Promise<boolean>;
+  saveCompany: (patch: Partial<Company>) => void;
+  saveTemplate: (id: string, body: string) => void;
   // ui
   newDeal: boolean;
   setNewDeal: (open: boolean) => void;
@@ -122,24 +139,38 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [error, setError] = useState('');
   const [newDeal, setNewDeal] = useState(false);
+  const [company, setCompany] = useState<Company>(DEFAULT_COMPANY);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
 
   const load = useCallback(async () => {
-    const [p, c, s, j, t, st] = await Promise.all([
+    const [p, c, s, j, t, st, inv, ag, tp] = await Promise.all([
       sb.from('profiles').select('id,name,role,email,quo_phone,active').order('name'),
       sb.from('crew_members').select('id,name,role').eq('active', true).order('name'),
       sb.from('services').select('id,name,grp,is_custom,sort').order('sort').order('name'),
       sb.from('jobs').select('*, client:clients(id,name,type), contact:contacts(id,name,email,phone), costs:job_costs(*), job_services(service_id), job_crew(crew_member_id)').order('created_at'),
       sb.from('tasks').select('*').order('due'),
-      sb.from('app_settings').select('*').maybeSingle()
+      sb.from('app_settings').select('*').maybeSingle(),
+      sb.from('invoices').select('*').order('created_at', { ascending: false }),
+      // Signature images stay on the server; the CRM only needs the status.
+      sb.from('agreements').select('id,number,job_id,status,title,body,price_cents,sign_token,sent_at,viewed_at,signed_at,signer_name,signer_title').order('created_at', { ascending: false }),
+      sb.from('agreement_templates').select('*').order('name')
     ]);
-    const failed = [p, c, s, j, t, st].find(x => x.error);
+    const failed = [p, c, s, j, t, st, inv, ag, tp].find(x => x.error);
     if (failed?.error) { setError(failed.error.message); return; }
     setProfiles((p.data || []).map(toProfile));
     setCrew((c.data || []) as CrewMember[]);
     setServicesList((s.data || []).map((r: Row) => ({ id: r.id, name: r.name, grp: r.grp, isCustom: r.is_custom })));
     setJobs((j.data || []).map(toJob));
     setTasks((t.data || []).map(toTask));
-    if (st.data) setSettings({ marginTarget: st.data.margin_target, minJob: fromCents(st.data.min_job_cents), stages: st.data.stages, showLost: st.data.show_lost });
+    if (st.data) {
+      setSettings({ marginTarget: st.data.margin_target, minJob: fromCents(st.data.min_job_cents), stages: st.data.stages, showLost: st.data.show_lost });
+      setCompany(toCompany(st.data));
+    }
+    setInvoices((inv.data || []).map(toInvoice));
+    setAgreements((ag.data || []).map(toAgreement));
+    setTemplates((tp.data || []).map((r: Row) => ({ id: r.id, name: r.name, body: r.body, isDefault: r.is_default })));
     setReady(true);
   }, [sb]);
 
@@ -249,7 +280,116 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
   const deleteJob: Crm['deleteJob'] = async id => {
     setJobs(js => js.filter(j => j.id !== id));
     setTasks(ts => ts.filter(t => t.jobId !== id));
-    await run(sb.from('jobs').delete().eq('id', id));
+    const { error } = await sb.from('jobs').delete().eq('id', id);
+    if (error) {
+      setError(/invoices_job_id_fkey|agreements_job_id_fkey/.test(error.message)
+        ? 'This deal has invoices or agreements, so it can’t be deleted. Move it to Lost instead.'
+        : error.message);
+      load();
+    }
+  };
+
+  // ── Documents ──────────────────────────────────────────────────────────
+
+  const jobById = (id: string) => jobs.find(j => j.id === id);
+  const svcNames = (j: Job) => j.serviceIds.map(id => services.find(x => x.id === id)?.name).filter((x): x is string => !!x);
+  const pct = (cents: number, p: number) => Math.round((cents * p) / 100);
+
+  const createInvoice: Crm['createInvoice'] = async (jobId, kind) => {
+    const j = jobById(jobId);
+    if (!j) return null;
+    const value = toCents(j.value);
+    const earlier = invoices.filter(x => x.jobId === jobId && x.status !== 'Void' && x.kind !== 'Final');
+    const lines: Line[] =
+      kind === 'Deposit' ? [{ description: `Deposit (${company.depositPct}%) — ${j.title}`, qty: 1, unit_cents: pct(value, company.depositPct) }]
+      : kind === 'Progress' ? [{ description: `Progress billing — ${j.title}`, qty: 1, unit_cents: 0 }]
+      : [
+          { description: `${j.title}${svcNames(j).length ? ' — ' + svcNames(j).join(', ') : ''}`, qty: 1, unit_cents: value },
+          ...earlier.map(x => ({ description: `Less: ${x.kind.toLowerCase()} invoice ${x.number}`, qty: 1, unit_cents: -x.subtotalCents }))
+        ];
+    const issue = new Date();
+    const due = new Date(issue); due.setDate(due.getDate() + company.paymentDays);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    const { data, error } = await sb.from('invoices').insert({
+      job_id: jobId, kind, lines, tax_rate: company.taxRate, tax_label: company.taxLabel,
+      issue_date: iso(issue), due_date: iso(due), created_by: initialMe.id,
+      bill_to: { client: j.client, contact: j.contact?.name || '', email: j.contact?.email || '', phone: j.contact?.phone || '', site: j.site }
+    }).select('*').single();
+    if (error) { setError(error.message); return null; }
+    setInvoices(xs => [toInvoice(data), ...xs]);
+    return data.id as string;
+  };
+
+  const updateInvoice: Crm['updateInvoice'] = async (id, patch) => {
+    const row: Row = {};
+    if ('status' in patch) row.status = patch.status;
+    if ('issueDate' in patch) row.issue_date = patch.issueDate;
+    if ('dueDate' in patch) row.due_date = patch.dueDate;
+    if ('lines' in patch) row.lines = patch.lines;
+    if ('taxRate' in patch) row.tax_rate = patch.taxRate;
+    if ('notes' in patch) row.notes = patch.notes;
+    if ('billTo' in patch) row.bill_to = patch.billTo;
+    if ('paidVia' in patch) row.paid_via = patch.paidVia;
+    const { data, error } = await sb.from('invoices').update(row).eq('id', id).select('*').single();
+    if (error) { setError(error.message); load(); return false; }
+    setInvoices(xs => xs.map(x => (x.id === id ? toInvoice(data) : x)));
+    if ('status' in patch) reloadSoon(); // job billing changes with it
+    return true;
+  };
+
+  const deleteInvoice: Crm['deleteInvoice'] = async id => {
+    const ok = await run(sb.from('invoices').delete().eq('id', id));
+    if (ok) setInvoices(xs => xs.filter(x => x.id !== id));
+    return ok;
+  };
+
+  const createAgreement: Crm['createAgreement'] = async jobId => {
+    const j = jobById(jobId);
+    const tpl = templates.find(t => t.isDefault) || templates[0];
+    if (!j) return null;
+    if (!tpl) { setError('There’s no agreement template yet. Add one under Team.'); return null; }
+    const body = fillTemplate(tpl.body, templateVars({
+      company, client: j.client, contact: j.contact?.name || '', email: j.contact?.email || '', site: j.site, title: j.title,
+      services: svcNames(j), priceCents: toCents(j.value), start: j.start, end: j.end, emergency: j.emergency, date: new Date().toISOString().slice(0, 10)
+    }));
+    const { data, error } = await sb.from('agreements').insert({
+      job_id: jobId, template_id: tpl.id, body, price_cents: toCents(j.value), created_by: initialMe.id
+    }).select('id,number,job_id,status,title,body,price_cents,sign_token,sent_at,viewed_at,signed_at,signer_name,signer_title').single();
+    if (error) { setError(error.message); return null; }
+    setAgreements(xs => [toAgreement(data), ...xs]);
+    return data.id as string;
+  };
+
+  const updateAgreement: Crm['updateAgreement'] = async (id, patch) => {
+    const row: Row = {};
+    if ('status' in patch) row.status = patch.status;
+    if ('title' in patch) row.title = patch.title;
+    if ('body' in patch) row.body = patch.body;
+    if ('priceCents' in patch) row.price_cents = patch.priceCents;
+    setAgreements(xs => xs.map(x => (x.id === id ? { ...x, ...patch } : x)));
+    return run(sb.from('agreements').update(row).eq('id', id));
+  };
+
+  const deleteAgreement: Crm['deleteAgreement'] = async id => {
+    const ok = await run(sb.from('agreements').delete().eq('id', id));
+    if (ok) setAgreements(xs => xs.filter(x => x.id !== id));
+    return ok;
+  };
+
+  const COMPANY_COLUMNS: Record<keyof Company, string> = {
+    name: 'company_name', address: 'company_address', email: 'company_email', phone: 'company_phone', hstNumber: 'hst_number',
+    taxRate: 'tax_rate', taxLabel: 'tax_label', paymentDays: 'payment_days', depositPct: 'deposit_pct', etransferEmail: 'etransfer_email', footer: 'invoice_footer'
+  };
+  const saveCompany: Crm['saveCompany'] = patch => {
+    setCompany(c => ({ ...c, ...patch }));
+    const row: Row = {};
+    for (const [key, v] of Object.entries(patch)) row[COMPANY_COLUMNS[key as keyof Company]] = v;
+    run(sb.from('app_settings').update(row).eq('id', 1));
+  };
+
+  const saveTemplate: Crm['saveTemplate'] = (id, body) => {
+    setTemplates(ts => ts.map(t => (t.id === id ? { ...t, body } : t)));
+    run(sb.from('agreement_templates').update({ body, updated_at: new Date().toISOString() }).eq('id', id));
   };
 
   const addTask: Crm['addTask'] = t => {
@@ -299,6 +439,8 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     ready, me, profiles, crew, services, jobs, tasks, settings, error, clearError: () => setError(''),
     updateJob, setCost, setServices, toggleCrew, saveContact, createDeal, deleteJob,
     addTask, toggleTask, deleteTask, addCrew, removeCrew, updateProfile,
+    company, invoices, agreements, templates, createInvoice, updateInvoice, deleteInvoice,
+    createAgreement, updateAgreement, deleteAgreement, saveCompany, saveTemplate,
     newDeal, setNewDeal
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

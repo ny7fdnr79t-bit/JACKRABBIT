@@ -5,6 +5,7 @@ import { Plus, X } from '@phosphor-icons/react';
 import { useCrm } from '@/lib/store';
 import { CREW_ROLES, initials, USER_ROLES } from '@/lib/crm';
 import { CommitInput, Loading } from '@/components/ui';
+import CompanySettings from '@/components/CompanySettings';
 
 // Profiles and field crew. Integrations (email, Quo) come in a later phase.
 export default function Team() {
@@ -15,7 +16,7 @@ export default function Team() {
   return (
     <div className="page page-wide">
       <header className="page-head">
-        <div><div className="meta">Who uses the CRM, and who works the sites</div><h3>Team</h3></div>
+        <div><div className="meta">People, crews, and company details for documents</div><h3>Team</h3></div>
       </header>
       {!ready ? <Loading /> : <>
         <section className="section">
@@ -82,6 +83,8 @@ export default function Team() {
             ))}
           </div>
         </section>
+
+        <CompanySettings />
       </>}
     </div>
   );

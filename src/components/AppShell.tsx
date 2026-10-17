@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useOpenJob } from '@/lib/useOpenJob';
 import {
-  Recycle, SquaresFour, Kanban, FileText, CheckSquare, GlobeSimple, Tray, UsersThree, SignOut, Warning, X
+  Recycle, SquaresFour, Kanban, FileText, CheckSquare, GlobeSimple, Tray, UsersThree, SignOut, Warning, X, Receipt, Signature
 } from '@phosphor-icons/react';
 import { CrmProvider, useCrm } from '@/lib/store';
 import { initials, PROTECTED_STAGES, type Profile } from '@/lib/crm';
@@ -35,7 +35,7 @@ function JobDrawerRoute() {
 }
 
 function Sidebar() {
-  const { me, jobs, tasks, settings } = useCrm();
+  const { me, jobs, tasks, settings, invoices, agreements } = useCrm();
   const path = usePathname();
   const openStages = settings.stages.filter(s => !PROTECTED_STAGES.includes(s));
   const nav = [
@@ -43,6 +43,8 @@ function Sidebar() {
     { href: '/pipeline', label: 'Pipeline', icon: Kanban, count: String(jobs.filter(j => openStages.includes(j.stage)).length) },
     { href: '/contracts', label: 'Contracts', icon: FileText, count: String(jobs.filter(j => j.stage === 'Won' && j.status !== 'Completed').length) },
     { href: '/tasks', label: 'Tasks', icon: CheckSquare, count: String(tasks.filter(t => !t.done).length) },
+    { href: '/agreements', label: 'Agreements', icon: Signature, count: String(agreements.filter(a => a.status === 'Sent').length || '') },
+    { href: '/invoices', label: 'Invoices', icon: Receipt, count: String(invoices.filter(x => x.status === 'Sent').length || '') },
     { href: '', label: 'Web leads', icon: GlobeSimple, count: '' },
     { href: '', label: 'Inbox', icon: Tray, count: '' },
     { href: '/team', label: 'Team', icon: UsersThree, count: '' }

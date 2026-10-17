@@ -7,6 +7,7 @@ import {
   addDays, BILLING, COSTS, costed, costOf, marginColor, marginOf, money, STATUS, today, type Job
 } from '@/lib/crm';
 import { CommitInput, EmergencySeg, pickerSummary, ServicePicker, TaskRow } from '@/components/ui';
+import { JobDocuments } from '@/components/docs-ui';
 
 export default function JobDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { jobs, ready } = useCrm();
@@ -161,6 +162,8 @@ function Body({ job: j, onClose }: { job: Job; onClose: () => void }) {
           </div>
         </section>
       )}
+
+      <JobDocuments jobId={j.id} />
 
       <section className="section">
         <h5>Tasks</h5>
