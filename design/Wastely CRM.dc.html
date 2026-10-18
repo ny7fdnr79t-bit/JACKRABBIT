@@ -14,6 +14,7 @@
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 <style>html{color-scheme:dark} body{margin:0;background:var(--color-bg)} a{color:var(--color-accent)} a:hover{color:var(--color-accent-400)} select.input{appearance:auto} input[type=date].input{color-scheme:dark}</style>
 </helmet>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#161826"></rect><text x="50" y="64" text-anchor="middle" font-family="Inter,sans-serif" font-size="44" font-weight="500" fill="#9184d9">W</text></svg></template>
 <div style="display:grid;grid-template-columns:212px minmax(0,1fr);min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
   <aside style="position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:var(--space-8);padding:var(--space-6) var(--space-4);background:linear-gradient(180deg,var(--color-surface),var(--color-bg))">
     <div style="display:flex;align-items:center;gap:10px;padding:0 var(--space-2)">
@@ -30,6 +31,7 @@
       </sc-for>
     </nav>
     <div style="margin-top:auto;display:flex;flex-direction:column;gap:var(--space-3);padding:0 var(--space-2)">
+      <button class="btn btn-primary" onClick="{{ ai.toggle }}" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:8px"><i class="ph ph-sparkle"></i>Ask AI</span><span style="font-size:11px;color:var(--color-neutral-400)">⌘J</span></button>
       <div style="display:flex;align-items:center;gap:10px">
         <span style="width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:12px;border:1px solid var(--color-accent);color:var(--color-accent-200)">{{ me.initials }}</span>
         <div style="min-width:0;display:flex;flex-direction:column">
@@ -40,7 +42,7 @@
       <select class="input" aria-label="Switch profile" value="{{ meId }}" onChange="{{ onMe }}" style="min-height:30px;font-size:12px;padding:4px 8px">
         <sc-for list="{{ meOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
       </select>
-      <button class="btn btn-ghost" onClick="{{ resetData }}" style="justify-content:flex-start;font-size:12px;color:var(--color-neutral-400)"><i class="ph ph-arrow-counter-clockwise"></i>Reset demo data</button>
+      <button class="btn btn-ghost" onClick="{{ resetData }}" style="justify-content:flex-start;font-size:12px;color:var(--color-neutral-400)"><i class="ph ph-trash"></i>Clear all data</button>
     </div>
   </aside>
 
@@ -546,7 +548,16 @@
                   <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span>{{ mb.name }}</span><span style="color:var(--color-neutral-400)">{{ mb.value }}</span></div>
                 </sc-for>
               </div>
-              <button class="btn btn-secondary" onClick="{{ webInt.toggleConnect }}" style="align-self:flex-start">{{ webInt.connectLabel }}</button>
+              <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+                <h6 style="margin:0;color:var(--color-neutral-400)">Connection</h6>
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;flex-wrap:wrap"><span>Endpoint</span><code style="color:var(--color-neutral-300);font-size:12px;word-break:break-all">{{ webInt.endpoint }}</code></div>
+                <label class="field" style="margin:0"><span style="font-size:13px">CRM access key</span><input class="input" type="password" autocomplete="off" value="{{ webInt.key }}" onChange="{{ webInt.onKey }}" placeholder="Same value as CRM_KEY in Vercel"></input></label>
+                <div style="font-size:12px;color:var(--color-neutral-400)">{{ webInt.syncText }}</div>
+              </div>
+              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+                <button class="btn btn-primary" onClick="{{ webInt.checkNow }}"><i class="ph ph-arrows-clockwise"></i>Check now</button>
+                <button class="btn btn-secondary" onClick="{{ webInt.toggleConnect }}">{{ webInt.connectLabel }}</button>
+              </div>
             </section>
           </div>
         </sc-if>
@@ -583,6 +594,9 @@
       <div class="field" style="grid-column:1 / -1"><label>Client contact</label><input class="input" value="{{ dj.contact }}" onChange="{{ dj.onContact }}"></input></div>
       <div class="field"><label>Contact email</label><input class="input" type="email" value="{{ dj.contactEmail }}" onChange="{{ dj.onContactEmail }}"></input></div>
       <div class="field"><label>Contact phone</label><input class="input" type="tel" value="{{ dj.contactPhone }}" onChange="{{ dj.onContactPhone }}"></input></div>
+      <sc-for list="{{ dj.customFields }}" as="cf" hint-placeholder-count="0">
+        <div class="field"><label>{{ cf.label }}</label><input class="input" type="{{ cf.type }}" value="{{ cf.val }}" onChange="{{ cf.onChange }}"></input></div>
+      </sc-for>
     </div>
 
     <section style="display:flex;flex-direction:column;gap:var(--space-3)">
@@ -738,7 +752,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
         <div class="field"><label>Name</label><input class="input" required="{{ true }}" value="{{ pdraft.name }}" onChange="{{ pf.name }}"></input></div>
         <div class="field"><label>Role</label><select class="input" value="{{ pdraft.role }}" onChange="{{ pf.role }}"><sc-for list="{{ roleOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></div>
-        <div class="field"><label>Work email</label><input class="input" type="email" required="{{ true }}" placeholder="name@wastely.ca" value="{{ pdraft.email }}" onChange="{{ pf.email }}"></input></div>
+        <div class="field"><label>Work email</label><input class="input" type="email" placeholder="name@wastely.ca (optional for crew)" value="{{ pdraft.email }}" onChange="{{ pf.email }}"></input></div>
         <div class="field"><label>Quo number</label><input class="input" type="tel" placeholder="(416) 555-0100" value="{{ pdraft.phone }}" onChange="{{ pf.phone }}"></input></div>
         <div class="field" style="grid-column:1 / -1"><label>Email signature</label><textarea class="input" value="{{ pdraft.signature }}" onChange="{{ pf.signature }}" style="min-height:70px"></textarea></div>
       </div>
@@ -776,16 +790,66 @@
       <button class="btn btn-primary" onClick="{{ cv.end }}" style="margin-left:auto"><i class="ph ph-phone-x"></i>End call</button>
     </div>
   </div>
+</sc-if>
+
+<sc-if value="{{ ai.open }}" hint-placeholder-val="{{ false }}">
+  <aside style="position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);z-index:35;background:var(--color-surface);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;color:var(--color-text);font-family:var(--font-body)">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:var(--space-5) var(--space-6)">
+      <div style="display:flex;align-items:center;gap:10px"><i class="ph ph-sparkle" style="font-size:18px;color:var(--color-accent)"></i><span style="font-size:15px;font-weight:500">Assistant</span></div>
+      <div style="display:flex;gap:var(--space-2);align-items:center">
+        <sc-if value="{{ ai.hasMsgs }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ ai.clear }}" style="font-size:12px">Clear chat</button></sc-if>
+        <button class="btn btn-secondary btn-icon" onClick="{{ ai.close }}" aria-label="Close assistant"><i class="ph ph-x" style="font-size:16px"></i></button>
+      </div>
+    </header>
+    <div ref="{{ ai.listRef }}" style="flex:1;min-height:0;overflow-y:auto;padding:var(--space-2) var(--space-6) var(--space-6);display:flex;flex-direction:column;gap:var(--space-5)">
+      <sc-if value="{{ ai.empty }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:var(--space-5);padding-top:var(--space-4)">
+          <p style="margin:0;font-size:14px;line-height:1.5;color:var(--color-neutral-300);text-wrap:pretty">Ask about deals, margins and tasks, or tell me what to change. I can add pipeline stages and job fields, create deals and tasks, and update jobs. Every change can be undone.</p>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ ai.suggestions }}" as="sg" hint-placeholder-count="4">
+              <button onClick="{{ sg.ask }}" style="text-align:left;padding:9px 12px;border:1px solid var(--color-divider);border-radius:var(--radius-md);background:transparent;color:var(--color-neutral-200);font:inherit;font-size:13px;cursor:pointer" style-hover="border-color:var(--color-accent-700);background:color-mix(in srgb, var(--color-accent) 8%, transparent)">{{ sg.text }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-for list="{{ ai.msgs }}" as="m" hint-placeholder-count="0">
+        <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+          <div style="align-self:flex-end;max-width:85%;padding:8px 12px;border-radius:var(--radius-md);background:color-mix(in srgb, var(--color-accent) 16%, transparent);color:var(--color-accent-100);font-size:14px;line-height:1.45;white-space:pre-wrap">{{ m.text }}</div>
+        </sc-if>
+        <sc-if value="{{ m.isAssistant }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="font-size:14px;line-height:1.5;color:{{ m.color }};white-space:pre-wrap;text-wrap:pretty">{{ m.text }}</div>
+            <sc-if value="{{ m.hasChanges }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);background:var(--color-bg)">
+                <sc-for list="{{ m.changes }}" as="c" hint-placeholder-count="1">
+                  <div style="display:flex;gap:8px;font-size:13px;line-height:1.4;color:{{ m.changeColor }}"><i class="ph {{ m.changeIcon }}" style="color:var(--color-accent);margin-top:2px"></i><span>{{ c.t }}</span></div>
+                </sc-for>
+                <sc-if value="{{ m.canUndo }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ m.undo }}" style="align-self:flex-start;font-size:12px"><i class="ph ph-arrow-counter-clockwise"></i>Undo</button></sc-if>
+                <sc-if value="{{ m.undone }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-neutral-500)">Undone</span></sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </sc-for>
+      <sc-if value="{{ ai.busy }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--color-neutral-400)">Thinking…</div></sc-if>
+    </div>
+    <form onSubmit="{{ ai.send }}" style="display:flex;flex-direction:column;gap:var(--space-2);padding:var(--space-4) var(--space-6) var(--space-6)">
+      <textarea class="input" placeholder="Ask, or tell the CRM what to do…" value="{{ ai.input }}" onChange="{{ ai.onInput }}" onKeyDown="{{ ai.onKey }}" style="min-height:72px;resize:none"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--color-neutral-500)">Enter to send · Shift+Enter for a new line</span>
+        <button class="btn btn-primary" type="submit" disabled="{{ ai.cantSend }}"><i class="ph ph-paper-plane-tilt"></i>Send</button>
+      </div>
+    </form>
+  </aside>
 </sc-if></x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;marginTarget&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:30,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Business rules&quot;},&quot;showLost&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pipeline&quot;},&quot;defaultScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;overview&quot;,&quot;options&quot;:[&quot;overview&quot;,&quot;pipeline&quot;,&quot;contracts&quot;,&quot;tasks&quot;,&quot;web&quot;,&quot;inbox&quot;,&quot;team&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;}}">
-const KEY = 'wastely-crm-v2';
-const TODAY = '2026-09-24';
+const KEY = 'wastely-crm-v3';
+const TODAY = (d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'))(new Date());
+const localAt = iso => { const d = new Date(iso); if (isNaN(d)) return TODAY + 'T00:00'; const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
 const STAGES = ['Lead', 'Site visit', 'Quoted', 'Negotiation', 'Won', 'Lost'];
 const OPEN = ['Lead', 'Site visit', 'Quoted', 'Negotiation'];
 const COSTS = [['labour', 'Labour'], ['equipment', 'Equipment rental'], ['disposal', 'Disposal & tipping'], ['hauling', 'Hauling'], ['permits', 'Permits & fees']];
-const CREW = [['Luis Ortega', 'Foreman'], ['Tom Becker', 'Foreman'], ['Sam Whitfield', 'Operator'], ['Jen Tran', 'Operator'], ['Kyle Brandt', 'Driver'], ['Aiden Cho', 'Driver'], ['Omar Haddad', 'Labourer'], ['Rosa Lima', 'Labourer'], ['Nate Kowalski', 'Labourer'], ['Beth Morin', 'Labourer']];
-const OWNERS = ['Priya Nair', 'Marcus Bell', 'Dana Okafor'];
-const STAFF = [...OWNERS, 'Ravi Sethi', 'Helen Park'];
+const CREW_ROLES = ['Foreman', 'Operator', 'Driver', 'Labourer', 'Field'];
 const SERVICE_GROUPS = [
   { name: 'Cleanouts & Disposal', items: ['Estate Cleanout', 'Community Housing Turnover', 'Bulk Waste & Load-Out', 'Warehouse & Facility Clear-Outs', 'Recycling & Material Diversion'] },
   { name: 'Hazardous & Regulated', items: ['Commercial Hazardous Waste', 'Oil, Fuel & Chemical Disposal', 'Lithium Battery Disposal', 'E-Waste & Regulated Electronics'] },
@@ -794,57 +858,16 @@ const SERVICE_GROUPS = [
 ];
 const ALL_SERVICES = SERVICE_GROUPS.flatMap(g => g.items);
 const MIN_JOB = 5000;
-const SEED_SERVICES = {
-  j1: ['Warehouse & Facility Clear-Outs', 'Industrial Dismantling & Decommissioning', 'Recycling & Material Diversion'],
-  j2: ['Land Clearing & Site Prep'], j3: ['Estate Cleanout'],
-  j4: ['Industrial Dismantling & Decommissioning', 'Oil, Fuel & Chemical Disposal'],
-  j5: ['Warehouse & Facility Clear-Outs', 'Interior Strip-Out', 'E-Waste & Regulated Electronics'],
-  j6: ['Land Clearing & Site Prep'], j7: ['Bulk Waste & Load-Out', 'Asbestos Removal'],
-  j8: ['Bulk Waste & Load-Out', 'Oil, Fuel & Chemical Disposal'],
-  j9: ['Industrial Dismantling & Decommissioning', 'Commercial Hazardous Waste'], j10: ['Estate Cleanout'],
-  j11: ['Land Clearing & Site Prep'], j12: ['Land Clearing & Site Prep'],
-  j13: ['Industrial Dismantling & Decommissioning', 'Commercial Hazardous Waste', 'E-Waste & Regulated Electronics'],
-  j14: ['Land Clearing & Site Prep', 'Commercial Hazardous Waste'],
-  j15: ['Community Housing Turnover', 'Mould Removal']
-};
-const ROLES = ['Account manager', 'Dispatch', 'Billing', 'Leadership', 'Field'];
-const SEED_TEAM = [
-  { id: 'u1', name: 'Priya Nair', role: 'Account manager', email: 'priya@wastely.ca', phone: '(416) 555-0142', signature: 'Priya Nair\nAccount Manager, Wastely' },
-  { id: 'u2', name: 'Marcus Bell', role: 'Account manager', email: 'marcus@wastely.ca', phone: '(416) 555-0157', signature: 'Marcus Bell\nAccount Manager, Wastely' },
-  { id: 'u3', name: 'Dana Okafor', role: 'Account manager', email: 'dana@wastely.ca', phone: '(416) 555-0163', signature: 'Dana Okafor\nAccount Manager, Wastely' },
-  { id: 'u4', name: 'Ravi Sethi', role: 'Dispatch', email: 'ravi@wastely.ca', phone: '(416) 555-0171', signature: 'Ravi Sethi\nDispatch, Wastely' },
-  { id: 'u5', name: 'Helen Park', role: 'Billing', email: 'helen@wastely.ca', phone: '', signature: 'Helen Park\nBilling, Wastely' },
-  { id: 'u6', name: 'Jordan Wells', role: 'Leadership', email: 'jordan@wastely.ca', phone: '(416) 555-0100', signature: 'Jordan Wells\nOperations Director, Wastely' }
-];
+const ROLES = ['Account manager', 'Dispatch', 'Billing', 'Leadership', 'Foreman', 'Operator', 'Driver', 'Labourer', 'Field'];
+const SEED_TEAM = [{ id: 'u1', name: 'Wastely', role: 'Leadership', email: 'go@wastely.ca', phone: '', signature: 'Wastely' }];
 const SEED_INTEGRATIONS = {
-  email: { connected: true, provider: 'Google Workspace', autoLog: true, signature: true },
-  quo: { connected: true, record: true, transcribe: true, summarize: true, announce: true }
+  email: { connected: false, provider: 'Google Workspace', autoLog: true, signature: true },
+  quo: { connected: false, record: true, transcribe: true, summarize: true, announce: true }
 };
 const C = (id, jobId, kind, dir, userId, at, extra) => Object.assign({ id, jobId, kind, dir, userId, at }, extra || {});
-function seedComms() {
-  return [
-    C('c1', 'j1', 'email', 'out', 'u1', '2026-09-19T10:04', { subject: 'Bldg 2 schedule and bin placement', body: 'Hi Alan,\n\nWe finish racking removal in Bldg 1 by Wednesday and move into Bldg 2 on Thursday. We will need the east dock clear for three 40-yard roll-offs. Can you confirm the dock is available from 7 am?\n\nThanks,\nPriya' }),
-    C('c2', 'j1', 'email', 'in', null, '2026-09-19T14:31', { subject: 'Re: Bldg 2 schedule and bin placement', body: 'Priya, the east dock is yours from 7. Security will have the gate open. The tenant in unit 4 asked that trucks avoid the north lane before 9.\n\nAlan' }),
-    C('c3', 'j1', 'call', 'out', 'u1', '2026-09-23T15:12', { duration: 262, recorded: true, summary: 'Alan confirmed dock access for Thursday. He asked for a disposal manifest for the refrigeration units and weigh tickets with the next invoice. Priya will send both by Friday.', transcript: [['Priya', 'Hi Alan, it’s Priya from Wastely. Quick call about Thursday.'], ['Alan', 'Sure. Are we still good for the east dock?'], ['Priya', 'Yes, three roll-offs arriving at 7. Luis will be the foreman on site.'], ['Alan', 'Great. Our insurer wants a disposal manifest for the refrigeration units. Can you send that?'], ['Priya', 'I’ll include the manifest and the weigh tickets with the next invoice.'], ['Alan', 'Perfect. Friday works.']] }),
-    C('c4', 'j1', 'sms', 'in', null, '2026-09-24T07:48', { body: 'Gate is open. Trucks can come in through the south entrance.' }),
-    C('c5', 'j1', 'sms', 'out', 'u4', '2026-09-24T07:52', { body: 'Thanks Alan. First roll-off is 10 minutes out.' }),
-    C('c6', 'j5', 'email', 'in', null, '2026-09-23T16:20', { subject: 'Contract redlines, Bldg B', body: 'Hi Priya,\n\nAttached are our redlines. The main items are the payment schedule (we would like 20/40/40) and a cap on e-waste disposal fees. Can we talk this week?\n\nMaya' }),
-    C('c7', 'j7', 'sms', 'out', 'u3', '2026-09-21T11:05', { body: 'Hi Grace, can we get on site Tuesday to confirm access and the power shutoff?' }),
-    C('c8', 'j7', 'sms', 'in', null, '2026-09-21T11:40', { body: 'Tuesday is tight. Could Wednesday morning work?' }),
-    C('c9', 'j15', 'call', 'in', 'u3', '2026-09-22T22:47', { duration: 418, recorded: true, summary: 'After-hours emergency: a burst pipe flooded six ground-floor units. Carla needs units stripped and mould-treated before tenants return. Dana booked a crew for 7 am and estimated $21,500.', transcript: [['Carla', 'Hi, this is Carla at Northfield Housing. We have a burst pipe and six units flooded.'], ['Dana', 'I’m sorry to hear that. Is the water shut off?'], ['Carla', 'Yes, but the drywall and flooring are soaked and tenants are waiting to move back.'], ['Dana', 'We can have a crew there at 7 tomorrow for strip-out and mould treatment.'], ['Carla', 'Please do. What will it cost?'], ['Dana', 'For six units I’d estimate twenty-one five. I’ll email the quote tonight.']] }),
-    C('c10', 'j15', 'email', 'out', 'u3', '2026-09-22T23:15', { subject: 'Emergency quote, Northfield units 101–106', body: 'Hi Carla,\n\nAs discussed, our quote for strip-out, disposal and mould treatment across six units is $21,500. The crew arrives at 7 am.\n\nDana' }),
-    C('c11', 'j2', 'sms', 'in', null, '2026-09-23T16:02', { body: 'Sofia here. Can the crew leave the tree line along the north fence?' })
-  ];
-}
+function seedComms() { return []; }
 const S = (id, form, at, page, fields) => ({ id, form, at, page, fields, status: 'new', jobId: null });
-function seedSubmissions() {
-  return [
-    S('w1', 'Quote request', '2026-09-24T08:41', 'https://wastely.ca/estate-cleanout.dc.html', { name: 'Melissa Grant', phone: '(613) 555-0147', email: 'melissa.grant@gmail.com', location: 'Kanata, Ottawa', services: 'Estate Cleanout', 'Property size': '1,000–2,500 sq ft', 'How full is it?': 'Packed — full to the walls', Access: 'Ground level, truck at the door', When: 'Within a week', details: 'My mother’s 3-bedroom bungalow. Full basement and a packed garage. We list in three weeks.', confirmed: 'I understand this job is budgeted around $7,450 – $10,000 and want to proceed with a final quote.' }),
-    S('w2', 'Contact', '2026-09-24T06:12', 'https://wastely.ca/Contact.dc.html', { Name: 'Derek Ahn', Company: 'Ridgeline Property Management', Email: 'dahn@ridgelinepm.ca', Phone: '(416) 555-0193', 'Site location': 'Scarborough', Timeline: 'As soon as possible, tenant has moved out', 'Project details': 'Two units with visible mould behind the drywall after a leak. Need strip-out and remediation before we re-rent.', services: 'Urgent — needed now, Mould removal, Interior strip-out' }),
-    S('w3', 'Quote request', '2026-09-23T17:05', 'https://wastely.ca/industrial-dismantling.dc.html', { name: 'Kevin Laroche', phone: '(613) 555-0122', email: 'kevin@larochemfg.ca', location: 'Kingston', services: 'Industrial Dismantling & Decommissioning, Oil, Fuel & Chemical Disposal', 'Property size': 'Over 10,000 sq ft', 'How full is it?': 'Normal contents', Access: 'Occupied or restricted site', When: 'Standard — two weeks or more', details: 'Closing our stamping line. Presses, conveyors and hydraulic oil to remove while the rest of the plant keeps running.', confirmed: 'I understand this job is budgeted around $38,600 – $51,750 and want to proceed with a final quote.' }),
-    S('w4', 'Careers', '2026-09-23T12:30', 'https://wastely.ca/Careers.dc.html', { Name: 'Tyler Boucher', Email: 'tyler.b@outlook.com', Phone: '(343) 555-0175', Position: 'Labourer', Experience: 'Three years in demolition. WHMIS and Working at Heights certified. Own truck.' })
-  ];
-}
+function seedSubmissions() { return []; }
 const norm = x => String(x || '').toLowerCase().replace(/[^a-z]/g, '');
 const mapService = label => {
   const n = norm(label);
@@ -854,14 +877,7 @@ const mapService = label => {
 const pick = (f, ...keys) => { for (const key of keys) { const hit = Object.keys(f).find(x => x.toLowerCase() === key.toLowerCase()); if (hit && f[hit]) return f[hit]; } return ''; };
 const parseRange = txt => { const m = String(txt || '').match(/\$([\d,]+)\s*[–-]\s*\$([\d,]+)/); return m ? [+m[1].replace(/,/g, ''), +m[2].replace(/,/g, '')] : null; };
 const contactName = j => (j.contact || '').split(',')[0].trim() || j.client;
-function deriveContact(j, i) {
-  if (!j.contactEmail) {
-    const n = contactName(j).toLowerCase().replace(/[^a-z ]/g, '').split(' ').filter(Boolean);
-    const dom = j.client.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 20) + '.ca';
-    j.contactEmail = n.length > 1 ? n[0] + '.' + n[n.length - 1] + '@' + dom : 'info@' + dom;
-  }
-  if (!j.contactPhone) j.contactPhone = '(905) 555-0' + String(110 + i * 7).slice(-3);
-}
+function deriveContact(j) { if (!j.contactEmail) j.contactEmail = ''; if (!j.contactPhone) j.contactPhone = ''; }
 const mmss = sec => Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
 const fmtAt = at => {
   const d = new Date(at);
@@ -885,47 +901,7 @@ const J = (id, title, client, clientType, service, stage, value, c, owner, site,
 }, extra || {});
 const T = (id, title, jobId, assignee, due, type, done) => ({ id, title, jobId, assignee, due, type, done: !!done });
 
-function seed() {
-  const d = seed0();
-  d.jobs.push(J('j15', 'Flood-damaged unit turnover, 6 units', 'Northfield Community Housing', 'Property manager', '', 'Won', 21500, [7800, 2400, 3100, 1600, 600], 'Dana Okafor', '71 Northfield Ave, Brampton', 'Carla Mendes, Housing ops', { status: 'On site', billing: 'Not invoiced', start: '2026-09-23', end: '2026-09-26', crew: ['Nate Kowalski', 'Aiden Cho'], emergency: true }));
-  d.jobs.forEach(j => { j.services = SEED_SERVICES[j.id] || []; delete j.service; j.emergency = !!j.emergency; });
-  d.customServices = [];
-  return d;
-}
-function seed0() {
-  return {
-    jobs: [
-      J('j1', '120k sq ft warehouse decommission', 'Northgate Logistics', 'Industrial', 'Warehouse decommissioning', 'Won', 186000, [42000, 28500, 31200, 12800, 3400], 'Priya Nair', '6350 Airport Rd, Mississauga', 'Alan Reyes, Facilities', { status: 'On site', billing: 'Deposit invoiced', start: '2026-09-08', end: '2026-10-17', crew: ['Luis Ortega', 'Sam Whitfield', 'Omar Haddad', 'Kyle Brandt'] }),
-      J('j2', '14-acre lot clearing, Phase 2', 'Halton Ridge Developments', 'Developer', 'Land clearing', 'Won', 94500, [26000, 21500, 9800, 7400, 2100], 'Marcus Bell', 'Britannia Rd & 4th Line, Milton', 'Sofia Grant, Project lead', { status: 'On site', billing: 'Progress invoiced', start: '2026-09-15', end: '2026-10-03', crew: ['Tom Becker', 'Jen Tran', 'Rosa Lima'] }),
-      J('j3', 'Estate cleanout before listing', 'Crestview Realty', 'Realtor', 'Property cleanout', 'Won', 8900, [3200, 0, 1900, 900, 0], 'Dana Okafor', '418 Maple Grove Dr, Oakville', 'Kim Laurent, Listing agent', { status: 'Completed', billing: 'Paid', start: '2026-09-02', end: '2026-09-04', crew: ['Nate Kowalski', 'Aiden Cho'] }),
-      J('j4', 'Racking & refrigeration removal', 'Brampton Cold Storage', 'Industrial', 'Warehouse decommissioning', 'Won', 132000, [34000, 18000, 38500, 14000, 4200], 'Priya Nair', '40 Van Kirk Dr, Brampton', 'Derek Ho, Operations', { status: 'Scheduled', billing: 'Deposit invoiced', start: '2026-10-06', end: '2026-11-07', crew: ['Luis Ortega', 'Beth Morin'] }),
-      J('j5', 'Distribution centre decommission, Bldg B', 'Westway Distribution', 'Industrial', 'Warehouse decommissioning', 'Negotiation', 240000, [58000, 36000, 44000, 18500, 5200], 'Priya Nair', '2100 Steeles Ave W, Vaughan', 'Maya Chen, Real estate'),
-      J('j6', '3-lot clearing and grubbing', 'Maple & Finch Homes', 'Developer', 'Land clearing', 'Quoted', 36000, [9800, 8200, 3600, 2900, 900], 'Marcus Bell', 'Rutherford Rd, Vaughan', 'Joe Russo, Site super'),
-      J('j7', 'Demolition debris haul-out', 'Harbourline Properties', 'Property manager', 'Demolition debris', 'Site visit', 58000, [14000, 9000, 16500, 7800, 1200], 'Dana Okafor', '255 Wellington St N, Hamilton', 'Grace Oduya, Asset manager'),
-      J('j8', 'Shop and yard cleanout', 'Keele Street Auto', 'Commercial', 'Property cleanout', 'Lead', 12000, [3800, 1200, 2600, 1400, 0], 'Dana Okafor', 'Keele St, Toronto', 'Frank Deluca, Owner'),
-      J('j9', 'Portfolio decommissioning, 3 sites', 'Summit Industrial REIT', 'Industrial', 'Warehouse decommissioning', 'Lead', 410000, [0, 0, 0, 0, 0], 'Priya Nair', 'Mississauga, Brampton, Milton', 'Owen Park, Portfolio manager'),
-      J('j10', 'Pre-listing cleanout', 'Lakeshore Realty Group', 'Realtor', 'Property cleanout', 'Quoted', 6400, [2200, 0, 1300, 700, 0], 'Dana Okafor', '88 Lakeshore Rd E, Mississauga', 'Tara Singh, Broker'),
-      J('j11', 'Subdivision clearing', 'Ironwood Builders', 'Developer', 'Land clearing', 'Lost', 72000, [21000, 17500, 7200, 5600, 1800], 'Marcus Bell', 'Caledon', 'Brent Cole, Land acquisition'),
-      J('j12', 'Orchard removal and grading', 'Greenbelt Farms', 'Commercial', 'Land clearing', 'Negotiation', 48000, [12500, 11800, 4200, 3600, 1500], 'Marcus Bell', 'Heritage Rd, Caledon', 'Anne Vos, Owner'),
-      J('j13', 'Print plant decommission', 'Dufferin Print Co.', 'Industrial', 'Warehouse decommissioning', 'Site visit', 120000, [0, 0, 0, 0, 0], 'Priya Nair', 'Dufferin St, Toronto', 'Leo Marsh, Plant manager'),
-      J('j14', 'Soil and debris remediation', 'Queensway Lands Inc.', 'Developer', 'Site remediation', 'Quoted', 164000, [38000, 29000, 41000, 16000, 7800], 'Marcus Bell', 'The Queensway, Etobicoke', 'Rita Alves, Development')
-    ],
-    tasks: [
-      T('t1', 'Send revised quote with tipping fees', 'j6', 'Marcus Bell', '2026-09-23', 'Quote'),
-      T('t2', 'Book three 40-yd roll-offs for Bldg 2', 'j1', 'Ravi Sethi', '2026-09-24', 'Dispatch'),
-      T('t3', 'Invoice progress draw #2', 'j2', 'Helen Park', '2026-09-26', 'Invoice'),
-      T('t4', 'Walkthrough with plant manager', 'j13', 'Priya Nair', '2026-09-25', 'Visit'),
-      T('t5', 'Follow up on contract redlines', 'j5', 'Priya Nair', '2026-09-24', 'Call'),
-      T('t6', 'Schedule crew and equipment for Oct 6 start', 'j4', 'Ravi Sethi', '2026-09-30', 'Dispatch'),
-      T('t7', 'Confirm site access and power shutoff', 'j7', 'Dana Okafor', '2026-09-22', 'Visit'),
-      T('t8', 'Intro call with portfolio manager', 'j9', 'Priya Nair', '2026-09-29', 'Call'),
-      T('t9', 'Send deposit invoice', 'j4', 'Helen Park', '2026-09-18', 'Invoice', true),
-      T('t10', 'Quote follow-up call', 'j10', 'Dana Okafor', '2026-10-01', 'Call'),
-      T('t11', 'File tree removal permit', 'j12', 'Marcus Bell', '2026-09-27', 'Task'),
-      T('t12', 'Final walkthrough photos to client', 'j3', 'Dana Okafor', '2026-09-05', 'Visit', true)
-    ]
-  };
-}
+function seed() { return { jobs: [], tasks: [], customServices: [] }; }
 
 const money = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-CA');
 const k = n => n >= 1e6 ? '$' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/\.?0+$/, '') + 'M' : n >= 1000 ? '$' + Math.round(n / 1000) + 'k' : '$' + Math.round(n);
@@ -935,6 +911,37 @@ const days = (a, b) => Math.round((dt(b) - dt(a)) / 86400000);
 const addDays = (d, n) => { const x = dt(d); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
 const initials = n => n.split(' ').map(p => p[0]).join('');
 const opts = a => a.map(v => ({ v }));
+const PROTECTED = ['Won', 'Lost'];
+const SCREENS = ['overview', 'pipeline', 'contracts', 'tasks', 'web', 'inbox', 'team'];
+const eq = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+const clean = v => String(v || '').trim().slice(0, 80);
+const AI_SYSTEM = `You are the assistant built into Wastely CRM, used by a waste management, cleanout and abatement company. Amounts are dollars. Today is ${TODAY}.
+You can answer questions about the CRM data and change it. Be brief and specific; use plain sentences, no markdown headings or tables. When asked to draft a message, write it in full in "reply".
+Always respond with ONLY a JSON object, no code fences:
+{"reply": "what you say to the user", "actions": [ ... ]}
+Use "actions": [] when nothing should change. Only include actions the user asked for. Use exact job and task ids from the data.
+Available actions:
+{"type":"add_stage","name":"Site Visit Booked","before":"Quoted"}   (before is optional; default is before Won)
+{"type":"rename_stage","from":"Lead","to":"New lead"}
+{"type":"remove_stage","name":"Negotiation","moveTo":"Quoted"}   (Won and Lost can't be renamed or removed)
+{"type":"add_field","label":"Bin size","fieldType":"text|number|date"}   (adds a custom field to every job)
+{"type":"remove_field","label":"Bin size"}
+{"type":"set_margin_target","value":35}
+{"type":"add_service","name":"Hoarding cleanup"}
+{"type":"create_job","client":"","title":"","clientType":"","stage":"","value":0,"services":[],"owner":"","site":"","contact":"","contactEmail":"","contactPhone":"","emergency":false}
+{"type":"update_job","id":"j123","changes":{"stage":"","value":0,"owner":"","status":"","billing":"","start":"YYYY-MM-DD","end":"YYYY-MM-DD","site":"","contact":"","contactEmail":"","contactPhone":"","title":"","client":"","services":[],"crew":[],"emergency":false,"costs":{"labour":0,"equipment":0,"disposal":0,"hauling":0,"permits":0},"fields":{"Bin size":"20 yd"}}}   (include only keys that change)
+{"type":"delete_job","id":"j123"}
+{"type":"add_task","title":"","jobId":"","assignee":"","due":"YYYY-MM-DD","taskType":"Call|Visit|Dispatch|Invoice|Quote|Task"}
+{"type":"complete_task","id":"t123"}
+{"type":"go_to","screen":"overview|pipeline|contracts|tasks|web|inbox|team"}
+{"type":"open_job","id":"j123"}
+If the user asks for something these actions can't do (for example a new screen or a layout change), say so plainly and suggest asking for it as an app update.`;
+const parseAI = txt => {
+  const t = String(txt || '').replace(/^\s*```(json)?/i, '').replace(/```\s*$/, '');
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) { try { const o = JSON.parse(t.slice(a, b + 1)); if (o && typeof o === 'object') return { reply: String(o.reply || ''), actions: Array.isArray(o.actions) ? o.actions : [] }; } catch (e) {} }
+  return { reply: t.trim(), actions: [] };
+};
 
 class Component extends DCLogic {
   constructor(props) {
@@ -944,18 +951,25 @@ class Component extends DCLogic {
     const d = saved && saved.jobs ? saved : seed();
     d.jobs.forEach((j, i) => { if (!j.services) j.services = j.service ? [j.service] : []; deriveContact(j, i); });
     this.timelineRef = React.createRef();
+    this.aiListRef = React.createRef();
     this.state = {
       jobs: d.jobs, tasks: d.tasks, customServices: d.customServices || [], customNew: '', customJob: '', screen: props.defaultScreen || 'overview',
       openId: null, draft: null, dropCol: null, cFilter: 'All', tFilter: 'Everyone',
-      nt: { title: '', jobId: '', assignee: 'Priya Nair', due: TODAY }, drawerTask: '',
-      team: d.team || SEED_TEAM, meId: d.meId || 'u1', comms: d.comms || seedComms(),
+      nt: { title: '', jobId: '', assignee: ((d.team || SEED_TEAM)[0] || {}).name || '', due: TODAY }, drawerTask: '',
+      team: d.team || SEED_TEAM, meId: d.meId || (d.team || SEED_TEAM)[0].id, comms: d.comms || seedComms(),
       integrations: { ...SEED_INTEGRATIONS, web: { connected: true, callbackTask: true, emailCopy: true }, ...(d.integrations || {}) }, read: d.read || {},
-      submissions: d.submissions || seedSubmissions(), wFilter: 'New',
+      submissions: d.submissions || seedSubmissions(), wFilter: 'New', formsKey: d.formsKey || '', sync: { state: 'idle', at: '', msg: '' },
       threadId: null, inboxQ: '', composeMode: 'email', compose: { subject: '', body: '' },
-      openTx: {}, playing: null, call: null, settingsTab: 'Profiles', profileDraft: null
+      openTx: {}, playing: null, call: null, settingsTab: 'Profiles', profileDraft: null,
+      config: { stages: [...STAGES], fields: [], marginTarget: null, ...(d.config || {}) },
+      ai: { open: false, input: '', busy: false, msgs: [] }
     };
   }
   componentDidMount() {
+    this.onKeyAI = e => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'j') { e.preventDefault(); this.setState(st => ({ ai: { ...st.ai, open: !st.ai.open } })); } };
+    window.addEventListener('keydown', this.onKeyAI);
+    this.pullForms();
+    this.pullT = setInterval(() => this.pullForms(), 60000);
     this.tick = setInterval(() => {
       const st = this.state;
       if (st.playing) {
@@ -965,22 +979,184 @@ class Component extends DCLogic {
       } else if (st.call && st.call.phase === 'live') this.forceUpdate();
     }, 500);
   }
-  componentWillUnmount() { clearInterval(this.tick); clearTimeout(this.ringT); }
-  componentDidUpdate(pp, ps) {
+  componentWillUnmount() { window.removeEventListener('keydown', this.onKeyAI); clearInterval(this.tick); clearInterval(this.pullT); clearTimeout(this.ringT); }
+  async pullForms() {
+    const st = this.state;
+    if (!st.integrations.web.connected) return;
+    if (!/^https?:$/.test(location.protocol)) return this.setState({ sync: { state: 'error', at: '', msg: 'Open the deployed CRM to receive submissions.' } });
+    if (!st.formsKey) return this.setState({ sync: { state: 'error', at: '', msg: 'Enter the CRM access key to start receiving submissions.' } });
+    this.setState({ sync: { ...st.sync, state: 'checking' } });
+    try {
+      const r = await fetch('/api/forms', { headers: { 'x-crm-key': st.formsKey }, cache: 'no-store' });
+      if (r.status === 404) throw new Error('No /api/forms endpoint on this deployment.');
+      if (r.status === 401) throw new Error('Access key doesn’t match CRM_KEY on the server.');
+      if (!r.ok) throw new Error('Server error ' + r.status + '.');
+      const data = await r.json();
+      const incoming = (data.submissions || []).filter(x => x && x.id && x.fields);
+      this.setState(s2 => {
+        const have = new Set(s2.submissions.map(x => x.id));
+        const add = incoming.filter(x => !have.has(x.id)).map(x => ({ id: x.id, form: x.form || 'Website form', at: localAt(x.submittedAt), page: x.page || '', fields: x.fields, status: 'new', jobId: null }));
+        return { submissions: add.length ? [...s2.submissions, ...add] : s2.submissions, sync: { state: 'ok', at: new Date().toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }), msg: '' } };
+      });
+    } catch (e) {
+      this.setState({ sync: { state: 'error', at: '', msg: e.message || 'Couldn’t reach /api/forms.' } });
+    }
+  }
+  componentDidUpdate() {
     const s = this.state;
-    const keys = ['jobs', 'tasks', 'customServices', 'team', 'meId', 'comms', 'integrations', 'read', 'submissions'];
+    const ps = this._last || {};
+    this._last = s;
+    const keys = ['jobs', 'tasks', 'customServices', 'team', 'meId', 'comms', 'integrations', 'read', 'submissions', 'formsKey', 'config'];
     if (keys.some(key => ps[key] !== s[key])) {
       try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(keys.map(key => [key, s[key]])))); } catch (e) {}
     }
     const el = this.timelineRef.current;
     if (el && (ps.threadId !== s.threadId || ps.comms !== s.comms || ps.screen !== s.screen)) el.scrollTop = el.scrollHeight;
+    const al = this.aiListRef.current;
+    if (al && ps.ai && (ps.ai.msgs !== s.ai.msgs || ps.ai.busy !== s.ai.busy || !ps.ai.open)) al.scrollTop = al.scrollHeight;
+  }
+  aiContext() {
+    const s = this.state;
+    const cost = j => COSTS.reduce((a, [ck]) => a + (+j.costs[ck] || 0), 0);
+    return {
+      me: (s.team.find(u => u.id === s.meId) || {}).name, stages: s.config.stages,
+      customJobFields: s.config.fields.map(f => ({ label: f.label, type: f.type })),
+      marginTargetPct: s.config.marginTarget ?? this.props.marginTarget ?? 30, minJobValue: MIN_JOB,
+      clientTypes: CLIENT_TYPES, jobStatuses: STATUS, billingStates: BILLING,
+      services: [...ALL_SERVICES, ...s.customServices], team: s.team.map(u => ({ name: u.name, role: u.role })),
+      jobs: s.jobs.map(j => {
+        const c = cost(j);
+        const o = { id: j.id, client: j.client, title: j.title, clientType: j.clientType, stage: j.stage, value: j.value, costs: j.costs, margin: c && j.value ? Math.round((j.value - c) / j.value * 100) + '%' : 'not costed', owner: j.owner, services: j.services, site: j.site, contact: j.contact, contactEmail: j.contactEmail, contactPhone: j.contactPhone, emergency: !!j.emergency };
+        if (j.stage === 'Won') Object.assign(o, { status: j.status, billing: j.billing, start: j.start, end: j.end, crew: j.crew });
+        if (j.source) o.source = j.source;
+        const ex = s.config.fields.filter(f => (j.extra || {})[f.id]);
+        if (ex.length) o.fields = Object.fromEntries(ex.map(f => [f.label, j.extra[f.id]]));
+        return o;
+      }),
+      tasks: s.tasks.map(t => ({ id: t.id, title: t.title, jobId: t.jobId, assignee: t.assignee, due: t.due, type: t.type, done: t.done })),
+      newWebLeads: s.submissions.filter(x => x.status === 'new').length, currentScreen: s.screen, openJobId: s.openId
+    };
+  }
+  applyActions(actions) {
+    const st = this.state;
+    let { jobs, tasks, config, customServices } = st;
+    const nav = {}, done = [];
+    const names = st.team.map(u => u.name), meName = (st.team.find(u => u.id === st.meId) || st.team[0]).name;
+    const findJob = id => jobs.find(j => j.id === id);
+    const fid = label => (config.fields.find(f => eq(f.label, label)) || {}).id;
+    const uid = p => p + Date.now().toString(36) + done.length + Math.random().toString(36).slice(2, 5);
+    for (const a of actions) {
+      try {
+        if (a.type === 'add_stage') {
+          const name = clean(a.name); if (!name || config.stages.some(x => eq(x, name))) continue;
+          const arr = [...config.stages]; let at = a.before ? arr.findIndex(x => eq(x, a.before)) : -1; if (at < 0) at = arr.indexOf('Won'); if (at < 0) at = arr.length;
+          arr.splice(at, 0, name); config = { ...config, stages: arr }; done.push('Added stage “' + name + '”');
+        } else if (a.type === 'rename_stage') {
+          const from = config.stages.find(x => eq(x, a.from)), to = clean(a.to);
+          if (!from || !to || PROTECTED.includes(from) || config.stages.some(x => eq(x, to))) continue;
+          config = { ...config, stages: config.stages.map(x => x === from ? to : x) };
+          jobs = jobs.map(j => j.stage === from ? { ...j, stage: to } : j); done.push('Renamed stage “' + from + '” to “' + to + '”');
+        } else if (a.type === 'remove_stage') {
+          const name = config.stages.find(x => eq(x, a.name)); if (!name || PROTECTED.includes(name)) continue;
+          const rest = config.stages.filter(x => x !== name), to = rest.find(x => eq(x, a.moveTo)) || rest[0];
+          const n = jobs.filter(j => j.stage === name).length;
+          jobs = jobs.map(j => j.stage === name ? { ...j, stage: to } : j); config = { ...config, stages: rest };
+          done.push('Removed stage “' + name + '”' + (n ? ', moved ' + n + ' deal' + (n > 1 ? 's' : '') + ' to ' + to : ''));
+        } else if (a.type === 'add_field') {
+          const label = clean(a.label); if (!label || fid(label)) continue;
+          config = { ...config, fields: [...config.fields, { id: uid('f'), label, type: ['number', 'date'].includes(a.fieldType) ? a.fieldType : 'text' }] };
+          done.push('Added job field “' + label + '”');
+        } else if (a.type === 'remove_field') {
+          const f = config.fields.find(x => eq(x.label, a.label)); if (!f) continue;
+          config = { ...config, fields: config.fields.filter(x => x !== f) }; done.push('Removed job field “' + f.label + '”');
+        } else if (a.type === 'set_margin_target') {
+          const v = Math.round(+a.value); if (!(v > 0 && v < 100)) continue;
+          config = { ...config, marginTarget: v }; done.push('Margin target set to ' + v + '%');
+        } else if (a.type === 'add_service') {
+          const name = clean(a.name); if (!name || ALL_SERVICES.some(x => eq(x, name)) || customServices.some(x => eq(x, name))) continue;
+          customServices = [...customServices, name]; done.push('Added service “' + name + '”');
+        } else if (a.type === 'create_job') {
+          const id = uid('j');
+          const nj = J(id, clean(a.title), clean(a.client) || 'New client', CLIENT_TYPES.find(x => eq(x, a.clientType)) || CLIENT_TYPES[0], '', config.stages.find(x => eq(x, a.stage)) || config.stages[0], +a.value || 0, [0, 0, 0, 0, 0], names.find(x => eq(x, a.owner)) || meName, clean(a.site), clean(a.contact),
+            { services: Array.isArray(a.services) ? a.services.map(clean).filter(Boolean) : [], emergency: !!a.emergency, contactEmail: clean(a.contactEmail), contactPhone: clean(a.contactPhone) });
+          delete nj.service; jobs = [...jobs, nj]; done.push('Created deal for ' + nj.client);
+        } else if (a.type === 'update_job') {
+          const j = findJob(a.id); if (!j) continue;
+          const ch = a.changes || {}, patch = {};
+          ['title', 'client', 'site', 'contact', 'contactEmail', 'contactPhone', 'start', 'end'].forEach(key => { if (key in ch) patch[key] = clean(ch[key]); });
+          if ('value' in ch) patch.value = +ch.value || 0;
+          if ('emergency' in ch) patch.emergency = !!ch.emergency;
+          if (Array.isArray(ch.services)) patch.services = ch.services.map(clean).filter(Boolean);
+          if (Array.isArray(ch.crew)) patch.crew = ch.crew.map(c => names.find(x => eq(x, c))).filter(Boolean);
+          const pickOf = (list, v) => list.find(x => eq(x, v));
+          if (ch.stage && pickOf(config.stages, ch.stage)) patch.stage = pickOf(config.stages, ch.stage);
+          if (ch.owner && pickOf(names, ch.owner)) patch.owner = pickOf(names, ch.owner);
+          if (ch.clientType && pickOf(CLIENT_TYPES, ch.clientType)) patch.clientType = pickOf(CLIENT_TYPES, ch.clientType);
+          if (ch.status && pickOf(STATUS, ch.status)) patch.status = pickOf(STATUS, ch.status);
+          if (ch.billing && pickOf(BILLING, ch.billing)) patch.billing = pickOf(BILLING, ch.billing);
+          if (patch.stage === 'Won' && j.stage !== 'Won' && !patch.status) patch.status = 'Scheduled';
+          if (ch.costs && typeof ch.costs === 'object') { const cs = { ...j.costs }; COSTS.forEach(([ck]) => { if (ck in ch.costs) cs[ck] = +ch.costs[ck] || 0; }); patch.costs = cs; }
+          if (ch.fields && typeof ch.fields === 'object') { const ex = { ...(j.extra || {}) }; let any = false; Object.entries(ch.fields).forEach(([label, v]) => { const id = fid(label); if (id) { ex[id] = String(v ?? ''); any = true; } }); if (any) patch.extra = ex; }
+          const ks = Object.keys(patch); if (!ks.length) continue;
+          jobs = jobs.map(x => x.id === j.id ? { ...x, ...patch } : x);
+          done.push('Updated ' + j.client + ': ' + ks.map(key => key === 'extra' ? 'custom fields' : key.replace(/([A-Z])/g, ' $1').toLowerCase()).join(', '));
+        } else if (a.type === 'delete_job') {
+          const j = findJob(a.id); if (!j) continue;
+          jobs = jobs.filter(x => x.id !== j.id); tasks = tasks.filter(t => t.jobId !== j.id); if (st.openId === j.id) nav.openId = null;
+          done.push('Deleted deal for ' + j.client);
+        } else if (a.type === 'add_task') {
+          const title = clean(a.title); if (!title) continue;
+          const j = a.jobId && findJob(a.jobId);
+          tasks = [...tasks, T(uid('t'), title, j ? j.id : '', names.find(x => eq(x, a.assignee)) || (j ? j.owner : meName), /^\d{4}-\d\d-\d\d$/.test(a.due || '') ? a.due : TODAY, TASK_ICONS[a.taskType] ? a.taskType : 'Task')];
+          done.push('Added task “' + title + '”');
+        } else if (a.type === 'complete_task') {
+          const t = tasks.find(x => x.id === a.id); if (!t || t.done) continue;
+          tasks = tasks.map(x => x.id === t.id ? { ...x, done: true } : x); done.push('Completed “' + t.title + '”');
+        } else if (a.type === 'go_to') {
+          if (SCREENS.includes(a.screen)) { nav.screen = a.screen; nav.openId = null; }
+        } else if (a.type === 'open_job') {
+          if (findJob(a.id)) nav.openId = a.id;
+        }
+      } catch (e) {}
+    }
+    this.setState({ jobs, tasks, config, customServices, ...nav });
+    return done;
+  }
+  async askAI(raw) {
+    const st = this.state;
+    const text = String(raw ?? st.ai.input).trim(); if (!text || st.ai.busy) return;
+    const history = st.ai.msgs.filter(m => !m.error).slice(-12).map(m => ({ role: m.role, content: m.role === 'user' ? m.text : JSON.stringify({ reply: m.text, actionsApplied: m.changes || [] }) }));
+    this.setState(s2 => ({ ai: { ...s2.ai, input: '', busy: true, msgs: [...s2.ai.msgs, { id: 'u' + Date.now(), role: 'user', text }] } }));
+    const system = AI_SYSTEM + '\n\nCurrent CRM data (JSON):\n' + JSON.stringify(this.aiContext());
+    const messages = [...history, { role: 'user', content: text }];
+    const push = msg => this.setState(s2 => ({ ai: { ...s2.ai, busy: false, msgs: [...s2.ai.msgs, { id: 'a' + Date.now(), role: 'assistant', ...msg }] } }));
+    try {
+      let out;
+      if (window.claude && window.claude.complete) out = await window.claude.complete({ model: 'claude-sonnet-4-5', max_tokens: 2000, system, messages });
+      else {
+        if (!/^https?:$/.test(location.protocol)) throw new Error('Open the deployed CRM to use the assistant.');
+        const r = await fetch('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json', 'x-crm-key': this.state.formsKey || '' }, body: JSON.stringify({ system, messages }) });
+        if (r.status === 404) throw new Error('The assistant isn’t set up on the server yet. Add api/ai.js to the JACKRABBIT repo and redeploy.');
+        if (r.status === 401) throw new Error('Enter your CRM access key under Team → Integrations → Website forms. The assistant uses the same key.');
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'Assistant server error ' + r.status + '.');
+        out = data.text;
+      }
+      const parsed = parseAI(out);
+      const before = { jobs: this.state.jobs, tasks: this.state.tasks, config: this.state.config, customServices: this.state.customServices };
+      const changes = this.applyActions(parsed.actions);
+      push({ text: parsed.reply || (changes.length ? 'Done.' : 'I couldn’t make that change.'), changes, before: changes.length ? before : null });
+    } catch (e) {
+      push({ text: e.message || 'Something went wrong. Try again.', error: true });
+    }
   }
   updateJob(id, patch) {
     this.setState(s => ({ jobs: s.jobs.map(j => j.id === id ? { ...j, ...patch } : j) }));
   }
   renderVals() {
     const s = this.state, P = this.props;
-    const target = P.marginTarget ?? 30;
+    const target = s.config.marginTarget ?? P.marginTarget ?? 30;
+    const STG = s.config.stages, OPENS = STG.filter(x => !PROTECTED.includes(x));
     const showLost = P.showLost ?? false;
     const jobs = s.jobs;
     const byId = Object.fromEntries(jobs.map(j => [j.id, j]));
@@ -990,7 +1166,7 @@ class Component extends DCLogic {
     const costed = j => cost(j) > 0;
     const marginColor = j => !costed(j) ? 'var(--color-neutral-500)' : marginOf(j) < target ? 'var(--color-accent-300)' : 'var(--color-neutral-200)';
     const won = jobs.filter(j => j.stage === 'Won');
-    const open = jobs.filter(j => OPEN.includes(j.stage));
+    const open = jobs.filter(j => OPENS.includes(j.stage));
     const active = won.filter(j => j.status !== 'Completed');
     const onSiteJobs = won.filter(j => j.status === 'On site');
     const openJob = id => () => this.setState({ openId: id, drawerTask: '' });
@@ -1000,6 +1176,7 @@ class Component extends DCLogic {
     const me = team.find(u => u.id === s.meId) || team[0];
     const uName = id => (team.find(u => u.id === id) || {}).name || 'Wastely';
     const teamNames = team.map(u => u.name);
+    const CREWL = team.filter(u => CREW_ROLES.includes(u.role)).map(u => [u.name, u.role]);
     const teamFirst = new Set(teamNames.map(n => n.split(' ')[0]));
     const ig = s.integrations;
     const emailOn = ig.email.connected, quoOn = ig.quo.connected;
@@ -1102,7 +1279,7 @@ class Component extends DCLogic {
         open: openJob(j.id)
       };
     });
-    const stageTotals = OPEN.map(st => ({ st, items: jobs.filter(j => j.stage === st) }));
+    const stageTotals = OPENS.map(st => ({ st, items: jobs.filter(j => j.stage === st) }));
     const maxT = Math.max(1, ...stageTotals.map(x => sum(x.items, j => j.value)));
     const stageBars = stageTotals.map(x => {
       const t = sum(x.items, j => j.value);
@@ -1112,13 +1289,13 @@ class Component extends DCLogic {
     const dueSoon = s.tasks.filter(t => !t.done && t.due <= weekOut).sort(byDue).map(taskView);
 
     // Pipeline
-    const stages = showLost ? STAGES : STAGES.filter(x => x !== 'Lost');
+    const stages = showLost ? STG : STG.filter(x => x !== 'Lost');
     const columns = stages.map(st => {
       const items = jobs.filter(j => j.stage === st);
       const hot = s.dropCol === st;
       return {
         name: st, count: String(items.length), total: k(sum(items, j => j.value)),
-        mark: STAGE_MARK[st],
+        mark: STAGE_MARK[st] || 'var(--color-neutral-600)',
         bg: hot ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'color-mix(in srgb, var(--color-text) 2.5%, transparent)',
         ring: hot ? 'inset 0 0 0 1px var(--color-accent-700)' : 'none',
         onDragOver: e => e.preventDefault(),
@@ -1163,7 +1340,7 @@ class Component extends DCLogic {
         dates: j.start ? fmtD(j.start) + ' – ' + fmtD(j.end) : 'Not scheduled',
         value: money(j.value), cost: money(cost(j)), margin: marginOf(j) + '%',
         marginColor: marginColor(j), marginIcon: low ? 'ph-warning' : '',
-        crew: j.crew.length ? j.crew.length + ' · ' + (j.crew.find(c => CREW.find(x => x[0] === c && x[1] === 'Foreman')) || j.crew[0]).split(' ')[0] : 'None',
+        crew: j.crew.length ? j.crew.length + ' · ' + (j.crew.find(c => CREWL.find(x => x[0] === c && x[1] === 'Foreman')) || j.crew[0]).split(' ')[0] : 'None',
         billing: j.billing, billingTag: BILLING_TAG[j.billing], open: openJob(j.id)
       };
     });
@@ -1200,6 +1377,7 @@ class Component extends DCLogic {
         ...j, isWon: j.stage === 'Won', serviceLabel: svcLabel(j.services),
         hasSource: !!j.source, source: j.source || '',
         contactName: contactName(j),
+        customFields: s.config.fields.map(f => ({ label: f.label, type: f.type, val: (j.extra || {})[f.id] ?? '', onChange: e => up({ extra: { ...(j.extra || {}), [f.id]: e.target.value } }) })),
         onContactEmail: e => up({ contactEmail: e.target.value }),
         onContactPhone: e => up({ contactPhone: e.target.value }),
         emailJob: goThread(j.id, 'email'), textJob: goThread(j.id, 'sms'), callJob: startCall(j.id), openInbox: goThread(j.id),
@@ -1227,7 +1405,7 @@ class Component extends DCLogic {
         onValue: e => up({ value: +e.target.value || 0 }),
         costLines: COSTS.map(([key, label]) => ({ label, val: j.costs[key], onChange: e => up({ costs: { ...j.costs, [key]: +e.target.value || 0 } }) })),
         crewSummary: j.crew.length + ' assigned',
-        crewOpts: CREW.map(([name, role]) => {
+        crewOpts: CREWL.map(([name, role]) => {
           const on = j.crew.includes(name);
           return {
             name, role, busy: busy[name] ? ' · on site at ' + busy[name] : '',
@@ -1439,8 +1617,12 @@ class Component extends DCLogic {
       ],
       numbers: team.map(u => ({ name: u.name, value: u.phone || 'No number' }))
     };
+    const sy = s.sync;
+    const syncText = !ig.web.connected ? 'Paused' : sy.state === 'checking' ? 'Checking…' : sy.state === 'ok' ? 'Last checked ' + sy.at + ' · every minute' : sy.state === 'error' ? sy.msg : 'Not checked yet';
     const webInt = {
-      connected: ig.web.connected, status: ig.web.connected ? 'Receiving' : 'Paused', statusTag: ig.web.connected ? 'tag-accent' : 'tag-neutral',
+      connected: ig.web.connected, status: !ig.web.connected ? 'Paused' : sy.state === 'ok' ? 'Receiving' : sy.state === 'error' ? 'Not receiving' : 'Connecting', statusTag: ig.web.connected && sy.state === 'ok' ? 'tag-accent' : 'tag-neutral',
+      key: s.formsKey, onKey: e => this.setState({ formsKey: e.target.value.trim() }), syncText, checkNow: () => this.pullForms(),
+      endpoint: (/^https?:$/.test(location.protocol) ? location.origin : 'https://your-crm.vercel.app') + '/api/forms',
       connectLabel: ig.web.connected ? 'Pause' : 'Resume', toggleConnect: flip('web', 'connected'),
       toggles: [
         { label: 'Create a callback task', desc: 'Converting a submission adds a “Call back” task for today.', ...sw(ig.web.callbackTask, flip('web', 'callbackTask')) },
@@ -1455,22 +1637,43 @@ class Component extends DCLogic {
     const emSegNew = emergencySeg(draft.emergency, v => this.setState(st => ({ draft: { ...st.draft, emergency: v } })), 'em-new');
     const df = Object.fromEntries(['client', 'title', 'service', 'clientType', 'value', 'owner'].map(key => [key, e => this.setState({ draft: { ...this.state.draft, [key]: e.target.value } })]));
 
+    const aiS = s.ai;
+    const setAI = patch => this.setState(st => ({ ai: { ...st.ai, ...patch } }));
+    const lastUndoable = [...aiS.msgs].reverse().find(m => m.before && !m.undone);
+    const ai = {
+      open: aiS.open, busy: aiS.busy, input: aiS.input, listRef: this.aiListRef,
+      empty: !aiS.msgs.length && !aiS.busy, hasMsgs: aiS.msgs.length > 0, cantSend: aiS.busy || !aiS.input.trim(),
+      toggle: () => setAI({ open: !aiS.open }), close: () => setAI({ open: false }), clear: () => setAI({ msgs: [] }),
+      onInput: e => setAI({ input: e.target.value }),
+      onKey: e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.askAI(); } },
+      send: e => { e.preventDefault(); this.askAI(); },
+      suggestions: ['Which open deals are below the margin target?', 'Add a Bin size field to every job', 'Add a “Permit pending” stage before Won', 'What’s due this week, and who owns it?'].map(text => ({ text, ask: () => this.askAI(text) })),
+      msgs: aiS.msgs.map(m => ({
+        isUser: m.role === 'user', isAssistant: m.role === 'assistant', text: m.text,
+        color: m.error ? 'var(--color-accent-300)' : 'var(--color-neutral-200)',
+        hasChanges: !!(m.changes && m.changes.length), changes: (m.changes || []).map(t => ({ t })),
+        changeIcon: m.undone ? 'ph-arrow-counter-clockwise' : 'ph-check', changeColor: m.undone ? 'var(--color-neutral-500)' : 'var(--color-neutral-300)',
+        canUndo: m === lastUndoable, undone: !!m.undone,
+        undo: () => this.setState(st => ({ ...m.before, ai: { ...st.ai, msgs: st.ai.msgs.map(x => x.id === m.id ? { ...x, undone: true } : x) } }))
+      }))
+    };
+
     return {
-      nav, todayLong: dt(TODAY).toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }),
+      ai, nav, todayLong: dt(TODAY).toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }),
       isOverview: s.screen === 'overview', isPipeline: s.screen === 'pipeline', isContracts: s.screen === 'contracts', isTasks: s.screen === 'tasks',
       goPipeline: go('pipeline'), goTasks: go('tasks'),
-      kpis, onSite, crewDeployed: deployed.size + ' of ' + CREW.length + ' crew deployed', stageBars, dueSoon,
+      kpis, onSite, crewDeployed: deployed.size + ' of ' + CREWL.length + ' crew deployed', stageBars, dueSoon,
       columns, pipelineSub: open.length + ' open deals · ' + k(sum(open, x => x.value)),
       cFilters, cTotals, cRows,
       taskGroups: groups, tasksSub: openTaskCount + ' open' + (overdueCount ? ' · ' + overdueCount + ' overdue' : ''),
       tFilter: tf, onTFilter: e => this.setState({ tFilter: e.target.value }),
       assigneeFilterOpts: opts(['Everyone', ...teamNames]), assigneeOpts: opts(teamNames), jobOpts, nt, addTask,
       hasDrawer: !!j, dj, closeDrawer: () => this.setState({ openId: null }),
-      stageOpts: opts(STAGES), statusOpts: opts(STATUS), billingOpts: opts(BILLING), ownerOpts: opts(teamNames),
+      stageOpts: opts(STG), statusOpts: opts(STATUS), billingOpts: opts(BILLING), ownerOpts: opts(teamNames),
       clientTypeOpts: opts(CLIENT_TYPES),
       hasNewDeal: !!s.draft, draft, df, pickNew, emSegNew, minJob: 'Jobs start at ' + money(MIN_JOB) + '. Combine any services into one job.',
       hasDraftError: !!s.draftError, draftError: s.draftError || '',
-      openNewDeal: () => this.setState({ draftError: '', customNew: '', draft: { client: '', title: '', services: [], emergency: false, clientType: CLIENT_TYPES[0], value: '', owner: OWNERS[0] } }),
+      openNewDeal: () => this.setState({ draftError: '', customNew: '', draft: { client: '', title: '', services: [], emergency: false, clientType: CLIENT_TYPES[0], value: '', owner: me.name } }),
       closeNewDeal: () => this.setState({ draft: null }),
       stop: e => e.stopPropagation(),
       createDeal: e => {
@@ -1483,7 +1686,7 @@ class Component extends DCLogic {
         delete nj.service;
         this.setState(st => ({ jobs: [...st.jobs, nj], draft: null, openId: id, screen: 'pipeline' }));
       },
-      resetData: () => { if (confirm('Reset deals, tasks and messages to the demo data?')) { const d = seed(); d.jobs.forEach(deriveContact); this.setState({ ...d, comms: seedComms(), submissions: seedSubmissions(), read: {}, openId: null, threadId: null }); } },
+      resetData: () => { if (confirm('Delete all deals, tasks, messages and web leads in this browser? Profiles and settings stay.')) this.setState({ ...seed(), comms: [], submissions: [], read: {}, openId: null, threadId: null }); },
       isInbox: s.screen === 'inbox', isTeam: s.screen === 'team',
       me: { ...me, initials: initials(me.name) }, meOpts: team.map(u => ({ v: u.id, label: u.name })), meId: me.id,
       onMe: e => this.setState({ meId: e.target.value }),
@@ -1493,7 +1696,7 @@ class Component extends DCLogic {
       settingsTabs, isProfilesTab: s.settingsTab === 'Profiles', isIntegrationsTab: s.settingsTab === 'Integrations',
       profiles, emailInt, quoInt, webInt, roleOpts: opts(ROLES),
       isWeb: s.screen === 'web', wFilters, webLeads, hasWebLeads: !!webLeads.length, noWebLeads: !webLeads.length,
-      webSub: s.submissions.filter(x => x.status === 'new').length + ' new from wastely.ca',
+      webSub: s.submissions.filter(x => x.status === 'new').length + ' new from wastely.ca · ' + syncText, checkForms: () => this.pullForms(),
       newProfile: () => this.setState({ profileDraft: { name: '', role: ROLES[0], email: '', phone: '', signature: '' } }),
       hasProfileDraft: !!s.profileDraft, pdraft, pf, profileTitle: pdraft.id ? 'Edit profile' : 'New profile',
       canDeleteProfile: !!pdraft.id && pdraft.id !== me.id,
@@ -1501,8 +1704,8 @@ class Component extends DCLogic {
       saveProfile: e => {
         e.preventDefault();
         const d = this.state.profileDraft;
-        if (!d.name.trim() || !d.email.trim()) return;
-        const clean = { ...d, name: d.name.trim(), email: d.email.trim(), phone: (d.phone || '').trim() };
+        if (!d.name.trim()) return;
+        const clean = { ...d, name: d.name.trim(), email: (d.email || '').trim(), phone: (d.phone || '').trim() };
         if (d.id) {
           const old = team.find(u => u.id === d.id);
           this.setState(st => ({
