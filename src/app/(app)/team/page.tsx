@@ -1,17 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, X } from '@phosphor-icons/react';
+import { Plus, X, UserPlus } from '@phosphor-icons/react';
 import { useCrm } from '@/lib/store';
 import { CREW_ROLES, initials, USER_ROLES } from '@/lib/crm';
 import { CommitInput, Loading } from '@/components/ui';
 import CompanySettings from '@/components/CompanySettings';
+import { addMember } from './actions';
 
-// Profiles and field crew. Integrations (email, Quo) come in a later phase.
+// Profiles and field crew. Sign-ups are closed: Leadership gives people access here.
 export default function Team() {
   const { ready, me, profiles, crew, jobs, tasks, updateProfile, addCrew, removeCrew } = useCrm();
   const lead = me.role === 'Leadership';
   const [nc, setNc] = useState({ name: '', role: CREW_ROLES[0] as string });
+  const [np, setNp] = useState({ email: '', name: '', role: 'Leadership' as string });
+  const [npMsg, setNpMsg] = useState('');
+  const [npBusy, setNpBusy] = useState(false);
 
   return (
     <div className="page page-wide">
@@ -20,7 +24,28 @@ export default function Team() {
       </header>
       {!ready ? <Loading /> : <>
         <section className="section">
-          <div className="section-head"><h5>Profiles</h5><span className="meta">{lead ? 'You can change roles and activate new sign-ins.' : 'New people appear here after their first sign-in.'}</span></div>
+          <div className="section-head"><h5>Profiles</h5><span className="meta">{lead ? 'Only people added here can sign in.' : 'Leadership adds people here.'}</span></div>
+          {lead && (
+            <form style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1.4fr) minmax(160px, 1fr) 170px auto', gap: 'var(--space-3)', maxWidth: 860 }} onSubmit={async e => {
+              e.preventDefault();
+              if (!np.email.trim()) return;
+              setNpBusy(true);
+              setNpMsg('');
+              const r = await addMember(np);
+              setNpBusy(false);
+              if (r.error) { setNpMsg(r.error); return; }
+              setNpMsg(np.email.trim() + ' can now sign in with an emailed code.');
+              setNp({ email: '', name: '', role: 'Leadership' });
+            }}>
+              <input className="input" type="email" placeholder="Email" aria-label="New person's email" value={np.email} onChange={e => setNp({ ...np, email: e.target.value })} />
+              <input className="input" placeholder="Name" aria-label="New person's name" value={np.name} onChange={e => setNp({ ...np, name: e.target.value })} />
+              <select className="input" aria-label="New person's role" value={np.role} onChange={e => setNp({ ...np, role: e.target.value })}>
+                {USER_ROLES.map(r => <option key={r}>{r}</option>)}
+              </select>
+              <button className="btn btn-primary" type="submit" disabled={npBusy}><UserPlus />{npBusy ? 'Adding…' : 'Give access'}</button>
+            </form>
+          )}
+          {npMsg && <div className="meta" role="status">{npMsg}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
             {profiles.map(p => {
               const isMe = p.id === me.id;

@@ -59,10 +59,11 @@ Without Stripe keys, invoices still work and show e-transfer and cheque instruct
 
 ## Access
 
-- The **first person to sign in** becomes an active **Leadership** profile.
-- Anyone signing in with an `@wastely.ca` address is activated automatically (edit `allowed_domains` to change).
-- Anyone else sees “Access pending” until Leadership clicks **Activate** under Team.
+- Sign-in is email only: enter your email, get a 6-digit code, type it in (works inside the Mac app). The email also has a link, which signs you in to whichever browser opens it.
+- Public sign-ups are off in Supabase Auth. **Leadership adds people under Team → Give access**; the server creates the account and activates it.
+- Leadership can **Deactivate** someone under Team to cut their access.
 - Every table has row level security: only active members can read or write. Leadership alone can change roles, activate people, and edit settings.
+- Auth emails go through custom SMTP (Supabase → Authentication → Emails → SMTP Settings). Supabase's built-in sender only delivers to members of the Supabase team.
 
 ## Business rules (enforced in Postgres)
 
@@ -75,8 +76,8 @@ Without Stripe keys, invoices still work and show e-transfer and cheque instruct
 
 ```
 src/app/(app)/        signed-in screens: overview, pipeline, contracts, tasks, team
-src/app/login/        sign-in (Google, Microsoft, email link)
-src/app/auth/         OAuth callback and sign-out
+src/app/login/        sign-in (email + 6-digit code)
+src/app/auth/         email-link confirm, callback and sign-out
 src/components/       AppShell (sidebar), JobDrawer, NewDealDialog, shared UI
 src/lib/crm.ts        domain types, constants, money/date helpers
 src/lib/store.tsx     Supabase-backed state, optimistic writes, realtime reload
