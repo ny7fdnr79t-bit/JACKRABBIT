@@ -18,7 +18,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 
 ### 1. Supabase
 1. Create a project at supabase.com (region: Canada if available).
-2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql). (Or `supabase link` + `supabase db push` with the CLI.)
+2. Apply everything in [`supabase/migrations/`](supabase/migrations/) in filename order (`supabase link` + `supabase db push`, or paste each into **SQL Editor**). The database records which ones are applied in `supabase_migrations.schema_migrations`, so `db push` only runs new ones. Every table has row level security on, and an event trigger switches it on for any new table.
 3. **Authentication → Providers**
    - **Google**: enable, add the client ID/secret from a Google Cloud OAuth client (Web). Authorised redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
    - **Azure (Microsoft 365)**: enable, add the app registration's client ID/secret and tenant URL. Same redirect URI.
