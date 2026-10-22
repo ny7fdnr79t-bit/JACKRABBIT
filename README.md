@@ -9,7 +9,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 | Phase | State |
 | --- | --- |
 | Data model, auth, Overview / Pipeline / Contracts / Tasks, job panel, New deal, Team (profiles + crew) | **Built** |
-| Web leads (`/api/forms` port, Supabase-backed) | Next |
+| Web leads (`/api/forms` intake from wastely.ca, Web leads screen, Create deal) | **Built** |
 | AI assistant (`/api/ai` port, server-side actions + audit log) | Later |
 | Quo texts/calls, Gmail / Microsoft 365 email, Inbox | Later |
 | Invoices (deposit / progress / final, PDF, Stripe card payments) and client agreements (template, online signature, PDF) | **Built** |
@@ -37,7 +37,6 @@ The existing JACKRABBIT project is set to Framework Preset **Other** for the old
 - Environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server only), and for card payments `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
 - Keep `CRM_KEY`, `ANTHROPIC_API_KEY` and the Upstash vars — the Web leads and AI phases reuse them.
 
-Until `/api/forms` is ported, merging this to `main` stops the website-form endpoint the live site posts to. Deploy it as a preview first, or merge after the Web leads phase.
 
 ### 4. Stripe (card payments on invoices)
 1. In Stripe, use **test mode** first. Copy the secret key into `STRIPE_SECRET_KEY`.
@@ -46,6 +45,33 @@ Until `/api/forms` is ported, merging this to `main` stops the website-form endp
 4. Pay a test invoice with card `4242 4242 4242 4242`; it should flip to **Paid** on its own, and the job's billing follows.
 
 Without Stripe keys, invoices still work and show e-transfer and cheque instructions only.
+
+## Web leads (wastely.ca forms)
+
+- `POST /api/forms` takes `{ form, page, fields }` as JSON (sent as `text/plain` to skip the CORS preflight) or a normal form post. It accepts browsers on `https://wastely.ca`, `https://www.wastely.ca`, `https://ny7fdnr79t-bit.github.io` and this app (add more with `FORMS_ALLOWED_ORIGINS`, comma-separated). It caps bodies at 32 KB, ignores anything with a filled `_gotcha` field, drops keys starting with `_`, and allows 10 submissions a minute / 60 a day per sender (by a keyed hash of the IP).
+- Submissions land in `web_submissions` and show under **Web leads** straight away (realtime). The sidebar counts new ones.
+- **Create deal** opens New deal pre-filled from the lead (client, job title, client type, value from the indicative price, services, Urgent → Emergency). Saving runs `convert_web_submission`, which creates the job, its site and contact, a "Call back" task for today (if `app_settings.callback_task`), and marks the lead converted, all in one transaction.
+- Careers submissions can only be archived. Archived leads can be moved back to New or deleted (for spam).
+
+### Website change
+Every form on wastely.ca sends through `window.wsSubmit.send(d, to)` in `transition.js`. Add this inside that file, just above `function send(d, to) {`:
+
+```js
+  // Copy each submission into the Wastely CRM (Web leads). Never blocks the form.
+  function toCrm(d, to) {
+    try {
+      var p = location.pathname.toLowerCase();
+      var form = (to && to !== 'go@wastely.ca') || p.indexOf('career') >= 0 ? 'Careers' : p.indexOf('contact') >= 0 ? 'Contact' : 'Quote request';
+      fetch('https://jackrabbit-psi.vercel.app/api/forms', {
+        method: 'POST', keepalive: true,
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({ form: form, page: location.href, fields: d })
+      }).catch(function () {});
+    } catch (e) {}
+  }
+```
+
+and make `toCrm(d, to);` the first line inside `send`.
 
 ## Invoices and agreements
 
@@ -75,7 +101,7 @@ Without Stripe keys, invoices still work and show e-transfer and cheque instruct
 ## Layout
 
 ```
-src/app/(app)/        signed-in screens: overview, pipeline, contracts, tasks, team
+src/app/(app)/        signed-in screens: overview, pipeline, contracts, tasks, web leads, team
 src/app/login/        sign-in (email + 6-digit code)
 src/app/auth/         email-link confirm, callback and sign-out
 src/components/       AppShell (sidebar), JobDrawer, NewDealDialog, shared UI
@@ -84,7 +110,7 @@ src/lib/store.tsx     Supabase-backed state, optimistic writes, realtime reload
 src/lib/docs.ts       invoice/agreement types, template filling, agreement text format
 src/lib/pdf.tsx       PDF rendering (react-pdf) for invoices and agreements
 src/app/(public)/     client pages: /sign/<token>, /pay/<token>
-src/app/api/          PDF downloads, Stripe webhook
+src/app/api/          website form intake, health check, PDF downloads, Stripe webhook
 src/proxy.ts          session refresh + redirect to /login
 supabase/migrations/  schema, RLS, triggers, create_deal / ensure_services
 design/               prototype, handoff, old Vercel API functions (reference only)

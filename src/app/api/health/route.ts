@@ -14,7 +14,6 @@ const REQUIRED = [
 
 // Needed by later features; false here just means that feature isn't set up yet.
 const INTEGRATIONS = [
-  'CRM_FORMS_KEY',
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'QUO_API_KEY',

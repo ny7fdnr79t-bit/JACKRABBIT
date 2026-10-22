@@ -35,7 +35,7 @@ function JobDrawerRoute() {
 }
 
 function Sidebar() {
-  const { me, jobs, tasks, settings, invoices, agreements } = useCrm();
+  const { me, jobs, tasks, settings, invoices, agreements, leads } = useCrm();
   const path = usePathname();
   const openStages = settings.stages.filter(s => !PROTECTED_STAGES.includes(s));
   const nav = [
@@ -45,7 +45,7 @@ function Sidebar() {
     { href: '/tasks', label: 'Tasks', icon: CheckSquare, count: String(tasks.filter(t => !t.done).length) },
     { href: '/agreements', label: 'Agreements', icon: Signature, count: String(agreements.filter(a => a.status === 'Sent').length || '') },
     { href: '/invoices', label: 'Invoices', icon: Receipt, count: String(invoices.filter(x => x.status === 'Sent').length || '') },
-    { href: '', label: 'Web leads', icon: GlobeSimple, count: '' },
+    { href: '/leads', label: 'Web leads', icon: GlobeSimple, count: String(leads.filter(l => l.status === 'new').length || '') },
     { href: '', label: 'Inbox', icon: Tray, count: '' },
     { href: '/team', label: 'Team', icon: UsersThree, count: '' }
   ];

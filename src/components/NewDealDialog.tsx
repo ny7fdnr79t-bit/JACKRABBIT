@@ -9,7 +9,7 @@ import { EmergencySeg, pickerSummary, ServicePicker } from '@/components/ui';
 import { useOpenJob } from '@/lib/useOpenJob';
 
 export default function NewDealDialog() {
-  const { newDeal, setNewDeal, me, profiles, settings, createDeal } = useCrm();
+  const { newDeal, setNewDeal, me, profiles, settings, createDeal, dealSeed, convertLead } = useCrm();
   const openJob = useOpenJob();
   const path = usePathname();
   const blank = (): DealDraft => ({ client: '', title: '', clientType: CLIENT_TYPES[2], value: '', ownerId: me.id, emergency: false, services: [] });
@@ -17,7 +17,7 @@ export default function NewDealDialog() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (newDeal) { setD(blank()); setErr(''); } }, [newDeal]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (newDeal) { setD(dealSeed ? { ...dealSeed.draft } : blank()); setErr(''); } }, [newDeal, dealSeed]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!newDeal) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setNewDeal(false); };
@@ -32,7 +32,7 @@ export default function NewDealDialog() {
     if (!d.services.length) return setErr('Pick at least one service.');
     if ((+d.value || 0) < settings.minJob) return setErr('Jobs start at ' + money(settings.minJob) + '.');
     setBusy(true);
-    const id = await createDeal(d);
+    const id = dealSeed ? await convertLead(dealSeed, d) : await createDeal(d);
     setBusy(false);
     if (!id) return setErr('Couldn’t create the deal. Try again.');
     setNewDeal(false);
@@ -46,6 +46,7 @@ export default function NewDealDialog() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div className="dialog-title">New deal</div>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-400)' }}>Jobs start at {money(settings.minJob)}. Combine any services into one job.</div>
+          {dealSeed && <div style={{ fontSize: 13, color: 'var(--color-accent-300)' }}>{dealSeed.note}</div>}
         </div>
         <div className="grid-2">
           <div className="field span-2"><label htmlFor="nd-client">Client</label>

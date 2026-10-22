@@ -8,13 +8,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import {
-  DEFAULT_SETTINGS, fromCents, guessTaskType, toCents,
+  DEFAULT_SETTINGS, fromCents, guessTaskType, isoDay, toCents,
   type Contact, type CostKey, type CrewMember, type Job, type Profile, type Service, type Settings, type Task, type TaskType
 } from '@/lib/crm';
 import {
   DEFAULT_COMPANY, fillTemplate, templateVars, toAgreement, toCompany, toInvoice,
   type Agreement, type Company, type Invoice, type InvoiceKind, type Line, type Template
 } from '@/lib/docs';
+import type { LeadStatus, WebLead } from '@/lib/webleads';
 
 type Row = Record<string, any>;
 
@@ -26,6 +27,15 @@ export type DealDraft = {
   ownerId: string;
   emergency: boolean;
   services: string[]; // service names
+};
+
+// Extra details carried from a web lead into the New deal dialog.
+export type DealSeed = {
+  draft: DealDraft;
+  leadId: string;
+  site: string;
+  contact: { name: string; email: string; phone: string };
+  note: string;
 };
 
 type JobPatch = Partial<Pick<Job, 'title' | 'site' | 'stage' | 'status' | 'billing' | 'value' | 'emergency' | 'start' | 'end' | 'ownerId'>>;
@@ -70,9 +80,16 @@ type Crm = {
   deleteAgreement: (id: string) => Promise<boolean>;
   saveCompany: (patch: Partial<Company>) => void;
   saveTemplate: (id: string, body: string) => void;
+  // web leads
+  leads: WebLead[];
+  setLeadStatus: (id: string, status: LeadStatus) => void;
+  deleteLead: (id: string) => void;
+  convertLead: (seed: DealSeed, draft: DealDraft) => Promise<string | null>;
   // ui
   newDeal: boolean;
   setNewDeal: (open: boolean) => void;
+  dealSeed: DealSeed | null;
+  openDealFromLead: (seed: DealSeed) => void;
 };
 
 const Ctx = createContext<Crm | null>(null);
@@ -138,14 +155,16 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
   const [tasks, setTasks] = useState<Task[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [error, setError] = useState('');
-  const [newDeal, setNewDeal] = useState(false);
+  const [newDeal, setNewDealOpen] = useState(false);
   const [company, setCompany] = useState<Company>(DEFAULT_COMPANY);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [leads, setLeads] = useState<WebLead[]>([]);
+  const [dealSeed, setDealSeed] = useState<DealSeed | null>(null);
 
   const load = useCallback(async () => {
-    const [p, c, s, j, t, st, inv, ag, tp] = await Promise.all([
+    const [p, c, s, j, t, st, inv, ag, tp, wl] = await Promise.all([
       sb.from('profiles').select('id,name,role,email,quo_phone,active').order('name'),
       sb.from('crew_members').select('id,name,role').eq('active', true).order('name'),
       sb.from('services').select('id,name,grp,is_custom,sort').order('sort').order('name'),
@@ -155,9 +174,10 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
       sb.from('invoices').select('*').order('created_at', { ascending: false }),
       // Signature images stay on the server; the CRM only needs the status.
       sb.from('agreements').select('id,number,job_id,status,title,body,price_cents,sign_token,sent_at,viewed_at,signed_at,signer_name,signer_title').order('created_at', { ascending: false }),
-      sb.from('agreement_templates').select('*').order('name')
+      sb.from('agreement_templates').select('*').order('name'),
+      sb.from('web_submissions').select('id,form,page,at,fields,status,job_id').order('at', { ascending: false }).limit(500)
     ]);
-    const failed = [p, c, s, j, t, st, inv, ag, tp].find(x => x.error);
+    const failed = [p, c, s, j, t, st, inv, ag, tp, wl].find(x => x.error);
     if (failed?.error) { setError(failed.error.message); return; }
     setProfiles((p.data || []).map(toProfile));
     setCrew((c.data || []) as CrewMember[]);
@@ -171,6 +191,7 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     setInvoices((inv.data || []).map(toInvoice));
     setAgreements((ag.data || []).map(toAgreement));
     setTemplates((tp.data || []).map((r: Row) => ({ id: r.id, name: r.name, body: r.body, isDefault: r.is_default })));
+    setLeads((wl.data || []).map((r: Row) => ({ id: r.id, form: r.form, page: r.page || '', at: r.at, fields: r.fields || {}, status: r.status, jobId: r.job_id })));
     setReady(true);
   }, [sb]);
 
@@ -433,6 +454,50 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     run(sb.from('profiles').update(row).eq('id', id));
   };
 
+  // ── Web leads ──────────────────────────────────────────────────────────
+
+  const setLeadStatus: Crm['setLeadStatus'] = (id, status) => {
+    setLeads(ls => ls.map(l => (l.id === id ? { ...l, status } : l)));
+    run(sb.from('web_submissions').update({ status }).eq('id', id));
+  };
+
+  const deleteLead: Crm['deleteLead'] = id => {
+    setLeads(ls => ls.filter(l => l.id !== id));
+    run(sb.from('web_submissions').delete().eq('id', id));
+  };
+
+  const openDealFromLead: Crm['openDealFromLead'] = seed => {
+    setDealSeed(seed);
+    setNewDealOpen(true);
+  };
+
+  const convertLead: Crm['convertLead'] = async (seed, d) => {
+    const { data, error } = await sb.rpc('convert_web_submission', {
+      p_submission: seed.leadId,
+      p_client: d.client.trim(),
+      p_client_type: d.clientType,
+      p_title: d.title.trim(),
+      p_value_cents: toCents(+d.value),
+      p_owner_id: d.ownerId || null,
+      p_emergency: d.emergency,
+      p_services: d.services,
+      p_site: seed.site,
+      p_contact_name: seed.contact.name,
+      p_contact_email: seed.contact.email,
+      p_contact_phone: seed.contact.phone,
+      p_today: isoDay(new Date())
+    });
+    if (error) { setError(error.message); load(); return null; }
+    await load();
+    return data as string;
+  };
+
+  // Closing the dialog drops any web-lead seed.
+  const setNewDeal: Crm['setNewDeal'] = open => {
+    setNewDealOpen(open);
+    if (!open) setDealSeed(null);
+  };
+
   const me = profiles.find(p => p.id === initialMe.id) || initialMe;
 
   const value: Crm = {
@@ -441,7 +506,8 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     addTask, toggleTask, deleteTask, addCrew, removeCrew, updateProfile,
     company, invoices, agreements, templates, createInvoice, updateInvoice, deleteInvoice,
     createAgreement, updateAgreement, deleteAgreement, saveCompany, saveTemplate,
-    newDeal, setNewDeal
+    leads, setLeadStatus, deleteLead, convertLead,
+    newDeal, setNewDeal, dealSeed, openDealFromLead
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

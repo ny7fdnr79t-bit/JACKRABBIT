@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Recycle, EnvelopeSimple, ArrowLeft } from '@phosphor-icons/react';
 import { supabase } from '@/lib/supabase/client';
 
-// Email sign-in with a 6-digit code. A code works inside the Mac app; a
+// Email sign-in with a one-time code. A code works inside the Mac app; a
 // link in the email would open in the default browser instead. Accounts are
 // created by Leadership under Team, never here.
 export default function LoginPage() {
@@ -29,7 +29,7 @@ export default function LoginPage() {
       return;
     }
     setSent(true);
-    setMsg('We emailed you a 6-digit code. It works for one hour.');
+    setMsg('We emailed you a sign-in code. It works for one hour.');
   };
 
   const verify = async (e: React.FormEvent) => {
@@ -66,7 +66,7 @@ export default function LoginPage() {
           </form>
         ) : (
           <form onSubmit={verify} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <input className="input" inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="123456" maxLength={10}
+            <input className="input" inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="Code" maxLength={10}
               value={code} onChange={e => setCode(e.target.value)} aria-label="Sign-in code"
               style={{ fontSize: 20, letterSpacing: '0.3em', textAlign: 'center' }} />
             <button className="btn btn-primary" disabled={busy || code.replace(/\D/g, '').length < 6} type="submit">{busy ? 'Signing in…' : 'Sign in'}</button>
