@@ -11,6 +11,7 @@ import { CrmProvider, useCrm } from '@/lib/store';
 import { initials, PROTECTED_STAGES, type Profile } from '@/lib/crm';
 import JobDrawer from '@/components/JobDrawer';
 import NewDealDialog from '@/components/NewDealDialog';
+import UpdateBanner from '@/components/UpdateBanner';
 
 export default function AppShell({ me, children }: { me: Profile; children: React.ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export default function AppShell({ me, children }: { me: Profile; children: Reac
       </Suspense>
       <NewDealDialog />
       <ErrorToast />
+      <UpdateBanner />
     </CrmProvider>
   );
 }
