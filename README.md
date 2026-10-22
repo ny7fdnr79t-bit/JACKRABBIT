@@ -11,7 +11,8 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 | Data model, auth, Overview / Pipeline / Contracts / Tasks, job panel, New deal, Team (profiles + crew) | **Built** |
 | Web leads (`/api/forms` intake from wastely.ca, Web leads screen, Create deal) | **Built** |
 | AI assistant (`/api/ai` port, server-side actions + audit log) | Later |
-| Quo texts/calls, Gmail / Microsoft 365 email, Inbox | Later |
+| Gmail: connect under Team, threads on each deal, send and reply | **Built** (needs Google keys) |
+| Quo texts/calls, Inbox | Later |
 | Invoices (deposit / progress / final, PDF, Stripe card payments) and client agreements (template, online signature, PDF) | **Built** |
 
 ## Set up
@@ -35,7 +36,7 @@ npm run dev
 ### 3. Vercel
 The existing JACKRABBIT project is set to Framework Preset **Other** for the old static prototype. `vercel.json` sets `"framework": "nextjs"`, which overrides that for this branch. Also:
 - Environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server only), and for card payments `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
-- Keep `CRM_KEY`, `ANTHROPIC_API_KEY` and the Upstash vars — the Web leads and AI phases reuse them.
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` for Gmail (see below). `ANTHROPIC_API_KEY` for the AI assistant later.
 
 
 ### 4. Stripe (card payments on invoices)
@@ -72,6 +73,20 @@ Every form on wastely.ca sends through `window.wsSubmit.send(d, to)` in `transit
 ```
 
 and make `toCrm(d, to);` the first line inside `send`.
+
+## Gmail
+
+- **Team → Integrations → Connect Gmail** opens Google's consent screen in a new tab (the Mac app sends it to the default browser, because Google blocks sign-in inside app windows). Approve it and the mailbox is connected for the whole team: each person uses their own connection if they have one, otherwise the first connected mailbox.
+- The refresh token is stored encrypted in Supabase Vault (`google_token_save` / `google_token_get`, service role only). Access tokens are fetched as needed and never reach the browser.
+- Each deal's panel lists recent threads with the contact's email (live from Gmail), opens them as plain text with quoted text folded away, and sends new emails or replies in the same thread from the connected mailbox (with the sender's profile signature). Sent emails are logged in `communications`.
+- Scopes: `gmail.readonly`, `gmail.send`, and `calendar.events` (used in the Calendar step, so nobody has to reconnect).
+
+### Google Cloud setup (one time)
+1. console.cloud.google.com, signed in as the Workspace account → new project "Wastely CRM".
+2. APIs & Services → Library → enable **Gmail API** and **Google Calendar API**.
+3. OAuth consent screen (Google Auth Platform → Branding/Audience): app name "Wastely CRM", **Internal** audience (Workspace users only, no review, tokens don't expire after 7 days).
+4. Clients → Create client → **Web application**, authorised redirect URI `https://jackrabbit-psi.vercel.app/api/google/callback`.
+5. Put the client ID and secret in Vercel as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (Production), then redeploy.
 
 ## Invoices and agreements
 

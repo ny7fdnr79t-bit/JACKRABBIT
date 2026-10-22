@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Siren, GlobeSimple, Warning, Trash, EnvelopeSimple, ChatCircleText, Phone, CheckCircle, Circle } from '@phosphor-icons/react';
+import { X, Siren, GlobeSimple, Warning, Trash, ChatCircleText, Phone, CheckCircle, Circle } from '@phosphor-icons/react';
 import { useCrm, useLookups } from '@/lib/store';
 import {
   addDays, BILLING, COSTS, costed, costOf, marginColor, marginOf, money, STATUS, today, type Job
 } from '@/lib/crm';
 import { CommitInput, EmergencySeg, pickerSummary, ServicePicker, TaskRow } from '@/components/ui';
 import { JobDocuments } from '@/components/docs-ui';
+import { DealEmail } from '@/components/GmailUi';
 
 export default function JobDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { jobs, ready } = useCrm();
@@ -105,14 +106,14 @@ function Body({ job: j, onClose }: { job: Job; onClose: () => void }) {
       </div>
 
       <section className="section">
-        <div className="section-head"><h5>Conversation</h5><span className="meta">Email and Quo connect in a later phase</span></div>
+        <div className="section-head"><h5>Conversation</h5><span className="meta">Texts and calls arrive with Quo</span></div>
         <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" disabled><EnvelopeSimple />Email</button>
-          <button className="btn btn-secondary" disabled><ChatCircleText />Text</button>
+          <button className="btn btn-secondary" disabled title="Comes with Quo"><ChatCircleText />Text</button>
           {contact.phone
-            ? <a className="btn btn-primary" href={'tel:' + contact.phone.replace(/[^\d+]/g, '')}><Phone />Call {contact.name.split(',')[0] || j.client}</a>
-            : <button className="btn btn-primary" disabled><Phone />Call</button>}
+            ? <a className="btn btn-secondary" href={'tel:' + contact.phone.replace(/[^\d+]/g, '')}><Phone />Call {contact.name.split(',')[0] || j.client}</a>
+            : <button className="btn btn-secondary" disabled><Phone />Call</button>}
         </div>
+        <DealEmail jobId={j.id} contactId={j.contact?.id || null} email={contact.email.trim()} name={contact.name.split(',')[0].trim()} />
       </section>
 
       <section className="section" style={{ gap: 'var(--space-4)' }}>

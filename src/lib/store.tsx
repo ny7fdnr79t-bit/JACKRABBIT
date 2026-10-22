@@ -29,6 +29,8 @@ export type DealDraft = {
   services: string[]; // service names
 };
 
+export type GoogleAccount = { profileId: string; email: string; connectedAt: string };
+
 // Extra details carried from a web lead into the New deal dialog.
 export type DealSeed = {
   draft: DealDraft;
@@ -80,6 +82,8 @@ type Crm = {
   deleteAgreement: (id: string) => Promise<boolean>;
   saveCompany: (patch: Partial<Company>) => void;
   saveTemplate: (id: string, body: string) => void;
+  // google
+  googleAccounts: GoogleAccount[];
   // web leads
   leads: WebLead[];
   setLeadStatus: (id: string, status: LeadStatus) => void;
@@ -161,10 +165,11 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [leads, setLeads] = useState<WebLead[]>([]);
+  const [googleAccounts, setGoogleAccounts] = useState<GoogleAccount[]>([]);
   const [dealSeed, setDealSeed] = useState<DealSeed | null>(null);
 
   const load = useCallback(async () => {
-    const [p, c, s, j, t, st, inv, ag, tp, wl] = await Promise.all([
+    const [p, c, s, j, t, st, inv, ag, tp, wl, ga] = await Promise.all([
       sb.from('profiles').select('id,name,role,email,quo_phone,active').order('name'),
       sb.from('crew_members').select('id,name,role').eq('active', true).order('name'),
       sb.from('services').select('id,name,grp,is_custom,sort').order('sort').order('name'),
@@ -175,7 +180,8 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
       // Signature images stay on the server; the CRM only needs the status.
       sb.from('agreements').select('id,number,job_id,status,title,body,price_cents,sign_token,sent_at,viewed_at,signed_at,signer_name,signer_title').order('created_at', { ascending: false }),
       sb.from('agreement_templates').select('*').order('name'),
-      sb.from('web_submissions').select('id,form,page,at,fields,status,job_id').order('at', { ascending: false }).limit(500)
+      sb.from('web_submissions').select('id,form,page,at,fields,status,job_id').order('at', { ascending: false }).limit(500),
+      sb.from('google_accounts').select('profile_id,email,connected_at').order('connected_at')
     ]);
     const failed = [p, c, s, j, t, st, inv, ag, tp, wl].find(x => x.error);
     if (failed?.error) { setError(failed.error.message); return; }
@@ -191,6 +197,8 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     setInvoices((inv.data || []).map(toInvoice));
     setAgreements((ag.data || []).map(toAgreement));
     setTemplates((tp.data || []).map((r: Row) => ({ id: r.id, name: r.name, body: r.body, isDefault: r.is_default })));
+    // Missing table (before the Google migration) just means nothing is connected.
+    setGoogleAccounts(ga.error ? [] : (ga.data || []).map((r: Row) => ({ profileId: r.profile_id, email: r.email, connectedAt: r.connected_at })));
     setLeads((wl.data || []).map((r: Row) => ({ id: r.id, form: r.form, page: r.page || '', at: r.at, fields: r.fields || {}, status: r.status, jobId: r.job_id })));
     setReady(true);
   }, [sb]);
@@ -506,7 +514,7 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     addTask, toggleTask, deleteTask, addCrew, removeCrew, updateProfile,
     company, invoices, agreements, templates, createInvoice, updateInvoice, deleteInvoice,
     createAgreement, updateAgreement, deleteAgreement, saveCompany, saveTemplate,
-    leads, setLeadStatus, deleteLead, convertLead,
+    googleAccounts, leads, setLeadStatus, deleteLead, convertLead,
     newDeal, setNewDeal, dealSeed, openDealFromLead
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

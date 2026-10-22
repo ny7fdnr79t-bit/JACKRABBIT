@@ -7,6 +7,7 @@ import { CREW_ROLES, initials, USER_ROLES } from '@/lib/crm';
 import { CommitInput, Loading } from '@/components/ui';
 import CompanySettings from '@/components/CompanySettings';
 import { addMember } from './actions';
+import { GmailConnectCard } from '@/components/GmailUi';
 
 // Profiles and field crew. Sign-ups are closed: Leadership gives people access here.
 export default function Team() {
@@ -82,6 +83,11 @@ export default function Team() {
               );
             })}
           </div>
+        </section>
+
+        <section className="section">
+          <div className="section-head"><h5>Integrations</h5><span className="meta">Connected accounts the whole team uses</span></div>
+          <GmailConnectCard />
         </section>
 
         <section className="section">
