@@ -32,6 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Start from the Next.js CRM, not the old prototype on main. Switch to main after go-live.
+          ref: crm-nextjs
           fetch-depth: 1
       - uses: anthropics/claude-code-action@v1
         with:
