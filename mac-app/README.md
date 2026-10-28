@@ -1,17 +1,22 @@
 # Wastely CRM — Mac app
 
-## Build it (one time, ~5 min)
-1. Install Node.js from https://nodejs.org (LTS).
-2. Open Terminal, then:
-   cd ~/Downloads/mac-app
-   npm install
-   npm run dist
-3. Open `dist/Wastely CRM-1.0.0-universal.dmg` and drag Wastely CRM into Applications.
+A window onto the CRM website, with its own sign-ins kept separate from Safari and Chrome.
 
-First launch: right-click the app → Open → Open (it isn't signed with an Apple Developer ID yet).
+## Install
+Open `Wastely CRM-1.1.0-arm64.dmg` and drag **Wastely CRM** into Applications (replace the old one).
+The first time, right-click the app → **Open** → **Open**. It isn't signed with an Apple Developer ID yet.
 
-## Notes
-- The app loads https://jackrabbit-psi.vercel.app, so every Vercel deploy updates it automatically. No rebuild needed.
-- To change the URL (e.g. crm.wastely.ca), edit CRM_URL in main.js and rebuild.
-- Data is stored inside the app, separate from Safari/Chrome.
-- Try it without building: npm install, then npm start.
+## The CRM menu
+- **Live CRM**: jackrabbit-psi.vercel.app, what everyone uses.
+- **Preview CRM**: the new version on the `crm-nextjs` branch. Previews are private to your Vercel account, so the first time, sign in to Vercel in the app window.
+- **Open preview** links on the Builds screen open in their own app window.
+- **Open in Browser** (⇧⌘O) opens the current page in your default browser.
+The app remembers your choice.
+
+## Build it
+Requires Node.js.
+```
+npm install
+npm run dist
+```
+The installer appears in `dist/`. After the new CRM goes live on the main site, change the two addresses in `SITES` at the top of `main.js` and rebuild.
