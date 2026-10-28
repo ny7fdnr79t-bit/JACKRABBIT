@@ -4,6 +4,8 @@ Internal CRM for Wastely: deals from lead to won, contracts with operating costs
 
 Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne design tokens. The design reference and handoff notes live in [`design/`](design/HANDOFF.md).
 
+**Building on this:** [`CLAUDE.md`](CLAUDE.md) is the project memory (decisions, rules, gotchas) that Claude Code reads before every build, and [`ROADMAP.md`](ROADMAP.md) is the plan in order. The weekly self-review suggests the next roadmap step on the Builds screen, and each build ticks off what it finishes. Run `npm run check` (typecheck, database tests, build) before publishing anything.
+
 ## Status
 
 | Phase | State |

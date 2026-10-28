@@ -59,10 +59,20 @@ async function gh(path: string, init: RequestInit = {}) {
   return body;
 }
 
+// The current text of a file on the base branch, i.e. as of the latest published build.
+export async function readRepoFile(file: string): Promise<string | null> {
+  if (!buildsConfigured()) return null;
+  try {
+    const f = await gh(`/contents/${file}?ref=${encodeURIComponent(base())}`);
+    return f?.content ? Buffer.from(f.content, 'base64').toString('utf8') : null;
+  } catch { return null; }
+}
+
 // ── Filing ──────────────────────────────────────────────────────────────
 
 const instructions = () =>
   `\n\n---\nBuild this on a new branch from \`${base()}\` and open a pull request against \`${base()}\` that says "Closes #<this issue>". ` +
+  `Read CLAUDE.md first and follow its rules; run \`npm run check\` before finishing. If this completes an item in ROADMAP.md, tick it and add it under Done in the same pull request. ` +
   `Follow README.md. Keep the Nocturne design and the existing patterns. Run \`npm run typecheck\` and \`npm run build\` before finishing. ` +
   `If the change needs a database change, add a new file under supabase/migrations/ (never edit an existing one) and say in the pull request that it must be run in Supabase before publishing. ` +
   `Don't touch secrets, auth, row level security or payment code unless the request is about them, and call out any such change in the pull request.`;
