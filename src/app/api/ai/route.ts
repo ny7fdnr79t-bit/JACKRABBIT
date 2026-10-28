@@ -94,9 +94,13 @@ export async function POST(request: Request) {
       if (round === MAX_ROUNDS - 1) reply = 'That took more steps than I allow in one go. Tell me to keep going if you want me to continue.';
     }
   } catch (e) {
+    console.error('assistant error', e);
+    const detail = e instanceof Anthropic.APIError ? apiReason(e) : '';
     const msg = e instanceof Anthropic.RateLimitError ? 'The assistant is busy. Try again in a minute.'
-      : e instanceof Anthropic.AuthenticationError ? 'The assistant’s API key isn’t valid. Check ANTHROPIC_API_KEY.'
-      : e instanceof Anthropic.APIError ? `The assistant hit an error (${e.status}). Try again.`
+      : e instanceof Anthropic.AuthenticationError ? 'The assistant’s API key isn’t valid. Check ANTHROPIC_API_KEY in Vercel.'
+      : e instanceof Anthropic.PermissionDeniedError ? 'This Anthropic key isn’t allowed to use the assistant’s model. ' + detail
+      : e instanceof Anthropic.BadRequestError && /credit balance/i.test(detail) ? 'The Anthropic account has no credit left. Add credit at console.anthropic.com → Billing, then try again.'
+      : e instanceof Anthropic.APIError ? `The assistant hit an error (${e.status}): ${detail || 'no details'}`
       : 'The assistant hit an error. Try again.';
     // Changes already made this turn are kept and can still be undone.
     return NextResponse.json({ error: msg, changes: ctx.changes, turnId: ctx.turnId }, { status: 502 });
@@ -107,6 +111,12 @@ export async function POST(request: Request) {
   if (last.role === 'user') messages.push({ role: 'assistant', content: [{ type: 'text', text: reply }] });
 
   return NextResponse.json({ reply: reply || 'Done.', changes: ctx.changes, turnId: ctx.turnId, nav: ctx.nav, history: messages });
+}
+
+// Anthropic's own explanation, e.g. "Your credit balance is too low…".
+function apiReason(e: InstanceType<typeof Anthropic.APIError>) {
+  const body = e.error as { error?: { message?: string } } | undefined;
+  return String(body?.error?.message || e.message || '').slice(0, 300);
 }
 
 const hasThinking = (msgs: Msg[]) => msgs.some(m => Array.isArray(m.content) && m.content.some(b => b.type === 'thinking' || b.type === 'redacted_thinking'));
