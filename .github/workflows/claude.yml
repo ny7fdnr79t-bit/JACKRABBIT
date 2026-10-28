@@ -1,0 +1,43 @@
+# Builds CRM change requests with Claude Code.
+#
+# The CRM's assistant files requests as issues labelled "claude"; you can also
+# label any issue yourself, or mention @claude in an issue or PR comment.
+# Claude works on a new branch and opens a pull request; Vercel posts a preview
+# link on it. Nothing reaches the live CRM until someone merges the PR.
+#
+# Setup (once): add the ANTHROPIC_API_KEY repository secret, and install the
+# Claude GitHub app (run `claude` in a terminal, then /install-github-app).
+# GitHub runs issue workflows from the default branch, so this file must be
+# on main to take effect.
+name: Claude
+
+on:
+  issues:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Start from the Next.js CRM, not the old prototype on main. Switch to main after go-live.
+          ref: crm-nextjs
+          fetch-depth: 1
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          label_trigger: claude
+          # The Next.js CRM lives on crm-nextjs until it's merged; switch this to main afterwards.
+          base_branch: crm-nextjs
