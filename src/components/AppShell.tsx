@@ -11,10 +11,12 @@ import { CrmProvider, useCrm } from '@/lib/store';
 import { initials, PROTECTED_STAGES, type Profile } from '@/lib/crm';
 import JobDrawer from '@/components/JobDrawer';
 import NewDealDialog from '@/components/NewDealDialog';
+import { AiProvider, AskAiButton } from '@/components/AiPanel';
 
 export default function AppShell({ me, children }: { me: Profile; children: React.ReactNode }) {
   return (
     <CrmProvider me={me}>
+      <AiProvider>
       <div className="shell">
         <Sidebar />
         <main className="main">{children}</main>
@@ -24,6 +26,7 @@ export default function AppShell({ me, children }: { me: Profile; children: Reac
       </Suspense>
       <NewDealDialog />
       <ErrorToast />
+      </AiProvider>
     </CrmProvider>
   );
 }
@@ -67,6 +70,7 @@ function Sidebar() {
         ))}
       </nav>
       <div className="sidebar-foot">
+        <AskAiButton />
         <div className="me">
           <span className="me-avatar">{initials(me.name)}</span>
           <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>

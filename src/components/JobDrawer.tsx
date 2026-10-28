@@ -47,7 +47,7 @@ const CloseBtn = ({ onClose }: { onClose: () => void }) => (
 
 function Body({ job: j, onClose }: { job: Job; onClose: () => void }) {
 
-  const { profiles, crew, jobs, tasks, settings, updateJob, setCost, setServices, toggleCrew, saveContact, deleteJob, addTask } = useCrm();
+  const { profiles, crew, jobs, tasks, settings, updateJob, setCost, setServices, toggleCrew, saveContact, deleteJob, addTask, setJobField } = useCrm();
   const { serviceNames } = useLookups();
   const [taskDraft, setTaskDraft] = useState('');
   const isWon = j.stage === 'Won';
@@ -102,6 +102,10 @@ function Body({ job: j, onClose }: { job: Job; onClose: () => void }) {
         <div className="field span-2"><label htmlFor="d-contact">Client contact</label><CommitInput id="d-contact" value={contact.name} onCommit={v => saveC({ name: v })} /></div>
         <div className="field"><label htmlFor="d-email">Contact email</label><CommitInput id="d-email" type="email" value={contact.email} onCommit={v => saveC({ email: v })} /></div>
         <div className="field"><label htmlFor="d-phone">Contact phone</label><CommitInput id="d-phone" type="tel" value={contact.phone} onCommit={v => saveC({ phone: v })} /></div>
+        {settings.jobFields.map(f => (
+          <div key={f.id} className="field"><label htmlFor={'d-' + f.id}>{f.label}</label>
+            <CommitInput id={'d-' + f.id} type={f.type} value={j.extra[f.id] ?? ''} onCommit={v => setJobField(j.id, f.id, v)} /></div>
+        ))}
       </div>
 
       <section className="section">

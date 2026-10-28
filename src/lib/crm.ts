@@ -46,18 +46,21 @@ export type Job = {
   end: string;
   source: string;
   costs: Costs;
+  extra: Record<string, string>;
   serviceIds: string[];
   crewIds: string[];
   createdAt: string;
 };
 export type Task = { id: string; jobId: string | null; assigneeId: string | null; title: string; type: TaskType; due: string; done: boolean };
-export type Settings = { marginTarget: number; minJob: number; stages: string[]; showLost: boolean };
+export type JobField = { id: string; label: string; type: 'text' | 'number' | 'date' };
+export type Settings = { marginTarget: number; minJob: number; stages: string[]; showLost: boolean; jobFields: JobField[] };
 
 export const DEFAULT_SETTINGS: Settings = {
   marginTarget: 30,
   minJob: 5000,
   stages: ['Lead', 'Site visit', 'Quoted', 'Negotiation', 'Won', 'Lost'],
-  showLost: false
+  showLost: false,
+  jobFields: []
 };
 
 export const STAGE_MARK: Record<string, string> = {

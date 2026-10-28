@@ -10,7 +10,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 | --- | --- |
 | Data model, auth, Overview / Pipeline / Contracts / Tasks, job panel, New deal, Team (profiles + crew) | **Built** |
 | Web leads (`/api/forms` port, Supabase-backed) | Next |
-| AI assistant (`/api/ai` port, server-side actions + audit log) | Later |
+| AI assistant: chat in the CRM that reads and changes data and settings (with Undo and a change log), and files app change requests that Claude Code builds | **Built** |
 | Quo texts/calls, Gmail / Microsoft 365 email, Inbox | Later |
 | Invoices (deposit / progress / final, PDF, Stripe card payments) and client agreements (template, online signature, PDF) | **Built** |
 
@@ -18,7 +18,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 
 ### 1. Supabase
 1. Create a project at supabase.com (region: Canada if available).
-2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql). (Or `supabase link` + `supabase db push` with the CLI.)
+2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) and [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql). (Or `supabase link` + `supabase db push` with the CLI.)
 3. **Authentication → Providers**
    - **Google**: enable, add the client ID/secret from a Google Cloud OAuth client (Web). Authorised redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
    - **Azure (Microsoft 365)**: enable, add the app registration's client ID/secret and tenant URL. Same redirect URI.
@@ -46,6 +46,25 @@ Until `/api/forms` is ported, merging this to `main` stops the website-form endp
 4. Pay a test invoice with card `4242 4242 4242 4242`; it should flip to **Paid** on its own, and the job's billing follows.
 
 Without Stripe keys, invoices still work and show e-transfer and cheque instructions only.
+
+## AI assistant
+
+**Ask AI** in the sidebar (or ⌘J) opens a chat panel. It uses Claude Opus 5.5 (`claude-opus-5-5`) through `/api/ai`, with Anthropic's server-side refusal fallback turned on (`fallbacks: "default"`).
+
+- **What it can do:** answer questions about deals, tasks and invoices; create deals and tasks; update jobs (stage, status, value, dates, owner, costs, services, crew, contact, custom fields); draft invoices and agreements; and, for Leadership, add, rename or remove pipeline stages, add custom job fields, add services and set the margin target.
+- **What it can't do:** delete deals, send emails, invoices or agreements, or take payments.
+- **Safety:** the tools run with the signed-in person's own Supabase session, so row level security limits it exactly like that person. Every change is written to `ai_actions` with the steps to reverse it, and each reply has an **Undo** button.
+- **Setup:** add `ANTHROPIC_API_KEY` to Vercel (server only).
+
+### App change requests
+
+When someone asks for something the assistant's tools can't do (a new screen, button or report), it offers to file an **app change request**. That's Leadership only, and it's filed only after the person confirms the wording. The request becomes a GitHub issue labelled `claude`. The [Claude GitHub Action](.github/workflows/claude.yml) then builds it on a new branch and opens a pull request, which Vercel gives a preview link. Nothing goes live until someone reviews and merges it.
+
+Setup, once:
+1. In Vercel, add `GITHUB_TOKEN`: a fine-grained GitHub token for this repo only, with **Issues: Read and write**.
+2. In GitHub → repo **Settings → Secrets and variables → Actions**, add `ANTHROPIC_API_KEY`.
+3. Install the Claude GitHub app: run `claude` in a terminal, then `/install-github-app`.
+4. Copy `.github/workflows/claude.yml` onto `main`. GitHub only runs issue workflows from the default branch.
 
 ## Invoices and agreements
 
@@ -83,7 +102,9 @@ src/lib/store.tsx     Supabase-backed state, optimistic writes, realtime reload
 src/lib/docs.ts       invoice/agreement types, template filling, agreement text format
 src/lib/pdf.tsx       PDF rendering (react-pdf) for invoices and agreements
 src/app/(public)/     client pages: /sign/<token>, /pay/<token>
-src/app/api/          PDF downloads, Stripe webhook
+src/app/api/          PDF downloads, Stripe webhook, assistant (/api/ai, /api/ai/undo)
+src/lib/assistant/    assistant instructions and tools (each tool records its own undo)
+src/components/AiPanel.tsx  the chat panel
 src/proxy.ts          session refresh + redirect to /login
 supabase/migrations/  schema, RLS, triggers, create_deal / ensure_services
 design/               prototype, handoff, old Vercel API functions (reference only)

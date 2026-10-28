@@ -136,3 +136,14 @@ export function parseBody(body: string): Block[] {
 }
 
 export const isToken = (s: string) => /^[0-9a-f]{64}$/.test(s);
+
+// Starting lines for a new invoice, shared by the CRM screens and the assistant.
+export function draftInvoiceLines(kind: InvoiceKind, j: { title: string; services: string[]; valueCents: number }, depositPct: number,
+  earlier: { kind: InvoiceKind; number: string; subtotalCents: number }[]): Line[] {
+  if (kind === 'Deposit') return [{ description: `Deposit (${depositPct}%) — ${j.title}`, qty: 1, unit_cents: Math.round((j.valueCents * depositPct) / 100) }];
+  if (kind === 'Progress') return [{ description: `Progress billing — ${j.title}`, qty: 1, unit_cents: 0 }];
+  return [
+    { description: j.title + (j.services.length ? ' — ' + j.services.join(', ') : ''), qty: 1, unit_cents: j.valueCents },
+    ...earlier.filter(x => x.kind !== 'Final').map(x => ({ description: `Less: ${x.kind.toLowerCase()} invoice ${x.number}`, qty: 1, unit_cents: -x.subtotalCents }))
+  ];
+}

@@ -12,7 +12,7 @@ import {
   type Contact, type CostKey, type CrewMember, type Job, type Profile, type Service, type Settings, type Task, type TaskType
 } from '@/lib/crm';
 import {
-  DEFAULT_COMPANY, fillTemplate, templateVars, toAgreement, toCompany, toInvoice,
+  DEFAULT_COMPANY, draftInvoiceLines, fillTemplate, templateVars, toAgreement, toCompany, toInvoice,
   type Agreement, type Company, type Invoice, type InvoiceKind, type Line, type Template
 } from '@/lib/docs';
 
@@ -70,6 +70,8 @@ type Crm = {
   deleteAgreement: (id: string) => Promise<boolean>;
   saveCompany: (patch: Partial<Company>) => void;
   saveTemplate: (id: string, body: string) => void;
+  setJobField: (id: string, fieldId: string, value: string) => void;
+  reload: () => Promise<void>;
   // ui
   newDeal: boolean;
   setNewDeal: (open: boolean) => void;
@@ -115,6 +117,7 @@ const toJob = (r: Row): Job => {
       hauling: fromCents(c.hauling_cents),
       permits: fromCents(c.permits_cents)
     },
+    extra: r.extra || {},
     serviceIds: (r.job_services || []).map((x: Row) => x.service_id),
     crewIds: (r.job_crew || []).map((x: Row) => x.crew_member_id),
     createdAt: r.created_at
@@ -165,7 +168,7 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     setJobs((j.data || []).map(toJob));
     setTasks((t.data || []).map(toTask));
     if (st.data) {
-      setSettings({ marginTarget: st.data.margin_target, minJob: fromCents(st.data.min_job_cents), stages: st.data.stages, showLost: st.data.show_lost });
+      setSettings({ marginTarget: st.data.margin_target, minJob: fromCents(st.data.min_job_cents), stages: st.data.stages, showLost: st.data.show_lost, jobFields: st.data.job_fields || [] });
       setCompany(toCompany(st.data));
     }
     setInvoices((inv.data || []).map(toInvoice));
@@ -293,20 +296,13 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
 
   const jobById = (id: string) => jobs.find(j => j.id === id);
   const svcNames = (j: Job) => j.serviceIds.map(id => services.find(x => x.id === id)?.name).filter((x): x is string => !!x);
-  const pct = (cents: number, p: number) => Math.round((cents * p) / 100);
-
+  
   const createInvoice: Crm['createInvoice'] = async (jobId, kind) => {
     const j = jobById(jobId);
     if (!j) return null;
     const value = toCents(j.value);
     const earlier = invoices.filter(x => x.jobId === jobId && x.status !== 'Void' && x.kind !== 'Final');
-    const lines: Line[] =
-      kind === 'Deposit' ? [{ description: `Deposit (${company.depositPct}%) — ${j.title}`, qty: 1, unit_cents: pct(value, company.depositPct) }]
-      : kind === 'Progress' ? [{ description: `Progress billing — ${j.title}`, qty: 1, unit_cents: 0 }]
-      : [
-          { description: `${j.title}${svcNames(j).length ? ' — ' + svcNames(j).join(', ') : ''}`, qty: 1, unit_cents: value },
-          ...earlier.map(x => ({ description: `Less: ${x.kind.toLowerCase()} invoice ${x.number}`, qty: 1, unit_cents: -x.subtotalCents }))
-        ];
+    const lines = draftInvoiceLines(kind, { title: j.title, services: svcNames(j), valueCents: value }, company.depositPct, earlier);
     const issue = new Date();
     const due = new Date(issue); due.setDate(due.getDate() + company.paymentDays);
     const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -433,6 +429,14 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     run(sb.from('profiles').update(row).eq('id', id));
   };
 
+  const setJobField: Crm['setJobField'] = (id, fieldId, value) => {
+    const job = jobs.find(j => j.id === id);
+    if (!job) return;
+    const extra = { ...job.extra, [fieldId]: value };
+    patchJobLocal(id, j => ({ ...j, extra }));
+    run(sb.from('jobs').update({ extra }).eq('id', id));
+  };
+
   const me = profiles.find(p => p.id === initialMe.id) || initialMe;
 
   const value: Crm = {
@@ -440,7 +444,7 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     updateJob, setCost, setServices, toggleCrew, saveContact, createDeal, deleteJob,
     addTask, toggleTask, deleteTask, addCrew, removeCrew, updateProfile,
     company, invoices, agreements, templates, createInvoice, updateInvoice, deleteInvoice,
-    createAgreement, updateAgreement, deleteAgreement, saveCompany, saveTemplate,
+    createAgreement, updateAgreement, deleteAgreement, saveCompany, saveTemplate, setJobField, reload: load,
     newDeal, setNewDeal
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
