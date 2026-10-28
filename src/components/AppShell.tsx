@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useOpenJob } from '@/lib/useOpenJob';
 import {
-  Recycle, SquaresFour, Kanban, FileText, CheckSquare, GlobeSimple, Tray, UsersThree, SignOut, Warning, X, Receipt, Signature
+  Recycle, SquaresFour, Kanban, FileText, CheckSquare, GlobeSimple, Tray, UsersThree, SignOut, Warning, X, Receipt, Signature, Hammer
 } from '@phosphor-icons/react';
 import { CrmProvider, useCrm } from '@/lib/store';
 import { initials, PROTECTED_STAGES, type Profile } from '@/lib/crm';
@@ -50,7 +50,8 @@ function Sidebar() {
     { href: '/invoices', label: 'Invoices', icon: Receipt, count: String(invoices.filter(x => x.status === 'Sent').length || '') },
     { href: '', label: 'Web leads', icon: GlobeSimple, count: '' },
     { href: '', label: 'Inbox', icon: Tray, count: '' },
-    { href: '/team', label: 'Team', icon: UsersThree, count: '' }
+    { href: '/team', label: 'Team', icon: UsersThree, count: '' },
+    { href: '/builds', label: 'Builds', icon: Hammer, count: '' }
   ];
   return (
     <aside className="sidebar">

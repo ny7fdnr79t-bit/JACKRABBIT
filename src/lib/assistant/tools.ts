@@ -2,6 +2,7 @@ import 'server-only';
 import type Anthropic from '@anthropic-ai/sdk';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CLIENT_TYPES, BILLING, STATUS, TASK_TYPES, PROTECTED_STAGES, COSTS } from '@/lib/crm';
+import { discard, fileRequest, listBuilds, publish, requestChanges, rollback } from '@/lib/builds.server';
 import { draftInvoiceLines, fillTemplate, templateVars, toCompany, type InvoiceKind } from '@/lib/docs';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -207,9 +208,34 @@ export const TOOLS: Anthropic.Beta.BetaTool[] = [
     input_schema: obj({ title: str('Short title'), description: str('What to build and why, written so a developer can build it without asking questions: who uses it, where it appears, what it does, and what done looks like') }, ['title', 'description'])
   },
   {
+    name: 'list_builds',
+    description: 'App changes requested from the CRM and their live status: building, ready (has a preview link to try), published, discarded or failed.',
+    input_schema: obj({})
+  },
+  {
+    name: 'revise_build',
+    description: 'Ask Claude Code to change a build that is in progress or ready for review (Leadership only). Pass the person’s feedback in their words, made specific.',
+    input_schema: obj({ number: num('Build number (#) from list_builds'), feedback: str('What to change') }, ['number', 'feedback'])
+  },
+  {
+    name: 'publish_build',
+    description: 'Publish a ready build: merges it so it goes live (Leadership only). Call only after the person has tried the preview and explicitly said to publish this build in this conversation. Never publish on your own initiative.',
+    input_schema: obj({ number: num('Build number (#)') }, ['number'])
+  },
+  {
+    name: 'discard_build',
+    description: 'Discard a build that hasn’t been published (Leadership only). Confirm first.',
+    input_schema: obj({ number: num('Build number (#)') }, ['number'])
+  },
+  {
+    name: 'rollback_build',
+    description: 'Start undoing a published build (Leadership only). This creates a new build that reverts it, which is previewed and published like any other. Confirm first.',
+    input_schema: obj({ number: num('Build number (#) of the published build') }, ['number'])
+  },
+  {
     name: 'open_in_crm',
     description: 'Show something in the CRM: switch screen and/or open a job panel.',
-    input_schema: obj({ screen: { type: 'string', enum: ['overview', 'pipeline', 'contracts', 'tasks', 'agreements', 'invoices', 'team'] }, job_id: { type: 'string' } })
+    input_schema: obj({ screen: { type: 'string', enum: ['overview', 'pipeline', 'contracts', 'tasks', 'agreements', 'invoices', 'builds', 'team'] }, job_id: { type: 'string' } })
   }
 ];
 
@@ -548,23 +574,49 @@ const handlers: Record<string, Handler> = {
   },
 
   async request_feature(ctx, i) {
-    const { sb, me } = ctx;
-    leadershipOnly(ctx, 'file app change requests');
+    leadershipOnly(ctx, 'request app changes');
     const title = clean(i.title, 120) || fail('Give a title.');
     const description = clean(i.description, 6000) || fail('Describe the change.');
-    const token = process.env.GITHUB_TOKEN, repo = process.env.GITHUB_REPO || 'ny7fdnr79t-bit/JACKRABBIT';
-    if (!token) fail('Feature requests aren’t connected yet (GITHUB_TOKEN isn’t set on the server). Note the request and add it later.');
-    const body = `${description}\n\n---\nRequested from the CRM by **${me.name}** (${me.role}) on ${today()}.\n\nBuild this on a new branch from \`${process.env.GITHUB_BASE_BRANCH || 'crm-nextjs'}\` and open a pull request. Follow README.md; keep the Nocturne design, run \`npm run typecheck\` and \`npm run build\`, and add a Supabase migration for any schema change.`;
-    const r = await fetch(`https://api.github.com/repos/${repo}/issues`, {
-      method: 'POST',
-      headers: { authorization: 'Bearer ' + token, accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', 'content-type': 'application/json' },
-      body: JSON.stringify({ title, body, labels: [process.env.GITHUB_REQUEST_LABEL || 'claude'] })
-    });
-    const issue = await r.json().catch(() => ({}));
-    if (!r.ok) fail('GitHub didn’t accept the request: ' + (issue.message || r.status));
-    await must(sb.from('feature_requests').insert({ user_id: me.id, title, description, issue_url: issue.html_url, issue_number: issue.number }));
-    ctx.changes.push(`Filed app change request #${issue.number}: ${title}`);
-    return { issue_number: issue.number, url: issue.html_url, next: 'Claude Code builds it on a branch and opens a pull request with a preview link. Nothing goes live until someone merges it.' };
+    const r = await fileRequest(ctx.sb, ctx.me, title, description);
+    ctx.changes.push(`Requested app change #${r.number}: ${title}`);
+    ctx.nav = { screen: 'builds' };
+    return { build_number: r.number, next: 'Claude Code is building it on a separate copy of the app. It appears under Builds with a preview link when ready (usually 5–20 minutes). Nothing goes live until someone publishes it.' };
+  },
+
+  async list_builds({ sb }) {
+    const builds = await listBuilds(sb);
+    return { builds: builds.map(b => ({ number: b.number, title: b.title, kind: b.kind, status: b.status, detail: b.detail, preview: b.previewUrl, requested_by: b.requestedBy, requested_at: b.requestedAt.slice(0, 10), published_at: b.publishedAt?.slice(0, 10) || null })) };
+  },
+
+  async revise_build(ctx, i) {
+    leadershipOnly(ctx, 'change builds');
+    const feedback = clean(i.feedback, 4000) || fail('Say what to change.');
+    await requestChanges(ctx.sb, ctx.me, Number(i.number), feedback);
+    ctx.changes.push(`Asked Claude to revise build #${i.number}`);
+    return { ok: true, next: 'Claude is revising it; a new preview appears under Builds when it’s done.' };
+  },
+
+  async publish_build(ctx, i) {
+    leadershipOnly(ctx, 'publish builds');
+    const r = await publish(ctx.sb, ctx.me, Number(i.number));
+    ctx.changes.push(`Published build #${i.number}`);
+    return { ok: true, merged_pull_request: r.prNumber, needs_database_migration: r.needsMigration,
+      note: r.needsMigration ? 'This build includes a database change. Someone must run the new file from supabase/migrations in the Supabase SQL Editor, or the new feature may error.' : 'It goes live after the deploy finishes, usually within two minutes.' };
+  },
+
+  async discard_build(ctx, i) {
+    leadershipOnly(ctx, 'discard builds');
+    await discard(ctx.sb, ctx.me, Number(i.number));
+    ctx.changes.push(`Discarded build #${i.number}`);
+    return { ok: true };
+  },
+
+  async rollback_build(ctx, i) {
+    leadershipOnly(ctx, 'roll back builds');
+    const r = await rollback(ctx.sb, ctx.me, Number(i.number));
+    ctx.changes.push(`Started rollback of build #${i.number} (new build #${r.number})`);
+    ctx.nav = { screen: 'builds' };
+    return { rollback_build_number: r.number, next: 'Claude prepares the rollback as a new build; publish it once its preview looks right. For an emergency, Vercel can also instantly restore the previous deployment from its dashboard.' };
   },
 
   async open_in_crm(ctx, i) {

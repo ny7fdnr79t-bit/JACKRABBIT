@@ -18,7 +18,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 
 ### 1. Supabase
 1. Create a project at supabase.com (region: Canada if available).
-2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) and [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql). (Or `supabase link` + `supabase db push` with the CLI.)
+2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql) and [`20261029000000_builds.sql`](supabase/migrations/20261029000000_builds.sql). (Or `supabase link` + `supabase db push` with the CLI.)
 3. **Authentication → Providers**
    - **Google**: enable, add the client ID/secret from a Google Cloud OAuth client (Web). Authorised redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
    - **Azure (Microsoft 365)**: enable, add the app registration's client ID/secret and tenant URL. Same redirect URI.
@@ -56,12 +56,22 @@ Without Stripe keys, invoices still work and show e-transfer and cheque instruct
 - **Safety:** the tools run with the signed-in person's own Supabase session, so row level security limits it exactly like that person. Every change is written to `ai_actions` with the steps to reverse it, and each reply has an **Undo** button.
 - **Setup:** add `ANTHROPIC_API_KEY` to Vercel (server only).
 
-### App change requests
+### Builds: changing the CRM from inside the CRM
 
-When someone asks for something the assistant's tools can't do (a new screen, button or report), it offers to file an **app change request**. That's Leadership only, and it's filed only after the person confirms the wording. The request becomes a GitHub issue labelled `claude`. The [Claude GitHub Action](.github/workflows/claude.yml) then builds it on a new branch and opens a pull request, which Vercel gives a preview link. Nothing goes live until someone reviews and merges it.
+Leadership can get the app itself changed (new screens, buttons, reports) without leaving the CRM:
+
+1. **Ask.** Tell the assistant ("add a weekly crew schedule screen") or use **Builds → Request a change**. The assistant drafts the request and files it once you confirm.
+2. **Claude Code builds it** on a separate branch through the [Claude GitHub Action](.github/workflows/claude.yml), usually in 5–20 minutes. **Builds** shows the progress live.
+3. **Try it.** When it's **Ready to review**, open the **preview link**: a full copy of the CRM with the change in it.
+4. **Revise or publish.** Use **Ask for changes** (or tell the assistant) to send feedback, and Claude updates the same build. **Publish** merges it, and Vercel deploys it within a couple of minutes.
+5. **Roll back** a published build to have Claude prepare a build that undoes it, which you preview and publish like any other. For an emergency, Vercel → Deployments → **Instant Rollback** restores the previous version immediately.
+
+Nothing goes live without a person clicking Publish (or telling the assistant to publish that specific build). Publishing needs a successful preview. If a build adds a database change, the CRM tells you to run the new `supabase/migrations` file in Supabase.
+
+Builds are published into `GITHUB_BASE_BRANCH` (default `crm-nextjs`, matching `base_branch` in the workflow). Once the CRM is live from `main`, set both to `main`, and Publish then updates production.
 
 Setup, once:
-1. In Vercel, add `GITHUB_TOKEN`: a fine-grained GitHub token for this repo only, with **Issues: Read and write**.
+1. Create a fine-grained GitHub token for this repo only, with **Contents**, **Issues** and **Pull requests** set to Read and write, and **Actions**, **Deployments** and **Commit statuses** set to Read. Add it to Vercel as `GITHUB_TOKEN`.
 2. In GitHub → repo **Settings → Secrets and variables → Actions**, add `ANTHROPIC_API_KEY`.
 3. Install the Claude GitHub app: run `claude` in a terminal, then `/install-github-app`.
 4. Copy `.github/workflows/claude.yml` onto `main`. GitHub only runs issue workflows from the default branch.
@@ -105,6 +115,8 @@ src/app/(public)/     client pages: /sign/<token>, /pay/<token>
 src/app/api/          PDF downloads, Stripe webhook, assistant (/api/ai, /api/ai/undo)
 src/lib/assistant/    assistant instructions and tools (each tool records its own undo)
 src/components/AiPanel.tsx  the chat panel
+src/lib/builds.server.ts    Builds: GitHub issues → Claude Code → preview → publish
+src/app/(app)/builds/       the Builds screen
 src/proxy.ts          session refresh + redirect to /login
 supabase/migrations/  schema, RLS, triggers, create_deal / ensure_services
 design/               prototype, handoff, old Vercel API functions (reference only)

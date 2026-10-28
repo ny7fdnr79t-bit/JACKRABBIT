@@ -448,6 +448,10 @@ button { font: inherit; }
   display: flex; align-items: center; gap: 8px;
 }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
 /* Assistant */
 .ai-panel {
   position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%); z-index: 35; background: var(--color-surface);
