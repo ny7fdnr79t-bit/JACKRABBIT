@@ -15,6 +15,11 @@ export default function LoginPage() {
   const redirectTo = () => window.location.origin + '/auth/callback';
 
   useEffect(() => {
+    const e = new URLSearchParams(window.location.search).get('error');
+    if (e) setMsg(e === 'browser'
+      ? 'That sign-in link only works in the browser you asked for it from. Enter your email here to get a new code instead.'
+      : e === 'expired' ? 'That sign-in link has expired or was already used. Enter your email to get a new one.'
+      : 'Sign-in didn’t complete. Enter your email to try again.');
     fetch(process.env.NEXT_PUBLIC_SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! } })
       .then(r => r.json())
       .then(s => setProviders({ google: !!s?.external?.google, azure: !!s?.external?.azure }))
@@ -82,7 +87,7 @@ export default function LoginPage() {
             <button type="button" className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => { setSent(false); setCode(''); setMsg(''); }}>Use a different email or send a new code</button>
           </form>
         )}
-        {msg && <div className="meta" role="status">{msg}</div>}
+        {msg && <div role="status" style={{ fontSize: 13, color: 'var(--color-accent-300)' }}>{msg}</div>}
       </div>
     </main>
   );

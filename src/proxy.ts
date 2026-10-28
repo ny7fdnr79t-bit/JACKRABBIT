@@ -24,8 +24,14 @@ export async function proxy(request: NextRequest) {
       }
     }
   });
-  const { data } = await sb.auth.getUser();
   const path = request.nextUrl.pathname;
+  const sp = request.nextUrl.searchParams;
+  if (!path.startsWith('/auth/') && (sp.has('code') || sp.has('token_hash') || sp.has('error_description'))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/callback';
+    return NextResponse.redirect(url);
+  }
+  const { data } = await sb.auth.getUser();
   if (!data.user && !PUBLIC.some(p => path.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
