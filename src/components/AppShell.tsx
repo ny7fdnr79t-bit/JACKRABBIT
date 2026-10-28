@@ -8,6 +8,7 @@ import {
   Recycle, SquaresFour, Kanban, FileText, CheckSquare, GlobeSimple, Tray, UsersThree, SignOut, Warning, X, Receipt, Signature, Hammer
 } from '@phosphor-icons/react';
 import { CrmProvider, useCrm } from '@/lib/store';
+import { supabase } from '@/lib/supabase/client';
 import { initials, PROTECTED_STAGES, type Profile } from '@/lib/crm';
 import JobDrawer from '@/components/JobDrawer';
 import NewDealDialog from '@/components/NewDealDialog';
@@ -37,7 +38,17 @@ function JobDrawerRoute() {
   return id ? <JobDrawer id={id} onClose={() => open(null)} /> : null;
 }
 
+// Which screens get used feeds the weekly self-review.
+function useScreenViews() {
+  const path = usePathname();
+  const screen = path.split('/')[1] || 'overview';
+  useEffect(() => {
+    supabase().from('app_events').insert({ kind: 'view', screen }).then(() => {});
+  }, [screen]);
+}
+
 function Sidebar() {
+  useScreenViews();
   const { me, jobs, tasks, settings, invoices, agreements } = useCrm();
   const path = usePathname();
   const openStages = settings.stages.filter(s => !PROTECTED_STAGES.includes(s));

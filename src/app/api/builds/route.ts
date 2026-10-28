@@ -10,7 +10,11 @@ export async function GET() {
   if (!s) return NextResponse.json({ error: 'Sign in again.' }, { status: 401 });
   if (!buildsConfigured()) return NextResponse.json({ configured: false, builds: [] });
   try {
-    return NextResponse.json({ configured: true, builds: await listBuilds(s.sb) }, { headers: { 'cache-control': 'no-store' } });
+    const [builds, { data: review }] = await Promise.all([
+      listBuilds(s.sb),
+      s.sb.from('self_reviews').select('at,suggestions,summary').order('at', { ascending: false }).limit(1).maybeSingle()
+    ]);
+    return NextResponse.json({ configured: true, builds, lastReview: review }, { headers: { 'cache-control': 'no-store' } });
   } catch (e) {
     return NextResponse.json({ error: e instanceof BuildError ? e.message : 'Couldn’t load builds.' }, { status: 502 });
   }

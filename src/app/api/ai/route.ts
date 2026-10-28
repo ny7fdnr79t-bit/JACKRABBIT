@@ -62,6 +62,12 @@ export async function POST(request: Request) {
 
   let reply = '';
   let stripped = false;
+  const tools: string[] = [], toolErrors: string[] = [];
+  let outcome: 'ok' | 'error' | 'refusal' | 'limit' = 'ok';
+  // Feeds the weekly self-review: what people ask, and what the assistant couldn't do.
+  const log = () => sb.from('assistant_log').insert({
+    user_id: me.id, prompt: text.slice(0, 2000), tools: [...new Set(tools)], tool_errors: toolErrors.slice(0, 10).map(e => e.slice(0, 200)), outcome, reply: reply.slice(0, 600)
+  }).then(() => {});
   try {
     for (let round = 0; round < MAX_ROUNDS; round++) {
       let res: Anthropic.Beta.BetaMessage;
@@ -77,7 +83,7 @@ export async function POST(request: Request) {
       }
       messages.push({ role: 'assistant', content: res.content });
 
-      if (res.stop_reason === 'refusal') { reply = 'I can’t help with that one. Try rephrasing, or do it from the screen directly.'; break; }
+      if (res.stop_reason === 'refusal') { outcome = 'refusal'; reply = 'I can’t help with that one. Try rephrasing, or do it from the screen directly.'; break; }
       if (res.stop_reason === 'pause_turn') continue;
       if (res.stop_reason !== 'tool_use') {
         reply = res.content.filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text').map(b => b.text).join('\n').trim();
@@ -88,10 +94,12 @@ export async function POST(request: Request) {
       for (const b of res.content) {
         if (b.type !== 'tool_use') continue;
         const r = await runTool(ctx, b.name, b.input);
+        tools.push(b.name);
+        if (r.isError) toolErrors.push(`${b.name}: ${r.content}`);
         results.push({ type: 'tool_result', tool_use_id: b.id, content: r.content, is_error: r.isError });
       }
       messages.push({ role: 'user', content: results });
-      if (round === MAX_ROUNDS - 1) reply = 'That took more steps than I allow in one go. Tell me to keep going if you want me to continue.';
+      if (round === MAX_ROUNDS - 1) { outcome = 'limit'; reply = 'That took more steps than I allow in one go. Tell me to keep going if you want me to continue.'; }
     }
   } catch (e) {
     console.error('assistant error', e);
@@ -102,6 +110,8 @@ export async function POST(request: Request) {
       : e instanceof Anthropic.BadRequestError && /credit balance/i.test(detail) ? 'The Anthropic account has no credit left. Add credit at console.anthropic.com → Billing, then try again.'
       : e instanceof Anthropic.APIError ? `The assistant hit an error (${e.status}): ${detail || 'no details'}`
       : 'The assistant hit an error. Try again.';
+    outcome = 'error'; reply = msg;
+    await log();
     // Changes already made this turn are kept and can still be undone.
     return NextResponse.json({ error: msg, changes: ctx.changes, turnId: ctx.turnId }, { status: 502 });
   }
@@ -110,6 +120,7 @@ export async function POST(request: Request) {
   const last = messages[messages.length - 1];
   if (last.role === 'user') messages.push({ role: 'assistant', content: [{ type: 'text', text: reply }] });
 
+  await log();
   return NextResponse.json({ reply: reply || 'Done.', changes: ctx.changes, turnId: ctx.turnId, nav: ctx.nav, history: messages });
 }
 

@@ -14,12 +14,15 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Row = Record<string, any>;
 
-export type BuildStatus = 'building' | 'ready' | 'published' | 'discarded' | 'failed';
+export type BuildStatus = 'suggested' | 'dismissed' | 'building' | 'ready' | 'published' | 'discarded' | 'failed';
 
 export type Build = {
   id: string;
   number: number | null;          // issue number
-  kind: 'feature' | 'rollback';
+  kind: 'feature' | 'rollback' | 'suggestion';
+  reason: string;                 // suggestions: the evidence behind it
+  impact: string | null;
+  effort: string | null;
   title: string;
   description: string;
   requestedBy: string;
@@ -64,15 +67,12 @@ const instructions = () =>
   `If the change needs a database change, add a new file under supabase/migrations/ (never edit an existing one) and say in the pull request that it must be run in Supabase before publishing. ` +
   `Don't touch secrets, auth, row level security or payment code unless the request is about them, and call out any such change in the pull request.`;
 
+async function openIssue(title: string, body: string) {
+  return gh('/issues', { method: 'POST', body: JSON.stringify({ title, body: body + instructions(), labels: [label()] }) });
+}
+
 export async function fileRequest(sb: SupabaseClient, me: { id: string; name: string; role: string }, title: string, description: string, kind: 'feature' | 'rollback' = 'feature') {
-  const issue = await gh('/issues', {
-    method: 'POST',
-    body: JSON.stringify({
-      title,
-      body: `${description}\n\nRequested from the CRM by **${me.name}** (${me.role}) on ${new Date().toISOString().slice(0, 10)}.${instructions()}`,
-      labels: [label()]
-    })
-  });
+  const issue = await openIssue(title, `${description}\n\nRequested from the CRM by **${me.name}** (${me.role}) on ${new Date().toISOString().slice(0, 10)}.`);
   const { data, error } = await sb.from('feature_requests')
     .insert({ user_id: me.id, title, description, kind, issue_url: issue.html_url, issue_number: issue.number })
     .select('id').single();
@@ -147,18 +147,21 @@ async function statusOf(row: Row, snap: Awaited<ReturnType<typeof snapshot>>): P
 }
 
 export async function listBuilds(sb: SupabaseClient): Promise<Build[]> {
-  const { data: rows, error } = await sb.from('feature_requests').select('*').order('created_at', { ascending: false }).limit(30);
+  const { data: rows, error } = await sb.from('feature_requests').select('*').order('created_at', { ascending: false }).limit(40);
   if (error) throw new BuildError(error.message);
   if (!rows?.length) return [];
+  const needsGitHub = rows.some(r => r.issue_number && !['suggested', 'dismissed', 'published'].includes(r.status));
   const [{ data: people }, { data: events }, snap] = await Promise.all([
     sb.from('profiles').select('id,name'),
     sb.from('build_events').select('*').in('request_id', rows.map(r => r.id)).order('at'),
-    snapshot()
+    needsGitHub ? snapshot() : Promise.resolve({ pulls: [], runs: [] })
   ]);
   const name = new Map((people || []).map(p => [p.id, p.name]));
   return Promise.all(rows.map(async r => {
     // Requests that are already settled don't need GitHub calls.
-    const live = r.status === 'published' && r.published_at
+    const live = r.status === 'suggested' || r.status === 'dismissed' || !r.issue_number
+      ? { status: r.status as BuildStatus, detail: r.status === 'dismissed' ? 'Dismissed.' : 'Suggested by the CRM’s weekly review.', prNumber: null, prUrl: null, previewUrl: null }
+      : r.status === 'published' && r.published_at
       ? { status: 'published' as const, detail: 'Published.', prNumber: r.pr_number, prUrl: r.pr_number ? `https://github.com/${repo()}/pull/${r.pr_number}` : null, previewUrl: null }
       : await statusOf(r, snap).catch(e => ({ status: 'failed' as const, detail: e.message, prNumber: r.pr_number, prUrl: null, previewUrl: null }));
     if (live.status !== r.status || live.prNumber !== r.pr_number) {
@@ -166,7 +169,8 @@ export async function listBuilds(sb: SupabaseClient): Promise<Build[]> {
     }
     return {
       id: r.id, number: r.issue_number, kind: r.kind, title: r.title, description: r.description,
-      requestedBy: name.get(r.user_id) || 'Someone', requestedAt: r.created_at, issueUrl: r.issue_url,
+      reason: r.reason || '', impact: r.impact, effort: r.effort,
+      requestedBy: r.user_id ? name.get(r.user_id) || 'Someone' : 'Weekly review', requestedAt: r.created_at, issueUrl: r.issue_url,
       publishedAt: r.published_at, publishedBy: r.published_by ? name.get(r.published_by) || null : null,
       events: (events || []).filter(e => e.request_id === r.id).map(e => ({ at: e.at, who: name.get(e.user_id) || '', kind: e.kind, note: e.note })),
       ...live
@@ -238,4 +242,24 @@ export async function rollback(sb: SupabaseClient, me: { id: string; name: strin
   return fileRequest(sb, me, `Roll back: ${r.title}`,
     `Undo the change published in pull request #${r.pr_number} ("${r.title}"). Revert exactly what that pull request changed and nothing else. ` +
     `If later changes depend on it, keep them working and explain what you did. If it added a database migration, add a new migration that reverses it only if that is safe for existing data; otherwise explain in the pull request.`, 'rollback');
+}
+
+// ── Suggestions from the weekly review ──────────────────────────────────
+
+export async function approveSuggestion(sb: SupabaseClient, me: { id: string; name: string; role: string }, ref: string) {
+  const r = await requestRow(sb, ref);
+  if (r.status !== 'suggested') throw new BuildError('That suggestion has already been handled.');
+  const issue = await openIssue(r.title,
+    `${r.description}\n\n**Why:** ${r.reason}\n\nSuggested by the CRM's weekly self-review; approved for building by **${me.name}** (${me.role}) on ${new Date().toISOString().slice(0, 10)}.`);
+  await sb.from('feature_requests').update({ status: 'building', issue_url: issue.html_url, issue_number: issue.number, user_id: r.user_id ?? me.id, updated_at: new Date().toISOString() }).eq('id', r.id);
+  await sb.from('build_events').insert({ request_id: r.id, user_id: me.id, kind: 'approved', note: '' });
+  return { number: issue.number as number };
+}
+
+export async function dismissSuggestion(sb: SupabaseClient, me: { id: string }, ref: string) {
+  const r = await requestRow(sb, ref);
+  if (r.status !== 'suggested') throw new BuildError('That suggestion has already been handled.');
+  // Kept, not deleted, so the next review knows not to suggest it again.
+  await sb.from('feature_requests').update({ status: 'dismissed', updated_at: new Date().toISOString() }).eq('id', r.id);
+  await sb.from('build_events').insert({ request_id: r.id, user_id: me.id, kind: 'dismissed', note: '' });
 }

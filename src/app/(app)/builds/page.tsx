@@ -1,20 +1,21 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowSquareOut, Rocket, ChatCircleText, Trash, ArrowCounterClockwise, Plus, Sparkle, GithubLogo, CircleNotch } from '@phosphor-icons/react';
+import { ArrowSquareOut, Rocket, ChatCircleText, Trash, ArrowCounterClockwise, Plus, Sparkle, GithubLogo, CircleNotch, Lightbulb, Hammer, X, MagnifyingGlass } from '@phosphor-icons/react';
 import { useCrm } from '@/lib/store';
 import { fmtD } from '@/lib/crm';
 import { Loading } from '@/components/ui';
 import { useAi } from '@/components/AiPanel';
 
 type Build = {
-  id: string; number: number | null; kind: 'feature' | 'rollback'; title: string; description: string; requestedBy: string; requestedAt: string;
-  status: 'building' | 'ready' | 'published' | 'discarded' | 'failed'; detail: string; issueUrl: string | null; prNumber: number | null;
+  id: string; number: number | null; kind: 'feature' | 'rollback' | 'suggestion'; reason: string; impact: string | null; effort: string | null; title: string; description: string; requestedBy: string; requestedAt: string;
+  status: 'suggested' | 'dismissed' | 'building' | 'ready' | 'published' | 'discarded' | 'failed'; detail: string; issueUrl: string | null; prNumber: number | null;
   prUrl: string | null; previewUrl: string | null; publishedAt: string | null; publishedBy: string | null;
   events: { at: string; who: string; kind: string; note: string }[];
 };
 
 const TAG: Record<Build['status'], [string, string]> = {
+  suggested: ['tag-accent', 'Suggested'], dismissed: ['tag-neutral', 'Dismissed'],
   building: ['tag-accent-2', 'Building'], ready: ['tag-accent', 'Ready to review'], published: ['tag-outline', 'Published'],
   discarded: ['tag-neutral', 'Discarded'], failed: ['tag-neutral', 'Needs attention']
 };
@@ -29,12 +30,14 @@ export default function Builds() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ title: string; description: string } | null>(null);
+  const [review, setReview] = useState<{ at: string; suggestions: number; summary: string } | null>(null);
+  const [showDismissed, setShowDismissed] = useState(false);
 
   const load = useCallback(async () => {
     const r = await fetch('/api/builds', { cache: 'no-store' });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) { setErr(d.error || 'Couldn’t load builds.'); setBuilds(b => b || []); return; }
-    setErr(''); setConfigured(d.configured !== false); setBuilds(d.builds || []);
+    setErr(''); setConfigured(d.configured !== false); setBuilds(d.builds || []); setReview(d.lastReview || null);
   }, []);
 
   // Refresh while anything is building; GitHub is the source of truth.
@@ -58,6 +61,15 @@ export default function Builds() {
     return true;
   };
 
+  const runReview = async () => {
+    setBusy('review'); setErr('');
+    const r = await fetch('/api/builds/review', { method: 'POST' });
+    const d = await r.json().catch(() => ({}));
+    setBusy(null);
+    if (!r.ok) return setErr(d.error || 'The review couldn’t run.');
+    await load();
+  };
+
   const file = async () => {
     if (!draft?.title.trim() || !draft.description.trim()) return setErr('Give it a title and describe what you want.');
     setBusy('new'); setErr('');
@@ -75,6 +87,9 @@ export default function Builds() {
         <div><div className="meta">Changes to the CRM itself, built by Claude Code. You try each one before it goes live.</div><h3>Builds</h3></div>
         {lead && configured && (
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <button className="btn btn-secondary" disabled={busy === 'review'} onClick={runReview} title="Claude looks at the last 30 days of use and suggests up to three improvements (about $0.20)">
+              {busy === 'review' ? <CircleNotch className="spin" /> : <MagnifyingGlass />}{busy === 'review' ? 'Reviewing…' : 'Review now'}
+            </button>
             <button className="btn btn-secondary" onClick={toggle}><Sparkle />Describe it to the assistant</button>
             <button className="btn btn-primary" onClick={() => setDraft({ title: '', description: '' })}><Plus />Request a change</button>
           </div>
@@ -108,7 +123,29 @@ export default function Builds() {
       {err && <div className="warn" role="alert" style={{ fontSize: 14 }}>{err}</div>}
       {builds === null ? <Loading /> : configured && builds.length === 0 && !draft ? (
         <div className="meta" style={{ fontSize: 14 }}>No builds yet. {lead ? 'Request a change, or ask the assistant (⌘J) for something the CRM can’t do yet.' : 'Leadership can request changes to the app here.'}</div>
-      ) : builds.map(b => <BuildCard key={b.id} b={b} lead={lead} busy={busy} act={act} />)}
+      ) : (
+        <>
+          {review && (
+            <div className="meta" style={{ fontSize: 13, display: 'flex', gap: 8 }}>
+              <Lightbulb size={16} style={{ flex: 'none', marginTop: 2 }} />
+              <span>Last review {day(review.at)}: {review.summary || (review.suggestions ? `${review.suggestions} suggestion(s).` : 'nothing to suggest.')} The CRM reviews itself every Monday.</span>
+            </div>
+          )}
+          {builds.some(b => b.status === 'suggested') && (
+            <section className="section">
+              <div className="section-head"><h5>Suggested by the CRM</h5><span className="meta">Nothing is built until you choose Build it</span></div>
+              {builds.filter(b => b.status === 'suggested').map(b => <SuggestionCard key={b.id} b={b} lead={lead} busy={busy} act={act} />)}
+            </section>
+          )}
+          {builds.filter(b => b.status !== 'suggested' && b.status !== 'dismissed').map(b => <BuildCard key={b.id} b={b} lead={lead} busy={busy} act={act} />)}
+          {builds.some(b => b.status === 'dismissed') && (
+            <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => setShowDismissed(!showDismissed)}>
+              {showDismissed ? 'Hide' : 'Show'} {builds.filter(b => b.status === 'dismissed').length} dismissed suggestion(s)
+            </button>
+          )}
+          {showDismissed && builds.filter(b => b.status === 'dismissed').map(b => <SuggestionCard key={b.id} b={b} lead={false} busy={busy} act={act} />)}
+        </>
+      )}
     </div>
   );
 }
@@ -177,6 +214,33 @@ function BuildCard({ b, lead, busy, act }: { b: Build; lead: boolean; busy: stri
               <ArrowCounterClockwise />Roll back
             </button>
           )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function SuggestionCard({ b, lead, busy, act }: { b: Build; lead: boolean; busy: string | null; act: (b: Build, action: string, extra?: Record<string, string>) => Promise<boolean> }) {
+  const [more, setMore] = useState(false);
+  const working = (a: string) => busy === b.id + a;
+  return (
+    <article className="card elev-sm" style={{ padding: 'var(--space-6)', gap: 'var(--space-3)', opacity: b.status === 'dismissed' ? 0.6 : 1 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span className={'tag ' + TAG[b.status][0]}><Lightbulb style={{ marginRight: 4 }} />{TAG[b.status][1]}</span>
+        {b.impact && <span className="meta">{b.impact} impact</span>}
+        {b.effort && <span className="meta">· {b.effort} change</span>}
+        <span className="meta">· {day(b.requestedAt)}</span>
+      </div>
+      <div style={{ fontSize: 17, fontWeight: 500 }}>{b.title}</div>
+      {b.reason && <div style={{ fontSize: 13, color: 'var(--color-accent-300)' }}>Why: {b.reason}</div>}
+      <p style={{ margin: 0, fontSize: 14, color: 'var(--color-neutral-200)', whiteSpace: 'pre-wrap', ...(more ? {} : { display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }) }}>{b.description}</p>
+      {b.description.length > 200 && <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => setMore(!more)}>{more ? 'Show less' : 'Show more'}</button>}
+      {lead && b.status === 'suggested' && (
+        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <button className="btn btn-primary" disabled={!!busy} onClick={() => confirm(`Build “${b.title}”? Claude Code starts building it; you’ll still preview it before anything goes live.`) && act(b, 'approve')}>
+            <Hammer />{working('approve') ? 'Starting…' : 'Build it'}
+          </button>
+          <button className="btn btn-secondary" disabled={!!busy} onClick={() => act(b, 'dismiss')}><X />{working('dismiss') ? 'Dismissing…' : 'Dismiss'}</button>
         </div>
       )}
     </article>

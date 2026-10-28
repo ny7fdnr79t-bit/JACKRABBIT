@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { currentMember } from '@/lib/session.server';
-import { BuildError, discard, publish, requestChanges, rollback } from '@/lib/builds.server';
+import { approveSuggestion, BuildError, discard, dismissSuggestion, publish, requestChanges, rollback } from '@/lib/builds.server';
 
 export const runtime = 'nodejs';
 
-// POST { action: 'changes' | 'publish' | 'discard' | 'rollback', feedback? } — Leadership only.
+// POST { action: 'changes' | 'publish' | 'discard' | 'rollback' | 'approve' | 'dismiss', feedback? } — Leadership only.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const s = await currentMember();
@@ -22,6 +22,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (action === 'publish') return NextResponse.json(await publish(s.sb, s.me, id));
     if (action === 'discard') { await discard(s.sb, s.me, id); return NextResponse.json({ ok: true }); }
     if (action === 'rollback') return NextResponse.json(await rollback(s.sb, s.me, id));
+    if (action === 'approve') return NextResponse.json(await approveSuggestion(s.sb, s.me, id));
+    if (action === 'dismiss') { await dismissSuggestion(s.sb, s.me, id); return NextResponse.json({ ok: true }); }
     return NextResponse.json({ error: 'Unknown action.' }, { status: 400 });
   } catch (e) {
     return NextResponse.json({ error: e instanceof BuildError ? e.message : 'Something went wrong.' }, { status: 502 });

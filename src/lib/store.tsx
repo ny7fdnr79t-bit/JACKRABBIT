@@ -439,6 +439,12 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
 
   const me = profiles.find(p => p.id === initialMe.id) || initialMe;
 
+  // Errors people see feed the weekly self-review.
+  useEffect(() => {
+    if (!error) return;
+    sb.from('app_events').insert({ kind: 'error', screen: window.location.pathname.split('/')[1] || '', message: error.slice(0, 500) }).then(() => {});
+  }, [error, sb]);
+
   const value: Crm = {
     ready, me, profiles, crew, services, jobs, tasks, settings, error, clearError: () => setError(''),
     updateJob, setCost, setServices, toggleCrew, saveContact, createDeal, deleteJob,

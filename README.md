@@ -18,7 +18,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 
 ### 1. Supabase
 1. Create a project at supabase.com (region: Canada if available).
-2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql) and [`20261029000000_builds.sql`](supabase/migrations/20261029000000_builds.sql). (Or `supabase link` + `supabase db push` with the CLI.)
+2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql), [`20261029000000_builds.sql`](supabase/migrations/20261029000000_builds.sql) and [`20261030000000_self_review.sql`](supabase/migrations/20261030000000_self_review.sql). (Or `supabase link` + `supabase db push` with the CLI.)
 3. **Authentication → Providers**
    - **Google**: enable, add the client ID/secret from a Google Cloud OAuth client (Web). Authorised redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
    - **Azure (Microsoft 365)**: enable, add the app registration's client ID/secret and tenant URL. Same redirect URI.
@@ -75,6 +75,19 @@ Setup, once:
 2. In GitHub → repo **Settings → Secrets and variables → Actions**, add `ANTHROPIC_API_KEY`.
 3. Install the Claude GitHub app: run `claude` in a terminal, then `/install-github-app`.
 4. Copy `.github/workflows/claude.yml` onto `main`. GitHub only runs issue workflows from the default branch.
+
+### The CRM suggests its own improvements
+
+Every Monday at 9am Toronto time (Vercel Cron, `vercel.json`), Claude reviews the last 30 days of use and proposes up to three builds. Leadership can also click **Review now** on Builds. It looks at:
+- which screens people use
+- errors people hit
+- what people ask the assistant, especially what it couldn't do
+
+Suggestions appear under **Builds → Suggested by the CRM**, each with the evidence behind it. **Build it** starts the normal build (preview → Publish), and **Dismiss** sets it aside so it isn't suggested again. Nothing is built without a person choosing it.
+
+- **Cost:** about $0.15–0.40 per review (Claude Opus 5.5), so roughly $1–2 a month. A quiet week with almost no use skips the call entirely. Each review's token use is stored in `self_reviews`.
+- **Privacy:** only Leadership can read the usage logs (`app_events`, `assistant_log`). They're kept 90 days, and suggestions never include client names or amounts.
+- **Setup:** add `CRON_SECRET` (any long random string) to Vercel. Vercel only runs crons on **production**, so the weekly schedule starts once the new CRM is live on `main`. Until then, use **Review now**.
 
 ## Invoices and agreements
 
