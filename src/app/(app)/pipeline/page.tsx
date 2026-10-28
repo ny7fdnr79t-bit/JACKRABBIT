@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Plus, Siren } from '@phosphor-icons/react';
+import { Plus, Siren, Kanban } from '@phosphor-icons/react';
 import { useCrm, useLookups } from '@/lib/store';
 import { costed, initials, k, marginColor, marginOf, PROTECTED_STAGES, STAGE_MARK, sum, svcLabel } from '@/lib/crm';
 import { Loading } from '@/components/ui';
@@ -35,7 +35,15 @@ export default function Pipeline() {
           <button className="btn btn-primary" onClick={() => setNewDeal(true)}><Plus />New deal</button>
         </div>
       </header>
-      {!ready ? <Loading /> : (
+      {ready && jobs.length === 0 && (
+        <div className="empty">
+          <Kanban size={28} color="var(--color-accent)" />
+          <div style={{ fontSize: 16, fontWeight: 500 }}>No deals yet</div>
+          <p className="meta" style={{ fontSize: 14, margin: 0, maxWidth: 420 }}>Create a deal for a job you’re quoting, or turn a lead into one from Leads. Then drag it across the stages as it moves.</p>
+          <button className="btn btn-primary" onClick={() => setNewDeal(true)}><Plus />New deal</button>
+        </div>
+      )}
+      {!ready ? <Loading /> : jobs.length === 0 ? null : (
         <div className="board">
           {stages.map(st => {
             const items = jobs.filter(j => j.stage === st);

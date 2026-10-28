@@ -6,13 +6,14 @@ Items marked **Needs a person** include steps only the owner can do (accounts, k
 
 ---
 
-### 1. [ ] web-leads: Website form submissions in the CRM
+### 1. [x] web-leads: Website form submissions in the CRM
 **Why:** Leads from wastely.ca land in an old Redis store behind the prototype. This blocks go-live, because the live site still depends on it.
 **Build:**
 - `POST /api/forms` route handler that accepts what the website sends today: `Content-Type: text/plain`, body JSON `{ form: 'Quote request' | 'Contact' | 'Careers', page, fields }`, where `fields` keys differ by form (see `design/HANDOFF.md` → Website forms, and `pick()`/`mapService()`/`parseRange()` in `design/Wastely CRM.dc.html`). Store rows in `web_submissions` (already in the schema) with the service-role client. Keep CORS for `https://wastely.ca`, `https://www.wastely.ca` and `*.github.io`, the `_gotcha` honeypot, a ~32 KB body cap and per-IP rate limiting (about 10 a minute). Always reply 200 quickly.
 - **Web leads** screen (sidebar item already reserved): New / Converted / Archived / All, cards as in the prototype. **Create deal** through `create_deal` with `source = 'Website · <form>'`, value = the midpoint of the `$X – $Y` range in `confirmed` or the minimum, urgent requests set `emergency`, and a "Call back" task for today. Careers can only be archived.
 - An assistant tool to list and convert web leads.
 **Done when:** a test POST shaped like the website's appears on Web leads within seconds and converts into a deal. `npm run check` passes.
+**Status (2026-10-28):** built: `/api/forms`, a Leads screen (website forms plus **Log a call** for phone/text/referral), Create deal pre-filled from the lead, and the assistant's `list_leads`. Website forms reach it once go-live points the website's URL at the new CRM. The $2,500 vs $5,000 minimum is still for the owner to decide.
 **Needs a person:** nothing before publishing. Once the CRM is live on `main` (item 3), the website's existing URL keeps working unchanged.
 **Owner to decide:** the website's contact form enforces a **$2,500** minimum, but the CRM's minimum job value is **$5,000**. Pick one and align both (the CRM value is `app_settings.min_job_cents`).
 
@@ -73,3 +74,4 @@ Items marked **Needs a person** include steps only the owner can do (accounts, k
 - 2026-10-17: Invoices (PDF, HST, Stripe payment page) and client agreements (template, online signing).
 - 2026-10-28: In-CRM assistant with Undo; Builds (change the app from the CRM); email-code sign-in; Mac app 1.1.
 - 2026-10-28: Weekly self-review that suggests builds; this roadmap and CLAUDE.md.
+- 2026-10-28: Leads inbox (website forms endpoint, Log a call, convert to deal) and a UI refresh (grouped sidebar, quick actions, Getting started, empty states).

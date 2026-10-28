@@ -9,6 +9,7 @@ Wastely does large one-off waste jobs in Ontario: estate and facility cleanouts,
 Next.js 16 App Router + TypeScript (strict), Supabase (Postgres, Auth, Realtime), Vercel, Nocturne design system (dark).
 - In Next.js 16, middleware is `src/proxy.ts`, and route `params`/`searchParams` are Promises.
 - `src/app/(app)/*`: signed-in screens. `src/app/(public)/*`: client-facing `/sign/<token>` and `/pay/<token>` pages (light theme, no login). `src/app/api/*`: PDFs, Stripe webhook, assistant, builds, cron.
+- `src/lib/leads.ts` + `src/app/api/forms/route.ts`: the Leads inbox. Website forms POST here (text/plain JSON `{ form, page, fields }`), and the team logs calls and texts by hand. Both are stored in `web_submissions`.
 - `src/lib/store.tsx`: the client data store. It loads everything for the team, applies writes optimistically, and reloads on Supabase Realtime changes. Screens read from `useCrm()`.
 - `src/lib/crm.ts`: domain types and constants (stages, statuses, billing, money/date helpers). `src/lib/docs.ts`: invoices and agreements (types, template filling, the agreement text format).
 - `src/lib/assistant/*`: the in-CRM AI (prompt + tools). `src/lib/builds.server.ts`: Builds (GitHub issue → Claude Code → PR → Vercel preview → Publish). `src/lib/review.server.ts`: the weekly self-review.

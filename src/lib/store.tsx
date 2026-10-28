@@ -15,6 +15,7 @@ import {
   DEFAULT_COMPANY, draftInvoiceLines, fillTemplate, templateVars, toAgreement, toCompany, toInvoice,
   type Agreement, type Company, type Invoice, type InvoiceKind, type Line, type Template
 } from '@/lib/docs';
+import { toLead, type Lead } from '@/lib/leads';
 
 type Row = Record<string, any>;
 
@@ -26,6 +27,11 @@ export type DealDraft = {
   ownerId: string;
   emergency: boolean;
   services: string[]; // service names
+  // Set when the deal comes from a lead.
+  leadId?: string;
+  source?: string;
+  site?: string;
+  contact?: { name: string; email: string; phone: string };
 };
 
 type JobPatch = Partial<Pick<Job, 'title' | 'site' | 'stage' | 'status' | 'billing' | 'value' | 'emergency' | 'start' | 'end' | 'ownerId'>>;
@@ -73,8 +79,12 @@ type Crm = {
   setJobField: (id: string, fieldId: string, value: string) => void;
   reload: () => Promise<void>;
   // ui
-  newDeal: boolean;
-  setNewDeal: (open: boolean) => void;
+  newDeal: false | Partial<DealDraft>;
+  setNewDeal: (open: boolean | Partial<DealDraft>) => void;
+  // leads
+  leads: Lead[];
+  logLead: (source: string, fields: Record<string, string>) => Promise<boolean>;
+  setLeadStatus: (id: string, status: 'new' | 'archived') => void;
 };
 
 const Ctx = createContext<Crm | null>(null);
@@ -141,14 +151,16 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
   const [tasks, setTasks] = useState<Task[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [error, setError] = useState('');
-  const [newDeal, setNewDeal] = useState(false);
+  const [newDeal, setNewDealState] = useState<false | Partial<DealDraft>>(false);
+  const setNewDeal = useCallback((open: boolean | Partial<DealDraft>) => setNewDealState(open === true ? {} : open), []);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [company, setCompany] = useState<Company>(DEFAULT_COMPANY);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
 
   const load = useCallback(async () => {
-    const [p, c, s, j, t, st, inv, ag, tp] = await Promise.all([
+    const [p, c, s, j, t, st, inv, ag, tp, ld] = await Promise.all([
       sb.from('profiles').select('id,name,role,email,quo_phone,active').order('name'),
       sb.from('crew_members').select('id,name,role').eq('active', true).order('name'),
       sb.from('services').select('id,name,grp,is_custom,sort').order('sort').order('name'),
@@ -158,9 +170,10 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
       sb.from('invoices').select('*').order('created_at', { ascending: false }),
       // Signature images stay on the server; the CRM only needs the status.
       sb.from('agreements').select('id,number,job_id,status,title,body,price_cents,sign_token,sent_at,viewed_at,signed_at,signer_name,signer_title').order('created_at', { ascending: false }),
-      sb.from('agreement_templates').select('*').order('name')
+      sb.from('agreement_templates').select('*').order('name'),
+      sb.from('web_submissions').select('*').order('at', { ascending: false }).limit(500)
     ]);
-    const failed = [p, c, s, j, t, st, inv, ag, tp].find(x => x.error);
+    const failed = [p, c, s, j, t, st, inv, ag, tp, ld].find(x => x.error);
     if (failed?.error) { setError(failed.error.message); return; }
     setProfiles((p.data || []).map(toProfile));
     setCrew((c.data || []) as CrewMember[]);
@@ -172,6 +185,7 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
       setCompany(toCompany(st.data));
     }
     setInvoices((inv.data || []).map(toInvoice));
+    setLeads((ld.data || []).map(toLead));
     setAgreements((ag.data || []).map(toAgreement));
     setTemplates((tp.data || []).map((r: Row) => ({ id: r.id, name: r.name, body: r.body, isDefault: r.is_default })));
     setReady(true);
@@ -273,11 +287,41 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
       p_value_cents: toCents(+d.value),
       p_owner_id: d.ownerId || null,
       p_emergency: d.emergency,
-      p_services: d.services
+      p_services: d.services,
+      p_source: d.source || null
     });
     if (error) { setError(error.message); return null; }
+    const jobId = data as string;
+    // Carry a lead's details onto the new deal.
+    const c = d.contact;
+    if (c && (c.name || c.email || c.phone)) {
+      const { data: job } = await sb.from('jobs').select('client_id').eq('id', jobId).single();
+      const ins = await sb.from('contacts').insert({ client_id: job?.client_id, name: c.name.trim(), email: c.email.trim() || null, phone: c.phone.trim() || null }).select('id').single();
+      if (!ins.error) await sb.from('jobs').update({ contact_id: ins.data.id, site: d.site || '' }).eq('id', jobId);
+    } else if (d.site) {
+      await sb.from('jobs').update({ site: d.site }).eq('id', jobId);
+    }
+    if (d.leadId) {
+      await run(sb.from('web_submissions').update({ status: 'converted', job_id: jobId, updated_at: new Date().toISOString() }).eq('id', d.leadId));
+      const who = (c?.name || d.client).split(' ')[0];
+      await sb.from('tasks').insert({ title: `Call back ${who}`, job_id: jobId, assignee_id: d.ownerId || initialMe.id, due: new Date().toISOString().slice(0, 10), type: 'Call' });
+    }
     await load();
-    return data as string;
+    return jobId;
+  };
+
+  // ── Leads ──────────────────────────────────────────────────────────────
+
+  const logLead: Crm['logLead'] = async (source, fields) => {
+    const { data, error } = await sb.from('web_submissions').insert({ form: source, page: '', fields }).select('*').single();
+    if (error) { setError(error.message); return false; }
+    setLeads(ls => [toLead(data), ...ls]);
+    return true;
+  };
+
+  const setLeadStatus: Crm['setLeadStatus'] = (id, status) => {
+    setLeads(ls => ls.map(l => (l.id === id ? { ...l, status } : l)));
+    run(sb.from('web_submissions').update({ status, updated_at: new Date().toISOString() }).eq('id', id));
   };
 
   const deleteJob: Crm['deleteJob'] = async id => {
@@ -451,7 +495,7 @@ export function CrmProvider({ me: initialMe, children }: { me: Profile; children
     addTask, toggleTask, deleteTask, addCrew, removeCrew, updateProfile,
     company, invoices, agreements, templates, createInvoice, updateInvoice, deleteInvoice,
     createAgreement, updateAgreement, deleteAgreement, saveCompany, saveTemplate, setJobField, reload: load,
-    newDeal, setNewDeal
+    newDeal, setNewDeal, leads, logLead, setLeadStatus
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

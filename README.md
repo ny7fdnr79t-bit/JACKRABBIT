@@ -11,7 +11,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 | Phase | State |
 | --- | --- |
 | Data model, auth, Overview / Pipeline / Contracts / Tasks, job panel, New deal, Team (profiles + crew) | **Built** |
-| Web leads (`/api/forms` port, Supabase-backed) | Next |
+| Leads: website forms (`/api/forms`) plus logged calls and texts, converted to deals in one click | **Built** (website forms arrive once live on `main`) |
 | AI assistant: chat in the CRM that reads and changes data and settings (with Undo and a change log), and files app change requests that Claude Code builds | **Built** |
 | Quo texts/calls, Gmail / Microsoft 365 email, Inbox | Later |
 | Invoices (deposit / progress / final, PDF, Stripe card payments) and client agreements (template, online signature, PDF) | **Built** |
@@ -20,7 +20,7 @@ Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Realtime), Nocturne
 
 ### 1. Supabase
 1. Create a project at supabase.com (region: Canada if available).
-2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql), [`20261029000000_builds.sql`](supabase/migrations/20261029000000_builds.sql) and [`20261030000000_self_review.sql`](supabase/migrations/20261030000000_self_review.sql). (Or `supabase link` + `supabase db push` with the CLI.)
+2. Run the migrations in order: open **SQL Editor**, paste [`20261016000000_core.sql`](supabase/migrations/20261016000000_core.sql) and run it, then the same for [`20261017000000_documents.sql`](supabase/migrations/20261017000000_documents.sql) [`20261028000000_assistant.sql`](supabase/migrations/20261028000000_assistant.sql), [`20261029000000_builds.sql`](supabase/migrations/20261029000000_builds.sql) and [`20261030000000_self_review.sql`](supabase/migrations/20261030000000_self_review.sql) and [`20261031000000_leads.sql`](supabase/migrations/20261031000000_leads.sql). (Or `supabase link` + `supabase db push` with the CLI.)
 3. **Authentication → Providers**
    - **Google**: enable, add the client ID/secret from a Google Cloud OAuth client (Web). Authorised redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
    - **Azure (Microsoft 365)**: enable, add the app registration's client ID/secret and tenant URL. Same redirect URI.

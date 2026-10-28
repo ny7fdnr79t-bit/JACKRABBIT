@@ -17,7 +17,8 @@ export default function NewDealDialog() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (newDeal) { setD(blank()); setErr(''); } }, [newDeal]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Opened blank, or pre-filled from a lead.
+  useEffect(() => { if (newDeal) { setD({ ...blank(), ...newDeal }); setErr(''); } }, [newDeal]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!newDeal) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setNewDeal(false); };
@@ -44,7 +45,7 @@ export default function NewDealDialog() {
       <form className="dialog" role="dialog" aria-label="New deal" onClick={e => e.stopPropagation()} onSubmit={submit}
         style={{ width: 'min(720px, 100%)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div className="dialog-title">New deal</div>
+          <div className="dialog-title">{d.leadId ? 'Create deal from lead' : 'New deal'}</div>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-400)' }}>Jobs start at {money(settings.minJob)}. Combine any services into one job.</div>
         </div>
         <div className="grid-2">

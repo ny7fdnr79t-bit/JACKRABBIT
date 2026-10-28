@@ -208,6 +208,11 @@ export const TOOLS: Anthropic.Beta.BetaTool[] = [
     input_schema: obj({ title: str('Short title'), description: str('What to build and why, written so a developer can build it without asking questions: who uses it, where it appears, what it does, and what done looks like') }, ['title', 'description'])
   },
   {
+    name: 'list_leads',
+    description: 'Leads: website form submissions and logged calls/texts that may become deals. Returns who, what they need, source, status and when. To turn one into a deal, use create_deal with its details, then tell the person to mark it converted on the Leads screen.',
+    input_schema: obj({ status: { type: 'string', enum: ['new', 'converted', 'archived', 'all'], description: 'Default: new' } })
+  },
+  {
     name: 'list_builds',
     description: 'App changes requested from the CRM and their live status: building, ready (has a preview link to try), published, discarded or failed.',
     input_schema: obj({})
@@ -235,7 +240,7 @@ export const TOOLS: Anthropic.Beta.BetaTool[] = [
   {
     name: 'open_in_crm',
     description: 'Show something in the CRM: switch screen and/or open a job panel.',
-    input_schema: obj({ screen: { type: 'string', enum: ['overview', 'pipeline', 'contracts', 'tasks', 'agreements', 'invoices', 'builds', 'team'] }, job_id: { type: 'string' } })
+    input_schema: obj({ screen: { type: 'string', enum: ['overview', 'leads', 'pipeline', 'contracts', 'tasks', 'agreements', 'invoices', 'builds', 'team'] }, job_id: { type: 'string' } })
   }
 ];
 
@@ -581,6 +586,13 @@ const handlers: Record<string, Handler> = {
     ctx.changes.push(`Requested app change #${r.number}: ${title}`);
     ctx.nav = { screen: 'builds' };
     return { build_number: r.number, next: 'Claude Code is building it on a separate copy of the app. It appears under Builds with a preview link when ready (usually 5–20 minutes). Nothing goes live until someone publishes it.' };
+  },
+
+  async list_leads({ sb }, i) {
+    let q = sb.from('web_submissions').select('id,form,at,fields,status,job_id').order('at', { ascending: false }).limit(100);
+    if (i.status !== 'all') q = q.eq('status', i.status || 'new');
+    const rows = (await must(q)) as Row[];
+    return { leads: rows.map(r => ({ id: r.id, source: r.form, received: String(r.at).slice(0, 16), status: r.status, converted_to_job: r.job_id, details: r.fields })) };
   },
 
   async list_builds({ sb }) {

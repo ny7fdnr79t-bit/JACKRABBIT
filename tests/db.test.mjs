@@ -131,5 +131,18 @@ await q(`insert into app_events (user_id, kind, at) values ($1,'view', now() - i
 await q('select prune_signals()');
 ok('signals older than 90 days are pruned', (await q('select count(*)::int n from app_events'))[0].n === 1);
 
+// ── Leads ─────────────────────────────────────────────────────────────
+console.log('\n# leads');
+await asService(() => q(`insert into web_submissions (form, page, fields, created_by) values ('Quote request','https://wastely.ca','{"name":"Jordan"}', null)`));
+ok('the website endpoint can store a lead', (await q(`select count(*)::int n from web_submissions where form='Quote request'`))[0].n === 1);
+await as(am.id, () => q(`insert into web_submissions (form, fields) values ('Phone call','{"Name":"Pat"}')`));
+ok('a member logs a call, recorded as theirs', (await q(`select created_by from web_submissions where form='Phone call'`))[0].created_by === am.id);
+ok('members see leads', (await as(am.id, () => q('select count(*)::int n from web_submissions')))[0].n === 2);
+ok('pending people see no leads', (await as('00000000-0000-0000-0000-000000000000', () => q('select count(*)::int n from web_submissions')))[0].n === 0);
+await rejects('a converted lead must point at a deal', () => as(am.id, () => q(`update web_submissions set status='converted' where form='Phone call'`)));
+await as(am.id, () => q(`update web_submissions set status='converted', job_id=$1 where form='Phone call'`, [job]));
+ok('a lead converts with its deal', (await q(`select status from web_submissions where form='Phone call'`))[0].status === 'converted');
+await rejects('fields must be an object', () => as(am.id, () => q(`insert into web_submissions (form, fields) values ('Other','[]')`)));
+
 console.log(failures ? `\n${failures} check(s) FAILED` : '\nAll database checks passed.');
 process.exit(failures ? 1 : 0);
